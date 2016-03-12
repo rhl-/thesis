@@ -1,0 +1,49 @@
+\begin{figure}[h]
+\centering
+\begin{subfigure}[b]{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.65]
+\begin{axis}[xlabel=\# of partitions, minor y tick num={1}, ylabel=speedup factor, legend style={legend pos=north west, font=\small}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere, ideal}
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/bunny..05.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/clique.20.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/sphere.csv};
+\addplot[dash pattern=on 4pt off 1pt on 4pt off 4pt, domain=2:10]{x+1};
+\end{axis}
+\end{tikzpicture}
+\caption{Speedup factor for reducing $\partial_{\K^{\C}}$}
+\label{fig:blowup-homology-speedup}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.65]
+%\pgfplotsset{ymax=5}
+\begin{axis}[xlabel=\# of partitions/threads, minor y tick num={1}, ylabel=speedup factor, legend style={legend pos=north west, font=\small}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere, ideal}
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/bunny..05.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/clique.20.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=speedup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/sphere.csv};
+\addplot[dash pattern=on 4pt off 1pt on 4pt off 4pt, domain=2:10]{x};
+\end{axis}
+\end{tikzpicture}
+\caption{Speedup factor for reducing $\partial_{\K}$}
+\label{fig:nonblowup-homology-speedup}
+\end{subfigure}
+\caption{(Left) Speedup factor $T_s/T_p$ where $T_p$ is the time to reduce $\partial_{\K^\C}$ in parallel on $p+1$ threads  and $T_s$ is the time to reduce $\partial_K$ in serial. (Right) Speedup factor of $T_s/T_p$ where $T_p$ measures the time to reduce $\partial_{\K}$ in parallel.}
+\label{fig:reduction-speedup}
+\end{figure}

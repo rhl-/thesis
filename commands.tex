@@ -1,0 +1,268 @@
+% commands.tex
+% Afra Zomorodian
+% August 20, 2009
+%\usepackage{lineno}
+
+%\usepackage[usenames,dvipsnames]{color}
+%\usepackage{subfig}
+\usepackage{amscd}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{eucal} % for mathcal
+\usepackage{url}
+\usepackage{clrscode}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{proof}
+\usepackage{times}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{epsfig}
+\usepackage{subcaption}
+%\usepackage{shortlst}
+%\usepackage{rotating}
+%\usepackage{enumitem}
+%\setlist{nolistsep}
+
+
+%% units are in inches
+%\setlength{\unitlength}{1in}
+%
+%% Useful macros for graphics
+%% centerfig
+%\newcommand{\centerfig}[2]{%
+%\centerline{\includegraphics[#2]{figs/#1}}
+%}
+%
+%\newcommand{\boxedcenterfig}[2]{%
+%%\setlength{\fboxsep}{0pt}
+%\centerline{\fbox{\includegraphics[#2]{figs/#1}}}
+%}
+%
+%\setlength{\fboxsep}{1pt}
+%
+%%% Define a new style for the package that will use a smaller font.
+%\makeatletter
+%\def\url@smallurlstyle{%
+%  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\small\ttfamily}}}
+%\makeatother
+%% Now actually use the newly defined style.
+%\urlstyle{smallurl}
+%
+%% subimg
+%\newcommand{\subimg}[5][-1]{%
+%\subfigure[#5]{%
+%  \label{#4}
+%  \ifthenelse {\equal{#1}{-1}}
+%    {\includegraphics[#3]{figs/#2}}
+%    {\begin{minipage}[b]{#1\columnwidth}{%
+%      \centerline{\includegraphics[#3]{figs/#2}}}
+%    \end{minipage}
+%    }
+%}}
+%
+%% subimgnt
+%\newcommand{\subimgnt}[3][-1]{%
+%\subfigure{%
+%  \ifthenelse {\equal{#1}{-1}}
+%    {\includegraphics[#3]{figs/#2}}
+%    {\begin{minipage}[b]{#1\columnwidth}{%
+%      \centerline{\includegraphics[#3]{figs/#2}}}
+%    \end{minipage}
+%    }
+%}}
+
+% mathbb
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\NN}{\ensuremath{\mathbb{N}}}
+\newcommand{\Q}{\ensuremath{\mathbb{Q}}}
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\F}{\ensuremath{\mathbb{F}}}
+\newcommand{\emax}{\ensuremath{\hat{\epsilon}}}
+\newcommand{\vr}{\ensuremath{\mathcal{V}}}
+\newcommand{\vrs}{\ensuremath{\vr_{\epsilon}(S)}}
+\newcommand{\es}{\ensuremath{E_{\epsilon}(S)}}
+\newcommand{\vs}{\ensuremath{V_{\epsilon}(S)}}
+\newcommand{\vrms}{\ensuremath{\vr_{\emax}(S)}}
+\newcommand{\ges}{\ensuremath{G_{\epsilon}(S)}}
+\newcommand{\gemax}{\ensuremath{G_{\emax}(S)}}
+\newcommand{\weight}{\ensuremath{\omega}}
+\newcommand{\gweight}{\ensuremath{w}}
+\DeclareMathOperator{\dist}{d}
+\newcommand{\cplusplus}{C\raisebox{0.5ex}{\small ++}}
+\newcommand{\Filt}[1]{\ensuremath{\leq_{#1}}}
+
+% names
+\newcommand{\cech}{\v{C}ech} % not in math mode
+\newcommand{\acm}{ACM}
+\newcommand{\ieee}{IEEE}
+\newcommand{\siggraph}{SIGGRAPH}
+\newcommand{\etlsh}{\textsc{E\raisebox{0.7ex}{\scriptsize 2}LSH}}
+\newcommand{\ann}{\textsc{Ann}}
+\newcommand{\cgal}{\textsc{Cgal}}
+\newcommand{\plex}{\textsc{Plex}}
+
+%%complexity classes
+\newcommand{\complexity}[1]{\textsc{#1}}
+\newcommand{\NPH}{\complexity{NP-Hard}}
+\newcommand{\NP}{\complexity{NP}}
+\newcommand{\NPC}{\complexity{NP-Complete}}
+\newcommand{\APX}{\complexity{APX}}
+\newcommand{\APXC}{\complexity{APX-Complete}}
+
+%%decision problems
+\newcommand{\ablp}{\textsc{$\alpha$-Balanced-Minimum-Blowup}}
+\newcommand{\dablp}{\textsc{Dual-$\alpha$-Balanced-Minimum-Blowup}}
+\newcommand{\aedge}{\textsc{$\alpha$-Balanced-Edge-Separator}}
+\newcommand{\avertex}{\textsc{$\alpha$-Subgraph-Balanced-Vertex-Separator}}
+\newcommand{\aBMB}{\textsc{$\alpha$-Bmb}}
+\newcommand{\aBES}{\textsc{$\alpha$-Bes}}
+\newcommand{\aBVS}{\textsc{$\alpha$-Bvs}}
+\newcommand{\YES}{\textsc{Yes}}
+
+\newcommand{\scitem}{\textsc{\normalfont\item}}
+
+% algorithms
+\newcommand{\allpairs}{\proc{All-Pairs}}
+\newcommand{\scan}{\proc{Scan}}
+\newcommand{\kdexact}{\proc{Kd-Exact}}
+\newcommand{\kdapprox}{\proc{Kd-Approx}}
+\newcommand{\bbdexact}{\proc{BBD-Exact}}
+\newcommand{\bbdapprox}{\proc{BBD-Approx}}
+\newcommand{\witness}{\proc{Witness}}
+\newcommand{\Foreach}{\textbf{foreach} }
+
+% expansion
+\newcommand{\inductive}{\proc{Inductive-VR}}
+\newcommand{\incremental}{\proc{Incremental-VR}}
+\newcommand{\maximal}{\proc{Maximal-VR}}
+\newcommand{\lowerneighbors}{\proc{Lower-Nbrs}}
+\newcommand{\addcofaces}{\proc{Add-Cofaces}}
+\newcommand{\ikgx}{\proc{IK-GX}}
+\newcommand{\generatecombinations}{\proc{Generate-Combinations}}
+\newcommand{\computeweightfunction}{\proc{Compute-Weights}}
+\newcommand{\computeweight}{\proc{Weight}}
+\newcommand{\ceil}[1]{\left \lceil#1\right \rceil}
+\newcommand{\floor}[1]{\lfloor#1\rfloor}
+
+% data sets
+\newcommand{\bunny}{{\textsf{B}}}
+\newcommand{\sphere}{\textsf{S}}
+\newcommand{\clique}{\textsf{C}}
+\newcommand{\multiblob}{\textsf{M}}
+\newcommand{\blobs}{\multiblob}
+\newcommand{\gnp}{\textsf{G}}
+
+% Erdos-Renyi
+\newcommand{\Erdos}{Erd\H{o}s}
+\newcommand{\Renyi}{R{\'e}nyi}
+\newcommand{\almosta}{a.a.\@}
+
+\renewcommand{\Im}[1]{\operatorname{Im}{#1}}
+\newcommand{\Ker}[1]{\operatorname{Ker}{#1}}
+%\newcommand{\rank}[1]{\operatorname{rank}{#1}}
+\newcommand{\Dim}[1]{\operatorname{dim}{#1}}
+\newcommand{\bd}{\ensuremath{\partial}}
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\size}{size}
+\newcommand{\betti}{\ensuremath{\beta}}
+\newcommand{\tensor}{\otimes}
+\DeclareMathOperator{\rank}{rank}
+\newcommand{\Bd}[1]{\partial_{#1}}
+\newcommand{\Cl}[1]{\operatorname{Cl}{#1}}
+\newcommand{\bigslant}[2]{{\raisebox{.2em}{$#1$}\left/\raisebox{-.2em}{$#2$}\right.}}
+\newcommand{\card}[1]{|#1|}
+\newcommand{\mv}{Mayer-Vietoris }
+\newcommand{\mvb}{\mv blowup complex}
+\newcommand{\K}{K}
+\renewcommand{\L}{L}
+\newcommand{\C}{U}
+\newcommand{\N}{N}
+\newcommand{\M}{M}
+\newcommand{\factor}{\card{\K^{\C}}/\card{\K}}
+\newcommand{\ratio}{\factor}
+\newcommand{\Parfor}{\kw{parallel for}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+%\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{corollary}{Corollary}[lemma]
+\theoremstyle{definition}
+\newtheorem{example}{Example}[subsection]
+\newtheorem{fact}{Fact}[subsection]
+\newtheorem{definition}{Definition}[section]
+
+%%%%%%%%%%
+%Afra's Colors
+%%%%%%%%%
+\definecolor{afra}{RGB}{198,168,208}
+\definecolor{afrablue}{RGB}{143,166,215}
+\definecolor{afragreen}{RGB}{182,215,112}
+\definecolor{afrapurple}{RGB}{218,177,239}
+\definecolor{darkgray}{gray}{0.3}
+\definecolor{afrapurplelight}{RGB}{198,168,208}
+\definecolor{afrabluedark}{RGB}{75,113,191}
+\definecolor{afrabluelight}{RGB}{143,166,215}
+\definecolor{afragreendark}{RGB}{154,191,75}
+\definecolor{afragreenlight}{RGB}{182,215,112}
+\definecolor{afrapurpledark}{RGB}{162,75,191}
+
+\usepackage{xcolor}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{filecontents}
+\usetikzlibrary{calc, fit, shadows, arrows, positioning, patterns, external, matrix}
+% if these lines are commented out, the box draws.
+\pgfdeclarelayer{edges}
+\pgfdeclarelayer{quadcell}
+\pgfsetlayers{quadcell,edges,main}
+\pgfplotsset{compat=newest}
+
+%%%%%%%%%%%
+%%BEGIN TIKZ TODO LOGIC
+%%%%%%%%%%%%%%%
+\makeatletter \newcommand \listoftodos{\section*{Todo list} \@starttoc{tdo}}
+\newcommand\l@todo[2]
+  {\par\noindent \textit{#2}, \parbox{10cm}{#1}\par} \makeatother
+
+\newcommand{\todo}[1]{
+% Add to todo list
+\addcontentsline{tdo}{todo}{\protect{#1}}
+%
+\begin{tikzpicture}[remember picture, baseline=-0.75ex]
+    \node [coordinate] (inText) {};
+\end{tikzpicture}
+%
+% Make the margin par
+    \begin{tikzpicture}[remember picture]
+        \definecolor{orange}{rgb}{1,0.5,0}
+ 
+        \draw node[draw=black, fill=orange, text width = 5cm] (inNote)
+                 {#1};
+    \end{tikzpicture}
+%
+%\begin{tikzpicture}[remember picture, overlay]
+%    \draw[draw = orange, thick]
+%        ([yshift=-0.2cm] inText)
+%            -| ([xshift=-0.2cm] inNote.west)
+%            -| (inNote.west);
+%\end{tikzpicture}
+%
+}
+\graphicspath{{figs/},{figs/speedup-figs/}}
+
+\def\lbl#1#2{\begingroup
+	    #2%
+	    \def\@currentlabel{#2}%
+	    \phantomsection\label{#1}\endgroup
+	}
+	
+\pgfdeclarelayer{ball}    % declare background layer
+\pgfdeclarelayer{edge}
+\pgfdeclarelayer{triangle}
+\pgfdeclarelayer{edges}
+\pgfdeclarelayer{quadcell}
+\pgfsetlayers{quadcell,edges,ball,triangle,edge,main}  % set the order of the layers (main is the standard layer)
+

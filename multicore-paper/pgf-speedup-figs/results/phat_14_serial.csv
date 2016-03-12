@@ -1,0 +1,6 @@
+filename,max memory (MB),complex dimension,Voluntary context switches,num_edges,Minor (reclaiming a frame) page faults,pure_cover_balance,blowup_size,Elapsed (wall clock) time (h:mm:ss or m:ss),speedup,build cover,System time (seconds),persistence,User time (seconds),complex size,edgecut,Percent of CPU this job got,cover_balance_ratio,filter complex,initialize_cascade_boundary,Involuntary context switches,smallest_cover,build_cover,largest_cover,graph_balance_ratio,num_threads,blowup_factor,total time,closed_cover_balance,re-filter complex,build_blowup,I/O Time
+bunny..05,952.479,,7.8,,607097.2,,,,1.0,,1.032,15.92,30.766,,,99,,,,3264.0,,,,,1,,,,,,14.3
+clique.11.22720,4954.94,,11,,2582955.2,,,,1.0,,6.682,8.86,91.588,,,99,,,,10119.0,,,,,1,,,,,,78.62
+clique.20,212.041,,5.2,,81341.6,,,,1.0,,0.202,0.7,3.136,,,99,,,,346.0,,,,,1,,,,,,2.4
+gnp.1250.047,28280,,6.0,,19165.4,,,,1.0,,0.018,6.7,6.768,,,99,,,,700.4,,,,,1,,,,,,0.1
+sphere,2286.27,,7.2,,1207029.4,,,,1.0,,2.858,8.16,43.0,,,99,,,,4719.0,,,,,1,,,,,,32.76

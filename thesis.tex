@@ -1,0 +1,119 @@
+% From Felix Kwok, SCCM, Nov 30, 2007.
+%
+% Basically this is a template file -- you should be able to take it and
+% start running.  It makes use of the suthesis-2e package from Emma Pease
+%     http://help-csli.stanford.edu/tex/suthesis/
+
+% The philosophy behind this template is that each chapter or
+% chapterlike section goes in a separate file and you use the \include
+% command to input it into the final document.  The \includeonly
+% command can be used so you only need to work on one or two chapters
+% at a time (instead of having to either latex the entire book each
+% time or losing cross-references and page numbering)
+
+% Copy this file and call it something like mythesis.tex
+
+\documentclass[12pt,twsoside]{report}
+\input{commands}
+\input{data}
+% Note that the documentclass can take other options such as
+%   twoside - for double sided printing
+%   openright - if double side  chapters always start on odd pages
+%   openany - if double side chapters start on the next page even or odd
+% 10pt can be replaced by 11pt (or 12pt), but NOTE THAT
+% THE REGISTRAR'S OFFICE ACCEPTS THE PARAMETERS SHOWN HERE,
+% including \setstretch{1.213}, which seems to be as close
+% to single spacing as they allow so far (2007).
+
+\usepackage{suthesis-2e}
+\usepackage{amsmath, amsfonts, amsthm,
+  verbatim, fancyhdr, graphicx, array,
+  color, listings, afterpage, epsfig, boxedminipage}
+
+%% Load other packages you need
+
+%% Uncomment the following and create mythesis-macros.sty for all your
+%% own macros.  This keeps this top level file looking fairly neat.
+% \usepackage{mythesis-macros}
+
+%% Certain types of theses require special title page format.  See the
+%% style file for the full list.  An example would be that for some of
+%% the language departments.
+% \dualthesis \dept{Asian Languages} \languagemajor{Korean}
+%% or educationhttps://www.facebook.com/danshaffer
+% \educationthesis
+
+   \title{Spectral Sequences and Applied Topology}
+   \author{Ryan H. Lewis}
+   \programthesis
+   \dept{Institute for Computational and Mathematics and Engineering}
+   \principaladviser{Gunnar Carlsson}
+%  \coprincipaladvisor{}
+   \firstreader{Leonidas Guibas}
+   \secondreader{Jack Poulson}
+  \thirdreader{Dmitry Morozov}
+
+% The following command would (if uncommented) allow only
+% chapter1 and chapter2 to be processed
+% \includeonly{chapter1,chapter2}
+
+% If you feel real savvy use
+% \typein{Now put in includeonly}
+% The \typein command stops latex at this point and allows you to type
+% in a command such as
+%    \includeonly{chapter3,chapter5}
+% This can save some time and means you don't have to edit this file
+% as much.
+
+\setstretch{1.213}  % SAVE SOME TREES WITH THIS AND 10pt
+
+\begin{document}
+
+\maketitle
+% First the preface sections.
+
+% This includes the file preface.tex which should include the
+% following commands
+% \beforepreface
+ \prefacesection{Abstract}
+% body of the preface
+%\include{abstract}
+Shape matters for data analysis. In this thesis we investigate the utility of spectral sequences for persistent homology, a tool which characterizes the shape of data. We show how to compute p.h. in parallel. 
+
+% Any other preface sections
+
+% The last preface section (e.g., acknowledgement.tex)
+% should look like
+ \prefacesection{Acknowledgement}
+This thesis could not have existed without my advisor Gunnar Carlsson. Without his mentorship I do not know where I would be. He has a unique ability to push people far beyond there mathematical comfort levels. I am grateful to Leonidas Guibas, Jack Poulson, Dmitry Morozov, and  for serving on my thesis committee. I would like to thank the Stanford Computational Topology group, whose lively meetings have taught me so much. Conversations with Anthony Bak, Michael Kerber, Michael Lesnick, and Pawin Vongmasa have shown me that creativity can get you quite far. Because of my friends in ICME including Austin Benson, Victor Minden, Bradley Nelson, Anil Damle, and Nolan Schodopole, I have many happy memories of my time in Graduate School. 
+
+I am indebted to my soon to be wife, Elena, as well as my family for there patience and support.
+
+% body
+ \afterpreface
+%\include{acknowledgement}
+
+
+% Now for the body of the thesis, modify the number of these lines as
+% needed
+
+% This includes chapter1.tex which should start with a \chapter{...}
+% command
+
+\include{chapter1}
+\include{chapter2}
+\include{chapter3}
+
+%\include{chapter4/chapter4}
+%\include{chapter5/chapter5}
+%\include{chapter6}
+
+% and the end material
+
+% bibliography.tex should include either
+\bibliographystyle{plain}
+%\bibliography{mythesis}
+% or some other way of doing the bibliography
+% \include{bibliography}
+
+\end{document}

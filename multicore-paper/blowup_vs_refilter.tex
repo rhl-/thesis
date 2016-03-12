@@ -1,0 +1,58 @@
+\begin{figure}
+\centering
+\begin{subfigure}[b]{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.65]
+\begin{axis}[
+name=left axis,
+ymin=0,
+ymax=15,
+xmax=12,
+xlabel=\# of  partitions,
+ylabel=time (seconds),
+minor y tick num={5},
+legend style={font=\large}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere, ideal}
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=build_blowup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=build_blowup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/bunny..05.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=build_blowup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/clique.20.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=build_blowup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=build_blowup, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/sphere.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Time to build $\K^{\C}$ with $p$ partition sets.}
+\end{subfigure}
+\begin{subfigure}[b]{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.65]
+\begin{axis}[
+ymin=0,
+ymax=15,
+xmax=12,
+xlabel=\# of  partitions,
+%ylabel=time (seconds),
+minor y tick num={5},
+legend style={legend pos = north west,font=\large}]
+%\legend{\multiblob, \bunny, \clique, \gnp, \sphere}
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=re-filter complex, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=re-filter complex, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/bunny..05.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=re-filter complex, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/clique.20.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=re-filter complex, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=re-filter complex, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/cover_homology/sphere.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Time to re-filter $\K$}
+\end{subfigure}
+\caption{Comparison of the time to build a blowup complex in $O(\frac{m}{p} + p)$ time versus re-filter the base complex in $O(\frac{m}{p}\log{m})$.}
+\label{fig:blowup-vs-no-blowup}
+\end{figure}

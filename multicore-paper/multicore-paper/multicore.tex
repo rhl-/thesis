@@ -1,0 +1,751 @@
+%\documentclass[a4paper,10pt]{IEEEtran}
+\documentclass{jocg}
+%\usepackage[margin=1in]{geometry}
+\include{commands}
+
+\title{\MakeUppercase{Multicore Homology}}
+\author{Ryan H. Lewis \and Afra Zomorodian}
+
+\author{%
+  Ryan~H.~Lewis,%
+  \thanks{\affil{Stanford University}, 
+          \email{rhl@stanford.edu}}\,
+  Afra~Zomorodian%
+  \thanks{\affil{D.E. Shaw},
+          \email{afra@cs.dartmouth.edu}}\,
+}
+\linenumbers
+\begin{document}
+%\date{\today}
+\DRAFT
+\maketitle
+
+\begin{abstract}
+In this work we design and implement a framework for the parallel computation of field homology using the \mv principle. We begin with a cover of the input space
+by overlapping subspaces. Then we use this cover to build the \mvb{}, a topological space, which organizes
+the various subspaces needed for employing the \mv principle. Finally, we compute the homology of each piece of the blowup
+complex in parallel and use the persistence algorithm to glue these results together. We present a simplistic model for the problem of finding covers which will lend themselves to parallelism and show that finding such covers is \NPH{}.
+We describe an algorithm for producing covers with a simple structure and bounded overlap based on graph partitions. This approach allows
+us to avoid the explicit construction of the blowup complex saving time and space. We implement our algorithms for multicore computers, and demonstrate their efficacy with a suite of experiments. For example, we achieve roughly an 8$\times$ speedup of the homology computations on a 3-dimensional complex with about 10 million simplices using 11 cores.
+\end{abstract}
+\begin{center}
+We include line numbers for our reviewers' ease of reference. \\
+\end{center}
+\pagebreak
+\section{Introduction}
+\begin{figure}
+\subfigure[We achieve a 68.9\% efficiency on 11 cores. The line $\mathit{y=x}$ 
+displays perfect efficiency.]{
+\scalebox{.6}{\input{figs/speedup-figs/bunny-speedup.tex}}
+\label{fig:front-picture}
+}
+\hfill
+\subfigure[A visualization of the input space, and its decomposition into 11 
+pieces.]{
+\includegraphics[width=2in]{bunny-vis}
+\label{fig:bunny-vis}
+}
+\caption{Homology speedup on a 3-dimensional complex with 9.7 M
+	simplices.}
+\end{figure}
+In this paper, we present a fast multicore algorithm for computing
+the homology of arbitrary dimensional cell complexes over field
+coefficients. Figure~\ref{fig:front-picture} shows the speedup factor
+of our algorithm for computing homology over $\Z_2$ coefficients
+of the data set $\bunny$, shown in Section~\ref{sec:exp}. By decomposing the 
+space into the 11 pieces visualized in Figure~\ref{fig:bunny-vis}, 
+we are able to compute the homology of the input space in 
+3.73 seconds, approximately eight times faster than the 29.8 seconds 
+necessary for serial computation. When comparing the total running time 
+including data preprocessing for both algorithms our parallel algorithm
+takes 9.38 seconds as compared to 35.67 seconds in serial. 
+All our timings are done on a 64-Bit GNU/Linux machine with dual, six core, 
+3.47Ghz Intel X5690 CPUs, and hyperthreading disabled.
+
+\subsection{Motivation}
+We are motivated by \emph{topological data analysis} 
+which attempts to extract a topological understanding of scientific data from 
+finite sets of samples. Usually data analysis assumes that the input point cloud
+comes from some underlying geometric space. Topological data analysis focuses on
+the recovery of the lost topology of this underlying space \cite{c-tnd-09}. 
+The classic pipeline for this analysis follows a two step process. First, we 
+compute a combinatorial model approximating the structure of the underlying 
+space. Second we compute topological invariants on these structures. One popular
+invariant, persistent homology \cite{elz-tps-02, zc-cph-05}, captures multiscale
+topological structure. Computing field homology, 
+especially over $\Z_2$ coefficients, is an integral part of topological data 
+analysis.
+
+Computing homology of complicated spaces requires both space and time. 
+In this paper, we focus on developing a parallel algorithm to compute homology 
+on multicore shared-memory machines.  
+This algorithm is a first step toward a 
+distributed-memory algorithm that will allow us to compute the persistent homology of 
+massive structures on computer clusters.
+
+\subsection{Prior Work}
+There is a large literature on serial computation of integer homology.
+Dumas et al.\@ review algorithms for computing integer homology that take 
+advantage of the sparsity of boundary matrices derived from simplicial 
+complexes~\cite{d-snf-03}. Their software is available within the GAP software 
+package~\cite{GAP4}. Joswig surveys the computation of invariants, including 
+homology for simplicial spaces with a focus on manifolds~\cite{j-csm-04}.
+Kaczy{\'n}ski et al.\@ develop heuristics to compute cubical 
+homology~\cite{kmm-ch-04}. Kaltofen et al.\@ provides a theoretical
+investigation of randomized parallel algorithms for computing the Smith normal 
+form~\cite{kks-snf-87,kks-snf-89} over finite fields and $\Q$, however, 
+these algorithms are not useful in practice~\cite{ProofByAuthority}.
+
+Any parallel computation of homology would require a decomposition of the
+space into pieces.  The theory of \emph{spectral sequences} explains how to 
+compute the homology of a space from its pieces. In our setting we decompose 
+our input space into pieces using a \emph{cover}; the \mv spectral sequence expresses 
+the relationship between the homology of these pieces of a space and the homology of the space itself.
+This makes the \mv spectral sequence  a natural gadget to study when developing algorithms for parallel homology~\cite{hatcher}. 
+The \mvb{} is a topological analogue of the \mv spectral sequence and it is used by 
+Zomorodian and Carlsson to compute localized homology~\cite{zc-lh-08}.  
+Merino et al.\@ use the Mayer-Vietoris sequence to compute the homology of
+three-dimensional simplicial complexes~\cite{bmlf-cmv-10}.  
+Lipsky et al.\@ use the \mv spectral sequence in an attempt to derive a parallel algorithm~\cite{lsv-ss-11}. 
+All works are theoretical in nature. The researchers do not address the algorithmic issues of finding covers;  
+Nor do they provide implementations of their algorithms or any empirical results. 
+
+The \mv spectral sequence is not the only algebraic tool which is useful for parallel homology computation.
+The spectral sequence of a filtration shows how a sequence of \emph{relative homology} computations may be carried out
+in parallel on contiguous chunks of a boundary matrix to arrive at the homology of a space. 
+Bauer, Kerber, and Reininghaus explore this approach to computing homology in parallel~\cite{bkr-cccph-13}. 
+
+\subsection{Our Work}
+In this paper we design and implement a divide and conquer framework for computing the field 
+homology of a cellular space in parallel. Field homology is popular in 
+topological data analysis since it has polynomial complexity and the persistence
+algorithm exhibits linear-time behavior in practice~\cite{elz-tps-02,zc-cph-05}. 
+Our framework relies on the \mvb{} a spatial version of the \mv spectral sequence~\cite{zc-lh-08}. 
+The \mvb{} is the \emph{total complex} of the terms of the first page of the 
+\mv spectral sequence and it's homology groups are isomorphic to that of the original space. 
+In this work we show how to build the \mvb{} and compute it's homology in parallel using the persistence algorithm. Our
+approach may be viewed as parallel computation of relative homology on chunks of the boundary matrix for the blowup complex. 
+However, because of the structure of the blowup complex, many relative chunks do not need to be further reduced against each other,
+unlike the algorithm presented by Bauer, Kerber, and Reininghaus~\cite{bkr-cccph-13}. 
+Since this pipeline requires a cover of the input space we investigate the general problem of finding covers of spaces.
+In Section~\ref{sec:covers} we identify a class of covers which lend themselves to efficient parallel
+algorithms and model the problem of finding covers in this class as an optimization problem. 
+We then  show that solving this problem is \NPH{}. Motivated by this result we instead provide a 
+algorithm for producing covers with bounded overlap, based on graph partitioning, in Section~\ref{sec:pcover}. We 
+observe that since we are limiting our viewpoint to ordinary homology the special nature of covers generated by our algorithm 
+allows us to avoid explicitly constructing the blowup complex. Nevertheless, the blowup complex is useful for organizing the
+work needed to be carried out in the general case. In Section~\ref{sec:exp} we present the results of a suite of experiments
+from a multicore version of our parallel algorithms and provide preliminary experimental results. All of the techniques in this paper are deterministic. 
+Our software is included in a \href{https://git.appliedtopology.org}{publicly available library}.
+
+\section{Background}
+We begin with a review of simplicial complexes, homology, and blowup complexes.
+We refer a non-specialist in algebraic topology to Hatcher~\cite{hatcher}
+and to Zomorodian~\cite[Chapter 13]{z-ct-10} for computational topology. 
+In principle the methods outlined in this paper generalize to any type of cellular space, 
+however we restrict ourselves to simplicial complexes. 
+
+\subsection{Preliminaries}
+Let $[n] = \{ 0,1, \ldots ,n \}$ be the first $n+1$ natural numbers. This
+definition is not conventional but we adopt the notation used
+in previous work for continuity with prior work~\cite{zc-lh-08}. A \emph{multiset}
+is a pair $(A,c)$ where $c: A \rightarrow \mathbb{N}$. A \emph{decomposition}
+of a set $S$ is a collection of nonempty subsets of $S$ whose union is $S$.
+A \emph{partition} of a set $S$ is a decomposition of $S$ by disjoint sets.
+A \emph{graph} $G = (V,E)$ is a set $V$ of \emph{vertices}, and 
+a set $E \subseteq V \times V$  of \emph{edges}. 
+Suppose we have a graph $G = (V,E)$. A \emph{graph partition} is a partition 
+$P = \{P_i\}_{i \in [n-1]}$ of $V$ into $n$ subsets. 
+A \emph{cut} is a partition of $V$ into two sets $A$ and $B$. 
+
+A \emph{simplicial complex} is a collection $\K$ of finite sets called
+\emph{simplices} such that if $\sigma \in \K$ and $\tau \subseteq \sigma$ then 
+$\sigma \in \K$. 
+We say that $\tau$ is a \emph{face} of $\sigma$, its \emph{coface}. A simplex
+is \emph{maximal} if it has no proper coface in $\K$. The set of maximal cells of a 
+simplicial complex $\K$ is $\M(\K)$. If $\card{\sigma} = k+1$
+then $\sigma$ is a $k$-simplex, it has \emph{dimension} $k$, denoted 
+$\dim{\sigma} = k$. We say that $\K$ is \emph{$d$-dimensional} if 
+$d = \max_{\sigma \in \K} \dim{\sigma}$. 
+Given a simplicial complex $\K$ the set of maximal 
+cells can be enumerated in $O(md)$ time.
+
+Suppose we have a subset $L \subseteq K$.  $L$ is a \emph{subcomplex}
+if it is a simplicial complex. The \emph{closure} of $L$ is 
+$\Cl(\L) = \{ \tau \mid \tau \subseteq \sigma \in L\}$. The 
+\emph{$k$-skeleton} of a complex $\K$ is the set of all simplices
+of dimension less than or equal to $k$. Note that the 1-skeleton of
+any complex may be viewed as a graph. 
+Let $\Delta^n$ be the $n$-simplex defined on $[n]$.  We note that 
+$\Delta^n$ is traditionally defined in a geometric setting and is 
+called the \emph{standard $n$-simplex}~\cite{hatcher}, although we 
+are using an abstract version here for our purposes. For any
+\emph{indexing set} $J \subseteq [n]$, $\Delta^J$ is the $(\card{J}-1)$ 
+dimensional face of $\Delta^n$  that is defined on $J$.
+We define a \emph{filtration} of $\K$ to be a partial ordering on the simplices of
+$\K$ such that every prefix of the ordering is a subcomplex and denote
+it as $\Filt{\K}$.
+Given a simplicial complex $\K$, An \emph{open cover}
+of $\K$ is a decomposition of $\K$ and a \emph{closed cover} $\C$
+of $\K$, is a decomposition of $\K$ by subcomplexes. Except where explicitly specified
+all covers in this work are closed. The \emph{nerve} $\N(\C)$
+of a cover $\C$ is the simplicial complex on $[\card{\C}-1]$ whose $k$-simplices 
+represent the non-trivial intersections of subsets of $\C$ of size $k+1$.
+The nerve is a subcomplex of the standard $n$-simplex and so we 
+denote its simplices by $\Delta^J$ where $J \subseteq [\card{\C}-1]$. 
+It is convenient to encode the cover $\C$ as a map from $\K$ to $\N(\C)$ where each 
+simplex $\sigma \in \K$ is mapped to the maximal cell in $\N(\C)$  which represents
+the indices of all the cover sets containing $\sigma$.
+
+A simplicial complex may be viewed as the result of gluing simplices of 
+different dimensions along common faces. Other types of complexes are defined 
+similarly using different types of \emph{cells}. 
+Such \emph{cellular} complexes include $\Delta$-complexes, \emph{cubical} 
+complexes, \emph{simplicial sets}, and \emph{CW-complexes}, 
+to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}.
+In this paper, we restrict to simplicial complexes as input, although our 
+methods generalize easily to other types of complexes. 
+
+\subsection{Homology}
+In this section, we describe the homology of cellular spaces over 
+field coefficients. Homology, however, is an invariant of arbitrary topological 
+spaces and may be computed over arbitrary coefficient rings~\cite{hatcher}.  
+Suppose we are given a finite cellular complex $\K$ and a field $k$. 
+The \emph{$n$th chain vector space $C_n$} is the $k$-vector space generated by 
+the set of $n$-dimensional cells of $K$, its \emph{canonical basis}.  
+Suppose we are given a linear \emph{boundary operator} 
+$\bd_n\colon C_n \rightarrow C_{n-1}$ such that 
+$\bd_n \circ \bd_{n-1} \equiv 0$ for any $n$.  
+The boundary operator connects the chain vector space into a 
+\emph{chain complex $C_*$}:
+\begin{linenomath*}
+\begin{equation*}
+  \cdots \rightarrow             C_{n+1}
+         \xrightarrow{\bd_{n+1}}  C_n
+         \xrightarrow{\bd_n}     C_{n-1}
+         \rightarrow \cdots .
+\label{eqn:chaincomplex}
+\end{equation*}
+\end{linenomath*}
+Given any chain complex, the \emph{$n$th homology vector space $H_n$} is:
+\begin{linenomath*}
+\begin{equation}
+  \label{eqn:homology}
+  H_n = {\ker{\bd_n}}\,/\,{\im{\bd_{n+1}}}, 
+\end{equation}
+\end{linenomath*}
+where $\ker$ and $\im$ are the \emph{kernel} and \emph{image} of $\bd$, 
+respectively.
+Each homology vector space is characterized fully by its \emph{Betti number}, 
+$\betti_n = \dim{H_n}$.  
+We now only need to define boundary operators to get homology. 
+For simplicial complexes, we begin by describing its action on any
+$n$-simplex $[v_0,\ldots,v_n] \in \K$:
+\begin{linenomath*}
+\begin{equation*}
+\bd_n [v_0,\ldots,v_n] = \sum_i (-1)^i [v_0,\ldots,\hat{v_i},\ldots,v_n],
+\end{equation*}
+\end{linenomath*}
+where $\hat{v_i}$ indicates that $v_i$ is deleted from the vertex 
+sequence. The boundary operator is the linear extension of the above action.
+
+Over field coefficients, homology is a vector space characterized by its dimension, 
+so we may compute homology using \emph{Gaussian elimination}~\cite{uhlig}.  
+In practice, we use the 
+\emph{persistence algorithm}~\cite{elz-tps-02,zc-cph-05}.
+This algorithm can compute the homology of any \emph{based persistence complex}
+~\cite{zc-lh-08},
+a class that includes simplicial complexes as well as the 
+blowup complex. As input, this algorithm requires a basis for 
+the chain complex $C_*$, a boundary operator $\bd_n$, and a filtration 
+on the basis elements. As such, we focus on characterizing these three inputs 
+for computing the homology of a blowup complex using the persistence algorithm.
+
+\subsection{Blowup Complex}
+
+Like homology, the blowup complex may be defined for arbitrary topological 
+spaces~\cite{zc-lh-08}, but in this paper, we focus on blowups of simplicial 
+complexes. For a longer exposition of the \mvb{} we refer the reader to Zomorodian
+\& Carlsson~\cite{zc-lh-08}. Given a simplicial complex $K$ and cover 
+$U = \{U^i\}_i$ of $n$ subcomplexes, let 
+$\K^J = \cap_{k \in J} U^j$. The \emph{Mayer-Vietoris blowup complex} is:
+\begin{linenomath*}
+\begin{align*}
+\K^U &= \bigcup_{\emptyset \not = J \subseteq [n-1]} \K^J \times \Delta^J,
+\end{align*}
+\end{linenomath*}
+where $\times$ is the Cartesian product~\cite{zc-lh-08} and $\Delta^J$ is a face of $\N(\C)$.
+ % Do example here before any further talk.
+\begin{example}
+\label{ex:blowup}
+Suppose we have a space $\K$ with cover $\C = \{ \C^0, \C^1 \}$ as is shown on 
+the top of Figure~\ref{fig:space-n-cover}, where we use a line as a 
+representative space and ovals to indicate cover sets, and the four vertices
+of the line are labeled from left to right as $a, b, c, d$ respectively.
+The cover defines the intersection $\K^{[1]} = \K^{ \{ 0 , 1 \} }$. 
+The corresponding blowup is shown in in Figure~\ref{fig:blowup}. We list each of
+the relevant pieces of $\K^{\C}$ as well as the nerve of the cover where we denote simplices as strings for 
+brevity.  
+\begin{linenomath*}
+\begin{align*}
+\N(\C) &= \{ 0, 1, 01 \} \\
+\K^0 \times \Delta^{\{0\}} &= \{a,b,c,ab,bc\} \times \{0\}, \\
+\K^1 \times \Delta^{\{1\}} &= \{b,c,d,bc,bd\} \times \{0\}, \\
+\K^{[1]} \times \Delta^{[1]} &=\{b,c,bc\} \times \{01\}. 
+\end{align*}
+\end{linenomath*}
+\end{example}
+\input{vignette}
+% key property
+Our work is based on the following key property.
+The blowup complex $\K^U$ has the same homology as its base complex $\K$ in any 
+dimension: $H_n(\K^U) \cong H_n(\K)$ for any $n$~\cite[Lemma 1]{zc-lh-08}. 
+Our approach then is to compute homology of the blowup complex 
+instead of the base complex. The blowup has a structure that allows 
+for computation in parallel, unlike the base complex.
+
+% simplicial
+To compute the homology of the blowup complex, we may interpret the definition 
+above in two different ways.  
+At the space level, we may view each cell of the blowup complex as a product 
+of two simplices $\sigma \times \Delta^J$, where 
+$\sigma \in \K$ and $\Delta^J \in \Delta^n$.  
+For example, the product of two edges, $bc \times \{01\}$, gives us a 
+quadrilateral cell in Example~\ref{ex:blowup}.  
+We may then triangulate the blowup complex to get a simplicial complex in order 
+to compute its homology.  While this approach is theoretically correct, it is 
+computationally prohibitive in practice due to the need for triangulation and 
+unnecessary. We use an alternative interpretation to avoid this work.
+
+% chain
+Alternatively, we examine the chain complex attached to the blowup complex.
+A basis for $C_n(K^U)$ is the set composed of elements 
+$\sigma \tensor \Delta^J$ for all $\emptyset \not = J \subseteq [n-1]$ and 
+simplices $\sigma \in K^J$ where $\dim{\sigma} + \dim{\Delta^J} = n$.  
+We define the boundary operator as~\cite[\textrm{Lemma }4]{zc-lh-08}:
+\begin{linenomath*}
+\begin{align*}
+\bd{\left (\sigma \tensor \Delta^J \right)}
+&=
+\bd{\sigma} \tensor \Delta^J + 
+(-1)^{\dim{\sigma}}\sigma \tensor \bd\Delta^J.
+\end{align*}
+\end{linenomath*}
+Here, we are defining a boundary operator for the blowup complex on the left 
+using the boundary operators on the right, all of which are simplicial and were 
+defined in the previous section. 
+\begin{example}
+The boundary of the quadrilateral cell 
+$bc \times \{01\}$: in Example~\ref{ex:blowup} is:
+\begin{linenomath*}
+\begin{align*}
+\bd{\left (bc \tensor \{01\} \right)}
+&=
+\bd{(bc)} \tensor \{01\} - bc \tensor \bd(\{01\}) \\
+&= c \tensor \{01\} - b \tensor \{01\} - bc \tensor \{1\} + bc \tensor \{0\}.
+\end{align*}
+\end{linenomath*}
+\end{example}
+Having specified the basis for the chain complex and a boundary operator, 
+we now need a filtration on the basis elements in order to use the 
+persistence algorithm. In principle an arbitrary filtration will do.
+But for computing homology in parallel, we will specify a particular filtration 
+whose structure mirrors the structure of the blowup complex. 
+
+\section{Blowup Structure}
+\label{sec:blowup_structure}
+%intro
+The construction of the blowup complex has two phases,  the \emph{local} and the
+ \emph{global} phase. In the local phase, the complex explodes into multiple 
+pieces, as in Figure~\ref{fig:local-pieces}. This means that we have potentially multiple versions of a simplex 
+represented by the various sets in the cover. For example, since edge $bc$ falls within both sets in the 
+cover in Figure~\ref{fig:space-n-cover}, it is represented by two cells 
+$bc \times 0$ and $bc \times 1$. The pieces at the local stage are disjoint, so 
+we may compute the homology of the pieces in parallel. 
+
+The global phase specifies cells that glue the different versions of the 
+original simplices together, rendering them homologically equivalent.  
+For example, in Figure~\ref{fig:blowup}, the cell 
+$b \times 01$ connects $b \times 0$ and $b \times 1$.  
+
+To describe a filtration on the blowup complex, we assume that we have an 
+arbitrary filtration $\Filt{\K}$ on the simplices of our input complex $\K$.  In practice, 
+we often label the vertices of a complex using numbers or letters and use the lexicographic 
+ordering of the vertices to generate a filtration on the complex. We use the same procedure 
+with $\N(\C)$ as its vertices are numbered by definition.
+
+Given a filtration $\Filt{\K}$ on $\K$ and $\Filt{\N(\C)}$ on $\Delta^n$ we define a partial order $\Filt{{\K^\C}}$ by 
+ordering all cells in the local phase before those in the global phase. This amounts to 
+comparing two cells $\sigma \times \Delta^M$ and $\tau \times \Delta^N$ by  
+comparing the second factor according to $\Filt{\N(\C)}$. We may complete this partial order to a filtration by then comparing the 
+first factor according to $\Filt{\K}$. 
+\begin{example}
+Figure~\ref{fig:blowup} has the following filtration: 
+\begin{linenomath*}
+\begin{equation*}
+(\overbrace{a \times 0, b \times 0 ,c \times 0,  ab \times 0, bc \times 0}^
+{\textrm{Local Piece \#0 } (t=0)},
+\overbrace{b \times 1 , c \times 1, d \times 1, bc \times 1, cd \times 1}^
+{\textrm{Local Piece \#1 }(t=0)},
+\overbrace{b \times 01, c \times 01, bc \times 01}^
+{\textrm{Global Piece } (t=1)}).
+\end{equation*}
+\end{linenomath*}
+\end{example}
+\begin{figure}
+\begin{multicols}{2}
+{
+\begin{codebox}
+\Procname{$\proc{Multicore-Homology}(\K,p)$}
+ \li  $\C \gets \proc{Cover}(\K, p)$
+ \li  $\K^{\C} \gets \proc{Build-Blowup-Complex}(\K, \C)$
+ \li  $\Parfor$   $\Delta^J \in \N(\C)$
+ \li  \Do $\proc{Pair-Cells}(\K^{J} \times \Delta^{J})$
+      \End
+ \li $\For$ $\Delta^J \in \N(\C)$ a $d$-cell for $d > 0$.
+ \li  \Do $\proc{Pair-Cells}(\Cl{(\K^{J} \times \Delta^{J})})$ 
+\end{codebox}
+}
+{
+\begin{codebox}
+\Procname{$\proc{Build-Blowup-Complex}(\K, \C)$}
+\li $\K^{\C} \gets \emptyset$
+\li $\Parfor$ $\sigma \in \K$
+\li \Do $\For$ $\tau \subseteq \C[\sigma]$
+\li \Do $\K^{\C} \gets \K^{\C} \cup (\sigma \times \tau)$ 
+\end{codebox}
+}
+\end{multicols}
+\caption{Psuedocode for computing the blowup complex and it's homology in parallel. $\proc{Cover}$ can be any algorithm for generating a cover of $\K$ by $p$ subspaces. We encode the cover $\C$ as a map from $\K$ to $\N(\C)$ where each simplex is mapped to the maximal cell in $\N(\C)$ to which it is a member of. The procedure $\proc{Pair-Cells}$ is defined in the Computational Topology section of the Algorithms and Theory of Computation Handbook \cite{z-ct-10}.}
+\label{fig:multicore-code}
+\end{figure}
+Algorithm~\ref{fig:multicore-code} shows how to build the blowup complex and compute it's homology in parallel. The procedure $\proc{Build-Blowup-Complex}$ runs in parallel and has parallel running time $O(2m/p + p)$ time where $m = \card{\K^{\C}}$ and $p$ is the number of processors available. In practice $\proc{Build-Blowup-Complex}$ not only produces a blowup complex but also the filtration of the blowup complex prescribed above. Aside from its output $\proc{Build-Blowup-Complex}$ only uses $O(p)$ extra space. While we have written that the second for-loop in $\proc{Multicore-Homology}$ is to be carried out in serial more parallelism is possible. By ordering the iterations of the loop according to the topology of $\N(\C)$. We leave this added parallelism for future work.
+ 
+The size of the blowup complex depends on the cover. In the worst case, all of 
+the simplices in a space $\K$ are contained within all $n$ sets of the cover 
+$\C$. In this case, for each simplex $\sigma \in \K$ we have a corresponding 
+product cell $\sigma \times \Delta^n$, which has $2^n$ faces. That is, the 
+blowup complex \emph{blows up} $\K$ to be $2^n$ times larger, thus deserving 
+its name. Therefore, it is imperative to find a cover which minimizes blowup but whose
+nerve also allows for parallelism. 
+
+\section{Covers}
+\label{sec:covers}
+Given a simplicial complex $\K$, our goal is to compute its homology.  
+Our approach, as illustrated in Figure~\ref{fig:vignette}, is to find a cover, 
+build the associated blowup complex, and compute the homology of the blowup complex in 
+parallel. We have now explained all the steps of this approach except how to find a cover. 
+We begin in Section~\ref{sec:hardness} by identifying 
+properties of covers that lend themselves to efficient computation.
+We continue by stating an optimization problem over covers which 
+minimizes the explosive size of the blowup of a complex. We then show this optimization problem to be \NPH{}.  
+In Section~\ref{sec:partition-based-covers}, we describe an algorithm 
+that generates covers which have a simple structure, and bounded overlap 
+based on graph partitions. We end this section by showing how a partition of the 
+0-cells of a complex can be lifted to a partition of a filtration on the complex 
+which can be used to compute homology in parallel without building the blowup complex.
+\subsection{Minimum Blowups}
+\label{sec:hardness}
+In this section, we formalize the problem of finding covers
+that minimize blowup size. We show that this problem is \NPH{}, and its 
+decision-variant, \NPC{}.
+
+It should be clear that seek a cover which does not yield a large blowup complex. 
+To quantify blowup, we define the $\emph{blowup factor}$ as the ratio: 
+$\factor.$ We search for a cover $\C$ of size $p$ that minimizes the blowup 
+factor. Since we intend to compute the homology of each local piece in parallel,
+ the number of local pieces of the blowup should be the number $p$ of available 
+processors. Finally, each local piece should be approximately the same 
+size. There are many ways of modeling this last constraint. 
+We model it by enforcing that no cover set should be larger than a fixed fraction
+$\alpha$ of the size of the input complex, where $\alpha \in (1/p,1)$. 
+Putting together all of the desired properties of blowups, we have the following 
+optimization problem stated for $p = 2$ and $\alpha \in (1/2, 1)$:
+\begin{description}
+\addtolength{\itemsep}{-.7\baselineskip}
+\item[\textsc{Problem:}]  \ablp 
+\item[\textsc{Instance:}] A simplicial complex $K$
+\item[\textsc{Goal:}] Find a cover $\C$ of $\K$ with $2$ elements such that: 
+\[ \max{\card{\C_i}} \leq \alpha\card{\K} \textrm{ and } \factor \textrm{ is minimized.} \]
+\end{description}
+Our goal is to show that this problem is $\NPH{}$ and it's decision problem variant $\NPC{}$.
+For the decision problem variant to be $\NPC{}$ we need to show that $\factor$ may
+be evaluated in polynomial time. Recall that $\K^{\C}$ might be exponentially larger than $\K$. 
+For covers by two sets we may employ the following lemma.
+\begin{lemma}
+\label{lem:char-blowup-sol}
+Let $\K$ be a complex and let $\C = \{\C_1, \C_2\}$ be a cover of $\K$ 
+by two sub complexes. Then:
+\begin{equation*}
+\factor = 1 + 2\frac{\card{\C_1 \cap \C_2}}{\card{\K}}. 
+\end{equation*}
+\end{lemma}
+\begin{proof}
+This follows directly from the product cell definition of $\K^\C$.
+\end{proof}
+\noindent Now we observe an important necessary condition of optimal solutions to \ablp{}.
+\begin{lemma}
+\label{lem:blowup-sol-max-simplices}
+Given a complex $\K$ and $\C = \{\C_1, \C_2\}$ be an optimal solution of  \ablp{}, then 
+$\C$ may be viewed as a partition of $\M(\K)$ the maximal cells of $\K$.
+\end{lemma}
+\begin{proof}
+If $\sigma \in \C_i \cap \C_j$ is a maximal cell, then consider the cover
+$\C'$ obtained by removing $\sigma$ from the set of larger
+cardinality. $\C'$ is certainly a cover satisfying $\alpha$-balance but
+by Lemma~\ref{lem:char-blowup-sol} the blowup factor has decreased
+which contradicts the optimality of $\C$.
+\end{proof}
+\noindent Suppose the input to \ablp{} is a graph $G$. In this context any cover $\C$ of $G$ is a pair of subgraphs $G_1,G_2$.
+Lemma~\ref{lem:blowup-sol-max-simplices} tells us that in any optimal solution the intersection $I = G_1 \cap G_2$ of these two 
+subgraphs is a set of vertices. The requirement that $\C$ is a cover implies that $I$ is a vertex separator.  \avertex{} is a similar problem on graphs. 
+For any $\alpha \in (\frac{1}{2},1)$:
+\begin{description}
+\addtolength{\itemsep}{-.8\baselineskip}
+\item[\textsc{Problem:}]  \avertex{}
+\item[\textsc{Instance:}] A graph $G$
+\item[\textsc{Goal:}] Find a vertex separator $(V_1,V_2,I)$ of $G$ such that: 
+\[ \card{I} \textrm{ is minimized.} \textrm{ subject to } \max_i{(\card{V_i} + \card{E_i})} + \card{I} \leq \alpha(\card{V}+\card{E})  \]
+\end{description}
+where $E_i$ is the set of edges with at least one endpoint in $V_i$. \avertex{} is \NPH{} for any $\alpha \in (\frac{1}{2},1)$ and it's decision problem variant is \NPC{}~\cite{rhl-yaggpis-14}.
+\begin{theorem}
+For any $\alpha \in (1/2,1)$ the optimization problem \ablp{}  is \NPH{} and it's decision problem variant \NPC{}.
+\end{theorem}
+\begin{proof}
+We restrict our problem to graph instances of $\avertex{}$ and the problems become equivalent.
+\end{proof}
+This procedure shows us how finding optimal blowups of graphs finds us a partition of that graph. In the next section we show how given a complex $\K$ 
+finding partition of it's 1-skeleton can be used to produce a cover of the entire complex.
+\subsection{Partition-Based Covers}
+\label{sec:partition-based-covers}
+\label{sec:pcover}
+\input{algorithm}
+In this section we describe an algorithm for generating covers on an 
+arbitrary complex from a partition of its one skeleton. We emphasize that while we propose a specific
+algorithm for generating these covers any procedure for generating covers suffices. 
+There may be a better approach for generating covers than the one presented. Recall that in the worst case,
+a cover may produce an exponentially large blowup. However, the heuristic presented in this section guarantees that $\factor < 3$. 
+
+There are many algorithms for generating covers, and they are all valid inputs to our parallel algorithms. 
+Zomorodian \& Carlsson consider two na\"ive methods for cover enumeration, \emph{random $\epsilon$-balls} 
+and \emph{tilings} \cite{zc-lh-08}. In a less general setting one might consider
+algorithms based on \emph{Voronoi diagrams} or level sets of 
+\emph{Morse functions}. However, the former method is
+computationally intractable in high dimensions and 
+the latter is unable to control the intersection patterns of cover sets. 
+There is a natural way of generating a cover of an arbitrary simplicial complex from a 
+partition of its one skeleton with a simple intersection pattern. 
+
+The algorithm $\proc{Partition-Based-Cover}$, illustrated in Figure~\ref{fig:vignette1}, takes a complex $\K$ and positive 
+integer $p \geq 2$ as input and produces a cover $\C$ of size $p+1$ as output. 
+First, we extract the one-skeleton of $\K$ and represent it as a graph $G$. 
+Second, we find a graph partition $P$ of $G$ of size $p$.  
+Third, we extend $P$ to an \emph{open cover} $\tilde{\C}$. Finally, we extend $\tilde{\C}$ to a cover $\C$. The algorithms
+for producing these two covers are called $\proc{Open-Cover}$ and
+$\proc{Close-Cover}$, respectively. 
+
+There are many algorithms for computing partitions of graphs which
+fall into four major classes of algorithms: geometric, non-geometric, 
+spectral, and hybrid methods \cite{fj-gp-98}. In pratice, we use \textsc{Metis}, 
+a hybrid method, since it tends to produce balanced partitions quickly~\cite{KaKu95}. Again
+any partitioning scheme will work. 
+Next, we describe $\proc{Open-Cover}(\K,P)$, which extends a partition of $G$ to a cover of $\K$. 
+
+The procedure $\proc{Open-Cover}(\K,P)$ is given in Algorithm~\ref{alg:open-cov} and outputs an open cover $\tilde{\C} = \{\tilde{\C}_i\}_{i \in [p]}$ which is a partition of $\K$. Given a partition $P = \{P_i\}_{i \in [p-1]}$ of the vertex set of $G$ we expand $P$ to $\tilde{\C}$. Specifically we first create sets 
+$\tilde{\C} = \{\tilde{\C}_i\}_{i \in [p]}$ where a simplex $\sigma$ is placed into $\tilde{\C}_i$ for $i \in [p-1]$ 
+if all of it's vertices lie in $P_i$ and is added to $\tilde{\C}_p$ otherwise. 
+
+In the procedure $\proc{Close-Cover}$ we replace $\tilde{C}_{i}$ with $\C_i = \Cl{(\tilde{\C}_i)}$. However, $\tilde{\C}_i$ for $i \in [p-1]$ is closed by construction so we only close the last set.  We have the following lemma: 
+\begin{lemma}
+\label{lem:blowup-factor}
+Given a complex $\K$, $p \geq 2$, $\proc{Partition-Based-Cover}(\K, p)$ 
+generates a cover $\C$ with $\factor < 3$. 
+\end{lemma}
+\begin{proof}
+For a complex $\K$ and $p \geq 2$, let $\C$ be the output of 
+$\proc{Partition-Based-Cover}(\K,p)$. The first
+$p$ cover sets are disjoint since they are formed from disjoint sets of vertices.
+Therefore there can be at most pairwise intersection so by the proof of Lemma~\ref{lem:char-blowup-sol} we have that $\ratio < 3$.
+\end{proof}
+Lemma~\ref{lem:blowup-factor} ensures that the necessary condition in Lemma~\ref{lem:blowup-sol-max-simplices}, is 
+satisfied. Finally, both $\proc{Open-Cover}$ and $\proc{Close-Cover}$ can be implemented in parallel. 
+\begin{figure}[h!]
+\begin{multicols}{2}
+{
+\begin{description}
+\addtolength{\itemsep}{-.65\baselineskip}
+\item[\small\textbf{Input:}] \small A complex $\K$, and a graph partition $P$.
+\item[\small\textbf{Output:}] \small A cover $\C$, of size $\card{P}+1$.
+\end{description}
+\vspace{-.6cm}
+\begin{codebox}
+\Procname{$\proc{Open-Cover}(\K,P)$}
+ \li	$\id{\C} \gets \emptyset$
+ \li  \Parfor\,$ \sigma \gets \sigma_1$ \To $\sigma_m \in \K$
+ \li 	   \Do  $\id{\C}[\sigma] \gets \proc{Partition-Cell}(P,\sigma)$
+          \End
+ \li \Return \id{\C}
+  \End
+\end{codebox}
+}
+{
+\begin{description}
+\addtolength{\itemsep}{-.65\baselineskip}
+\item[\small \textbf{Input:}] \small A graph partition $P$ of size $p$, and simplex $\sigma$
+\item[\small \textbf{Output:}] \small The index $i \in [p]$ of  $\tilde{\C}$ to place $\sigma$.
+\end{description}
+\vspace{-.65cm}
+\begin{codebox}
+\Procname{$\proc{Partition-Cell}(P, \sigma = [v_0, \ldots, v_d])$}
+ \li	$R \gets \emptyset$
+ \li  \For $v \gets v_0$ \To $v_d \in \sigma$
+ \li 	   \Do $R \gets P(v_0)$
+          \End
+ \li	\If $\card{R} = 1$ \Return $R[0]$
+ \li    \Else \Return $\card{P}$
+\end{codebox}
+}
+\end{multicols}
+\caption{The pseudocode for $\proc{Open-Cover}$ which runs in $O(md/p)$ time, where $m$ is the 
+number of simplices in $\K$ a $d$-dimensional complex, and $p$ is the 
+maximum number of available cores. $P$ is indexed starting at 0. For a vertex $v$, $P(v)$ 
+denotes the index of the partition set of $P$ containing $v$.
+}
+\label{alg:open-cov}
+\end{figure}
+The nerve of the covers generated by $\proc{Partition-Based-Cover}$ have the topology of a star. 
+Observe that in this particular situation since we are only interested in the homology of $\K$ we may avoid the 
+construction of the blowup complex and use the cover to place a filtration on $\K$. In particular, consider the filtration on $\K$ obtaining by 
+ordering $\tilde{\C}_i < \tilde{\C_p}$ for $i \in [p-1]$. In the next section we compare our two parallel algorithms against 
+the serial one on a series of examples.
+\vspace{-5mm} 
+\section{Experiments}
+\vspace{-5mm} 
+\label{sec:exp}
+In this section, we describe the implementation of our algorithm
+and explore its performance on real and synthetic data. We compare our
+performance against our existing serial software. Our implementation is in 
+\cplusplus\, using the generic programming paradigm. 
+We rely on the METIS library for computing graph partitions 
+\cite{KaKu95}, the Intel Threading Building Blocks 
+Library~\cite{IntelTBB} for parallelism, and our own
+library for homology computation. Our parallel implementation computes
+an initial filtration on $\K$, a cover $\C$, blowup complex 
+$\K^{\C}$ and associated filtration in a parallel fashion,
+independent of the number of partitions. Our serial implementation only
+computes an identical initial filtration, and then homology.
+The \emph{makespan} of a program is the longest running thread time.
+We divide the running time of our algorithm into two \emph{phases}.
+We refer to the segment of code leading to homology computation as 
+\emph{Phase I} and the makespan of this segment 
+the \emph{preprocessing time}. The time spent computing homology is
+\emph{Phase II}.
+For the sake of reproducibility, we now provide details on our experiments.
+
+We time both parallel and serial programs with wall-clock time
+using the tbb::clock. Each time reported is the average makespan,
+measured in seconds, over 10 runs of the program.
+As previously mentioned all of our experiments are done 
+using 11 cores on a 2 CPU, 12 Core, x86-64 Linux Machine, with 3.4 MHz Intel 
+Xeon X5690 Processors, 49 GB of RAM, SSE 4.2, and we disable hyperthreading 
+to prevent unnecessary contention between threads. We remind the reader that we 
+only have available $p-1$ of the total $p$ cores in order to leave room for 
+system processes, and that in this work we use at most one thread per available 
+core. 
+\subsection{Data}
+\input{table}
+All data sets are listed in Table~\ref{tab:data}. 
+Within Table~\ref{tab:data} we also summarize the results of 
+the serial and parallel algorithms within each of the two phases.
+All complexes are skeleta of a Vietoris-Rips Complex 
+$\vr_\epsilon$~\cite{z-fcv-10}. Next we describe the input space for each 
+experiment. 
+
+{\blobs} is a collection of
+22,720 copies of a fully connected 10 dimensional complex on 11 vertices, each 
+copy connected to the next by a single edge. {\clique} is a fully 
+connected complex on 19 vertices. Recall that the $n$-simplex has $\Theta(2^n)$ 
+faces. {\bunny} is a 3-complex built on a set of points sampled from the 
+\emph{Stanford bunny}. We create {\sphere}, using Muller's method to sample 
+uniformly on the unit 3-sphere~\cite{m-nmgpuns-59} and then use the diagonal map
+$x \rightarrow (x,x)$ to embed the points in $\R^8$~\cite{hatcher}. {\gnp} is a 
+4-dimensional clique complex built on a sparse \Erdos-\Renyi\ graph $G(n,p)$ 
+with $n = 1250$ and $p = 0.05$.
+ 
+\subsection{Statistics}
+
+Recall from Section~\ref{sec:partition-based-covers} our input is a complex
+$\K$ and integer $p > 1$. Our goal is to build a balanced cover for 
+which $\factor$ is as small as possible. First, we build a a graph partition of
+the one skeleton $G(\K)$. To produce our graph partition we chose the
+unsupervised graph partitioning algorithm METIS because it tends to produce 
+balanced graph partitions. Figure~\ref{fig:graph-balance} shows the balance
+ratio $\hat{\alpha} = \max_i{\card{V^i}}/\card{V}$ for each computed partition
+on each data set.
+
+Second, given a partition we next build a cover using 
+$\proc{Partition-Based-Cover}$. Finally, the procedure 
+$\proc{Build-Blowup-Complex}$ computes the blowup complex along with
+its filtration. Figure~\ref{fig:blowup-factors} shows $\factor$ for 
+the covers computed on each data set, and Figure~\ref{fig:balance-factors} 
+shows the balance ratio of the corresponding blowup complex: 
+$\alpha = \max_i{\card{\C^i}}/\card{\K}$.
+\input{graph_plots}
+\input{cover_plots} 
+\subsection{Timing}
+\input{speedup_factors}
+For each of our data sets we present the speedup factor of
+our algorithm versus serial persistence. Figure~\ref{fig:total-speedup}
+shows the speedup factor of our entire algorithm from start to finish as 
+compared to a persistence run in serial on the same input, from start to 
+finish. In Figure~\ref{fig:homology-speedup} we also compare the speedup for 
+homology computations between both algorithms.
+
+First, we can see that our techniques tend to scale the best on inputs
+in which all topological features are localized by the cover. However we see significantly 
+better performance on $\bunny$ versus $\blobs$. Due to the massive size
+of each $\blobs$, we believe that the variation between these two experiments is 
+demonstrating how memory bandwidth does not scale with the number
+of cores used by an algorithm. One might consider mitigating the effect of limited memory 
+bandwith by prefetching or other architecture specific parallelization
+techniques, but our goal is to demonstrate proof of concept, not optimization for all cases.
+
+Second, geometric inputs such as a $\sphere$ have entirely global topology; these
+features are necessarily resolved by a long serial computation. However, they still
+emit a balanced cover, so the bulk of the work is still evenly divided across each core,
+and we still see a linear speedup on this input.
+ 
+Finally, we see that inputs such as $\clique$ or $\gnp$ which are flag complexes of cliques or
+expander complexes, have entirely global topological structure,
+emit no balanced cover. and produce a small blowup factor. 
+Our algorithm is slower than the equivalent serial computations which
+is expected.
+
+\section{Conclusion \& Future Work}
+In this paper we present a method for computing the homology of 
+a cellular complex in parallel. We describe each step of the method,
+implement all algorithms, and present preliminary experimental results.
+While our main goal is to compute the persistent homology of larger complexes in 
+distributed memory we have demonstrated the ability for parallel computations 
+based on spatial decompositions of the input to outperform serial computations.
+
+We mentioned in Section~\ref{sec:blowup_structure} that there is 
+room for more parallelism in $\proc{Multicore-Homology}$. 
+For example, Let $M$ be any matching of the $d$-cells of $\N(\C)$. 
+One can first carry out these iterations of the for loop in parallel. 
+Additionally, given a filtration $\Filt{\K}$ on $\K$ and a cover $\C$
+one can construct a filtration on $\K^\C$ by projection. The resulting
+filtration produces identical persistent homology to that of $\Filt{\K}$ on $\K$.
+This filtration orders cells in the blowup first by their factor in $\K$ then
+breaks ties by ordering based on the factor in $\N(\C)$. We plan a followup
+paper to demonstrate parallelism using this approach in distributed memory.
+
+\section*{ACKNOWLEDGMENTS}
+The authors would like to thank  Gunnar Carlsson, Don Sheehy, Steve Canon, and 
+Milka Doktorova, for discussions and support.
+{ 
+  \small 
+  \bibliographystyle{abbrv}
+  \bibliography{multicore} 
+}
+\end{document}

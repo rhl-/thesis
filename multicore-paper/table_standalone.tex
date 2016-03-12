@@ -1,0 +1,32 @@
+\documentclass{standalone}
+\input{commands}
+\begin{document}
+\begin{table*}
+  \begin{center}
+    \small
+    \begin{tabular}{crrrrrrrr}
+      \hline
+      \multicolumn{6}{c}{Input Statistics} \\
+      \multicolumn{1}{c}{$D$} &
+      \multicolumn{1}{c}{$\card{D}$} &
+      \multicolumn{1}{c}{$\epsilon$, $p$} &
+      \multicolumn{1}{c}{$\card{E}$} &
+      \multicolumn{1}{c}{$d$} &
+      \multicolumn{1}{c}{$\card{\K}$} \\
+      \hline
+      \blobs &  249,920 & - & 1,272,319 & 10 & 46,530,559 \\
+      \clique &  20 & - & 190 & 19 & 1,048,575 \\
+      \bunny & 34,837 & 0.05 & 489,876 & 3 & 9,714,912 \\
+      \sphere & 50,000 & 0.18 & 546,388 & 8 & 19,134,612 \\
+      \gnp & 1250 & 0.047 &  & 4 & 73,309 \\
+      \hline
+    \end{tabular}
+  \end{center}
+  \caption{%
+    Input Statistics: The name $D$, and number of vertices of each data set $\card{D}$, 
+    as well as input parameter $\epsilon$ or $p$ in the case of a random graph, 
+    embedding dimension $d = \dim{D}$, size $\card{K}$, and edge-set size $\card{E}$ of each complex $\K$. 
+  }
+  \label{tab:data}
+\end{table*}
+\end{document}

@@ -1,0 +1,83 @@
+\begin{figure}
+\centering
+\begin{tikzpicture}[scale=.65]
+\begin{semilogyaxis}[
+name=plot1,
+ymin=.09,
+ymax=25,
+xmin=0,
+xmax=12,
+xlabel=\# of  threads, 
+title={$\proc{Multicore-Homology}$},
+ylabel= time to reduce boundary matrix (seconds),
+minor y tick num={5},
+legend style={at = {(.25,.6)}, font=\large}]
+%\legend{\multiblob, \bunny, \clique, \gnp, \sphere}
+\addplot table [x=num_threads, y=persistence, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_threads, y=persistence, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/bunny..05.csv};
+\addplot table [x=num_threads, y=persistence, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/clique.20.csv};
+\addplot table [x=num_threads, y=persistence, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/gnp.1250.047.csv};
+\addplot table [x=num_threads, y=persistence, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/sphere.csv};
+\end{semilogyaxis}
+\begin{semilogyaxis}[
+name=plot3,
+at=(plot1.below south east), anchor=above north east,
+ymin=.09,
+ymax=25,
+xmin=0,
+xmax=12,
+xlabel= \# of threads,
+title={$\proc{Heuristic-MH}$},
+%ylabel= time to reduce boundary matrix (seconds),
+minor y tick num={5},
+legend style={at={(1,.55)}, font=\large}]
+%\legend{\multiblob, \bunny, \clique, \gnp, \sphere}
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/cover_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/cover_homology/bunny..05.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/cover_homology/clique.20.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/cover_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/cover_homology/sphere.csv};
+\end{semilogyaxis}
+
+\begin{semilogyaxis}[
+name=plot4,
+at=(plot3.right of north east), anchor=left of north west,
+ymin=.09,
+ymax=25,
+xmin=0,
+xmax=12,
+xlabel= \# of threads, 
+title={$\proc{Spectral-Sequence}$},
+minor y tick num={5},
+legend style={at={(.95,.525)}, font=\large}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere}
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_ss/clique.11.22720.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_ss/bunny..05.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_ss/clique.20.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_ss/gnp.1250.047.csv};
+\addplot table [x=num_partitions,, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_ss/sphere.csv};
+\end{semilogyaxis}
+
+\begin{semilogyaxis}[
+name=plot2,
+at=(plot4.above north west),
+anchor = below south west,
+ymin=.09,
+ymax=25,
+xmin=0,
+xmax=12,
+xlabel=\# of  threads,
+title={$\proc{Chunk}$},
+minor y tick num={5},
+legend style={at={(.95,.525)}, font=\large}]
+%\legend{\multiblob, \bunny, \clique, \gnp, \sphere}
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/clique.11.22720.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/bunny..05.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/clique.20.csv};
+\addplot table [x=num_partitions, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/gnp.1250.047.csv};
+\addplot table [x=num_partitions,, y=persistence, col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/sphere.csv};
+\end{semilogyaxis}
+\end{tikzpicture}
+\caption{Time to reduce the boundary matrix for each algorithm. At $x=1$ on all plots we display the running time for reducing $\partial_{\K}$ using the standard algorithm from the appropriate software package.}
+\label{fig:ctl_vs_phat}
+\end{figure}

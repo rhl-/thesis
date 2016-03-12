@@ -1,0 +1,136 @@
+\begin{figure*}
+\begin{subfigure}[t]{.33\textwidth}
+\centering
+%\hspace*{-1cm}%
+\begin{tikzpicture}[scale=.5, y=0.6pt, x=.75pt]
+     %row 1
+     \node[font=\large] at (-50, 800) {$(K, U)$};
+     \draw[fill=afragreen, draw = black,  line width=2]  (47,800) circle (10pt);  
+     \draw[fill=afragreen, draw = black, line width=2]  (117,800) circle (10pt);   
+     \draw[fill=afragreen, draw = black, line width=2]  (190,800) circle (10pt); 
+     \draw[fill=afragreen, draw = black, line width=2]  (261,800) circle (10pt); 
+     \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (47,800) -- (117, 800);
+            \path[draw=black,fill=black,line width=2] (117,800) -- (190, 800);
+            \path[draw=black,fill=black,line width=2] (190,800) -- (261, 800);
+      \end{pgfonlayer}      
+      \draw[draw, color=afrablue, fill=none, line join=round,draw opacity=0.978,line width=2] (117, 800) ellipse (100 and 45);
+      \draw[draw, color=afrapurple, fill=none, line join=round,draw opacity=0.978,line width=2] (190, 800) ellipse (100 and 45);
+         %row 2 
+    \node[font=\large] at (-40, 740) {$K^0$};
+     \draw[fill=afragreen, draw = black, line width=2]  (47,730) circle (10pt);  
+     \draw[fill=afragreen, draw = black, line width=2]  (117,730) circle (10pt);   
+     \draw[fill=afragreen, draw = black, line width=2]  (190,730) circle (10pt); 
+     \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (47,730) -- (117, 730);
+            \path[draw=black,fill=black,line width=2] (117,730) -- (190, 730);
+      \end{pgfonlayer}   
+               %row 3
+     \node[font=\large] at (-50, 680) {$K^1$};
+     \draw[fill=afragreen, draw = black, line width=2]  (117,680) circle (10pt);   
+     \draw[fill=afragreen, draw = black, line width=2]  (190,680) circle (10pt); 
+      \draw[fill=afragreen, draw = black, line width=2]  (261,680) circle (10pt); 
+         \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (117,680) -- (190, 680);
+            \path[draw=black,fill=black,line width=2] (190,680) -- (261, 680);
+      \end{pgfonlayer}   
+          %row 4
+\node[font=\large] at (-50, 620) {$K^{[1]}$};
+     \draw[fill=afragreen, draw = black, line width=2]  (117,620) circle (10pt);   
+     \draw[fill=afragreen, draw = black, line width=2]  (190,620) circle (10pt); 
+         \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (117,620) -- (190, 620);
+      \end{pgfonlayer}     
+\end{tikzpicture}
+\caption{Space and Cover}
+\label{fig:space-n-cover}
+\end{subfigure}
+%\hfill
+\begin{subfigure}[t]{.33\textwidth}
+\centering
+%	\def\svgwidth{1in}
+%	\input{figs/local_pieces.pdf_tex}
+\begin{tikzpicture}[scale=.5, y=0.6pt, x=.75pt]
+    %disj 0
+    \begin{scope}[shift={(143,80)}]
+    \node[font=\large] at (300, 730) {$K^0 \times \Delta^{0}$};
+     \draw[draw, color=afrablue, fill=none, line join=round,draw opacity=0.978,line width=2] (117, 730) ellipse (100 and 45);
+     \draw[fill=afrablue, draw = black, line width=2]  (47,730) circle (10pt);  
+     \draw[fill=afrablue, draw = black, line width=2]  (117,730) circle (10pt);   
+     \draw[fill=afrablue, draw = black, line width=2]  (190,730) circle (10pt); 
+     \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (47,730) -- (117, 730);
+            \path[draw=black,fill=black,line width=2] (117,730) -- (190, 730);
+      \end{pgfonlayer}   
+      \end{scope}
+      %disj  1
+       \begin{scope}[shift={(0,0)}]
+         \node[font=\large] at (380, 680) {$K^1 \times \Delta^{1}$};
+       \draw[draw, color=afrapurple, fill=none, line join=round,draw opacity=0.978,line width=2] (190, 680) ellipse (100 and 45);
+     \draw[fill=afrapurple, draw = black, line width=2]  (117,680) circle (10pt);   
+     \draw[fill=afrapurple, draw = black, line width=2]  (190,680) circle (10pt); 
+      \draw[fill=afrapurple, draw = black, line width=2]  (261,680) circle (10pt); 
+         \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (117,680) -- (190, 680);
+            \path[draw=black,fill=black,line width=2] (190,680) -- (261, 680);
+      \end{pgfonlayer}   
+            \end{scope}
+\end{tikzpicture}
+\caption{Local pieces of the blowup complex.}
+	\label{fig:local-pieces}
+\end{subfigure}
+%\hfill
+\begin{subfigure}[t]{.33\textwidth}
+\centering
+\begin{tikzpicture}[scale=.5, y=0.6pt, x=.75pt]
+    %disj 0
+    \begin{scope}[shift={(143,80)}]
+    \node[font=\large] at (300, 730) {$K^0 \times \Delta^{0}$};
+     \draw[draw, color=afrablue, fill=none, line join=round,draw opacity=0.978,line width=2] (117, 730) ellipse (100 and 45);
+     \draw[fill=afrablue, draw = black, line width=2]  (47,730) circle (10pt);  
+     \draw[fill=afrablue, draw = black, line width=2]  (117,730) circle (10pt);   
+     \draw[fill=afrablue, draw = black, line width=2]  (190,730) circle (10pt); 
+     \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (47,730) -- (117, 730);
+            \path[draw=black,fill=black,line width=2] (117,730) -- (190, 730);
+      \end{pgfonlayer}   
+      \end{scope}
+      %disj  1
+       \begin{scope}[shift={(0,0)}]
+         \node[font=\large] at (380, 680) {$K^1 \times \Delta^{1}$};
+       \draw[draw, color=afrapurple, fill=none, line join=round,draw opacity=0.978,line width=2] (190, 680) ellipse (100 and 45);
+     \draw[fill=afrapurple, draw = black, line width=2]  (117,680) circle (10pt);   
+     \draw[fill=afrapurple, draw = black, line width=2]  (190,680) circle (10pt); 
+      \draw[fill=afrapurple, draw = black, line width=2]  (261,680) circle (10pt); 
+         \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (117,680) -- (190, 680);
+            \path[draw=black,fill=black,line width=2] (190,680) -- (261, 680);
+      \end{pgfonlayer}   
+            \end{scope}
+      %blowup edges 
+      \begin{scope}[shift={(143,80)}]
+     \begin{pgfonlayer}{edges}
+            \path[draw=black,fill=black,line width=2] (47,730) -- (47, 600);
+            \path[draw=black,fill=black,line width=2] (117,730) -- (117, 600);
+      \end{pgfonlayer}     
+          \node[font=\large] at (280, 665) {$K^{[1]} \times \Delta^{[1]}$};
+        \begin{pgfonlayer}{quadcell}
+      \draw [fill=afragreen,  preaction={fill, afragreen}, pattern=north west lines, pattern color=black] (47, 600) rectangle (117, 730);
+	\end{pgfonlayer}
+	\end{scope}
+\end{tikzpicture}
+		\caption{The blowup complex.}
+		\label{fig:blowup}
+\end{subfigure}
+\caption{Our approach. We are given a space equipped with a 
+	 cover~(\protect\subref{fig:space-n-cover}), the former represented by a path with
+         four vertices and three edges and the latter represented by ovals.  
+	 First, at time $(t = 0)$ we blowup up the space into 
+	 local pieces~(\protect\subref{fig:local-pieces}), each local piece is a copy of 
+	 the corresponding cover set, then, at $(t = 1)$ we glue together 
+	 duplicated simplices by adding in the blowup cells, rendering them 
+	 homologically equivalent, which gives us the blowup 
+	 complex~(\protect\subref{fig:blowup}).
+}
+\label{fig:vignette}
+\end{figure*}

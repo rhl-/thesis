@@ -1,0 +1,81 @@
+\begin{figure}
+\centering
+%\fbox{
+\begin{tikzpicture}[scale=.65]
+\begin{semilogyaxis}[
+name=plot1,
+%legend pos=outer north east,
+xmin=0,
+xmax=11,
+ymin=1,
+ymax=20000,
+xlabel=\# of partition sets,
+ylabel=Maximum Resident Set Size (MB),
+title={$\proc{Multicore-Homology}$},
+legend style={at = {(.9,.5)},font=\large}]
+%\legend{\multiblob, \bunny, \clique, \gnp, \sphere}
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/concurrent_homology/bunny..05.csv};
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/concurrent_homology/clique.20.csv};
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/concurrent_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions,, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/concurrent_homology/sphere.csv};
+\end{semilogyaxis}
+\begin{semilogyaxis}[
+name=plot2,
+at=(plot1.outer east), anchor=outer west,
+xmin=0,
+xmax=11,
+ymin=1,
+ymax=20000,
+xlabel=\# of threads,
+title={$\proc{Chunk}$},
+legend style={legend pos=south east,font=\tiny}, 
+legend style={at = {(1,.45)},font=\large}]
+%\legend{\multiblob, \bunny, \clique, \gnp, \sphere}
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/clique.11.22720.csv};
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/bunny..05.csv};
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/clique.20.csv};
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/gnp.1250.047.csv};
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_chunk/sphere.csv};
+\end{semilogyaxis}
+
+\begin{semilogyaxis}[
+name=plot3,
+at=(plot1.below south west), anchor=above north west,
+xmax=11,
+ymin=1,
+ymax=20000,
+title={$\proc{Heuristic-MH}$},
+xlabel=\# of partition sets, 
+legend style={at={(.98,.43)}, font=\footnotesize}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere}
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/cover_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/cover_homology/bunny..05.csv};
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/cover_homology/clique.20.csv};
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/cover_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/cover_homology/sphere.csv};
+\end{semilogyaxis}
+
+\begin{semilogyaxis}[
+name=plot4,
+at=(plot3.outer east), anchor=outer west,
+ymin=1,
+ymax=20000,
+xmin=0,
+xmax=11,
+xlabel= \# of threads, 
+title={$\proc{Spectral-Sequence}$},
+minor y tick num={5},
+legend style={at={(1,.6)}, font=\large}]
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_ss/clique.11.22720.csv};
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_ss/bunny..05.csv};
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_ss/clique.20.csv};
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_ss/gnp.1250.047.csv};
+\addplot table [x=num_threads, y=max memory (MB), col sep=comma] {pgf-speedup-figs/results/phat_14_ss/sphere.csv};
+\end{semilogyaxis}
+\end{tikzpicture}
+\caption{Total memory usage for each algorithm. Recall that PHAT takes as input a boundary matrix whereas the 
+procedures outlined in this work take as input a simplicial complex and generates an identical boundary matrix before reducing it. 
+At $x=1$ on all plots we display the memory used for the standard algorithm from the appropriate software package.}
+\label{fig:memory-usage}
+\end{figure}

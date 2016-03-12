@@ -1,0 +1,74 @@
+\chapter{Filtrations \& Persistent Homology}
+\section{The Spectral Sequence of a Filtration}
+Let $R$ be a commutative ring and $0 \rightarrow \K_0 \rightarrow \K_1 \rightarrow  \ldots \rightarrow  \K_n$ 
+be a filtration of chain complexes so that \[ \K_i = C(X_i, R) = \bigoplus_d C_d(X_i, R)\]
+and  \[ \K = \bigoplus_i \K_i \] is a graded $R[t]$-module.
+
+In this work we are interested in invariant decompositions of $H(\K)$. In the case when $R = k$ a field, we have a structure theorem:
+\[ H(\K)= \left( \bigoplus_{\alpha_i}t^{\alpha_i}R[t] \right) \bigoplus \left( \bigoplus_{[\alpha_i, \beta_i]} t^{\alpha_i}R[t]/t^{\beta_i}  \right)  \]
+The collection of intervals $[\alpha_i,\beta_i]$ together with the intervals $[\alpha_i, \infty)$ are a complete and discrete invariant 
+of the module $\K$. This invariant is referred to as a barcode.
+
+To begin we first demonstrate how to use a \emph{spectral sequence} to decompose $\K$ into its invariant form in the case when $R = k$.
+
+A spectral sequence is a sequence of chain complexes $(E_i, d_i)$ called \emph{pages}. The elements of $E_i$ are referred to as \emph{terms}, and the operators $d_i$ are 
+referred to as \emph{differentials}.  $E_{i+1}$ is defined to be the homology of the chain complex on the previous page.
+
+\noindent We begin with the original filtration of $\K$
+\[
+\begin{tikzcd} [column sep=small]
+0 \arrow{r}{i} & \K_0 \arrow{r}{i} & \K_1 \arrow{r}{i}   & \K_2 \arrow{r}{i} & \ldots \arrow{r}{i} & \K_{n-1} \arrow{r}{i} & \K_n
+\end{tikzcd}
+\]
+We refer to the homology of this sequence as the $E_0$ page of the spectral sequence. Next, demonstrate how to construct the $E_1$ page.
+
+\noindent With each map $K_i \rightarrow K_{i+1}$ we get a short exact sequence by attaching the cokernel:
+\[
+\begin{tikzcd} [column sep=small]
+0 \arrow{r}{i} & \K_0 \arrow{r}{i}\arrow{d}{j} & \K_1 \arrow{r}{i}\arrow{d}{j}   & \K_2 \arrow{r}{i}\arrow{d}{j} & \ldots \arrow{r}{i} & \K_{n-1} \arrow{r}{i} \arrow{d}{j} & \K_n\arrow{d}{j} \\ 		&     \K_0/{0} &			 \K_1/{\K_0} & 	 \K_2/{\K_{1}}		   & \ldots  			   & \K_{n-1}/{\K_{n-2}}		 & \K_n/{\K_{n-1}} 
+\end{tikzcd}
+\]
+This diagram passes to homology, where each short exact sequence extends to a long exact sequence. In the work that follows we consider the [relative] homology to be the $k$-vector space which is the direct sum of homology computations in each dimension. In addition, the diagram below is not commutative however each triangle is exact. Finally, we drop most indices on maps for visual clarity.
+\[
+\begin{tikzcd}[column sep=small]
+0 \arrow{r}{i} & H(\K_0 \arrow{r}{i}\arrow{d}{j}) & H(\K_1 \arrow{r}{i}\arrow{d}{j})   & H(\K_2 \arrow{r}{i}\arrow{d}{j}) & \ldots \arrow{r}{i} & H(\K_{n-1}) \arrow{r}{i} \arrow{d}{j} & H(\K_n\arrow{d}{j}) \\ 		
+&     H(\K_0) &			\arrow{l}{d_{1}} \arrow{ul}{\delta}  H(\K_1, {\K_0}) & 	\arrow{l}{d_{1}} \arrow{ul}{\delta} H(\K_2, {\K_{1}})		   & \arrow{l}{d_{1}} \arrow{ul}{\delta} \hspace{.5cm} \ldots  			   &\arrow{l}{d_{1}}\arrow{ul}{\delta}H(\K_{n-1}, {\K_{n-2}})		 & \arrow{l}{d_{1}} \arrow{ul}{\delta} H(\K_n, {\K_{n-1}})
+\end{tikzcd}
+\]
+The terms of the $E_1$ page are defined as follows $E_{1,i} = H(K_i, K_{i-1})$.  The first differential $d_{1,i}: E_{1,i} \rightarrow E_{1,{i-1}}$ by $d_1 = j \circ \delta$. Now it remains to show that $(E_1, d_1)$ is a chain complex.
+\begin{lemma} $d_1 \circ d_1 = 0$ \end{lemma} 
+\begin{proof}
+$d_1 \circ d_1 = (j \circ \delta) \circ (j \circ \delta) = j \circ \overbrace{(\delta \circ j)}^{\textrm{exactness}} \circ\, \delta = 0.$
+\end{proof}
+To write the terms on the $E_{n+1}$ page of the spectral sequence we compute homology of the $E_{n}$ page. 
+That is $E_{n+1} = H(E_n)$. 
+The differentials on each page are then defined as follows:
+\begin{definition} For $n > 0$ define $d_n = j \circ \overbrace{i^{-1} \circ \ldots \circ i^{-1}}^{(n-1)\textrm{ times}} \circ\, \delta$
+\end{definition}
+That $d_{n+1}$ is well defined follows from the fact that the terms on the $(n+1)^{st}$ page is the homology of the previous page. For example, to show that $d_2$ is well defined we need to show that $\delta([x]) \in \Im(i)$ for any $[x] \in E_{2,r}$ However we know that $d_1([x]) = 0$ by the construction of the $E_2$ terms, so in other words $\delta([x]) \in \Ker{(j)}$ and so by exactness $\delta([x]) \in \Im(i)$. A similar arguments holds on all higher pages.
+
+As an example lets compute the spectral sequence for this filtration of spaces.
+\begin{example}
+\[ \textrm{pt} \rightarrow S^1 \rightarrow S^1 \rightarrow \ldots \rightarrow D^1 \] 
+\end{example}
+Work out the example.
+
+What we can see is that through this construction is that the $E_\infty$ page of the spectral sequence contains represents $H(D^1)$. However, it turns out that along the way, we actually have computed the persistence homology of the filtration itself. Specifically we build an \emph{associated graded complex} $H(K) = \bigoplus_p H_p(K)$ where $H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p}$
+\begin{theorem}
+For any field $F$ the persistent homology module $H(K,F)$ is isomorphic to $H(K)$ 
+\end{theorem}
+\begin{proof}
+Since $F$ is a field $H(K,F)$ can be decomposed. It remains to show that and indecomposable $I_{[b,d]}$ appears on page $p = (d-b)$. Take any represenative cycle $x$ and let $x = \partial(y)$ such that $y$ appears in the filtration at index $d$. Observe that $[x] \notin E_{p,k}$ for $k < b$. If $b < k < d$ Observe that for $[x] \in E_{p,k}$ we have that $[x] = [0]$ since each term can viewed as a subquotient of $E_{1,k} = H(X_k, X_{k-1})$ and since $[x] \in X_{k-1}$ then we can say that $[x] = [0] \in E_{1,k} $. It follows that for $[x] \in E_{p,k}$ that $[x] = [0]$. Therefore $d_l([y]) = 0$ for all $l < p$, and $d_p([y])=[x]$. So it follows that $H_p$ encodes all length p summands of $H(K,F)$.
+\end{proof}
+\section{The Spectral Sequence Persistence Algorithm}
+In Chapter 1 we were presented with The Persistence Algorithm. This was a slight variation on Gaussian Elimination which took advantage of optimizations that were specific to reducing boundary matrices. The spectral sequence of a filtration suggests an iterative approach to computing persistent homology in which at iteration $p$ the barcode of length at most $p$ is resolved. This algorithm is stated in Figure~\ref{ss-alg}. However, it is of important to note the following facts:
+\begin{enumerate}
+\item When moving from page $p$ to page $p+1$ distinct differentials on the $p^{th}$ page may be reduced completely independently. this suggests a parallel algorithm.
+\item the optimizations stated in the standard persistence algorithm may be derived from the spectral sequence construction.
+\end{enumerate}
+To expand on point (2), observe that on any page $p$ the bars of length $p$ are in correspondence with any basis for:$Im(d_p)$, and that upon moving to the $(p+1)^{st}$ page, we quotient by this vector space. This is equivalent to dropping all rows found to be in the image of this vector space. This is sometimes referred to as the \emph{compressing} optimization~\cite{cz}. In addition, we see that in order for a pairing to occur, we must eventually match a cycle in the kernel of a differential to a later element which has this cycle as it's boundary. This statement is extremely powerful in terms of computation of persistence. In other words, we know that $\bd(\bd(\sigma)) = 0$, and as such we know that the first term on the first page spectral sequence, which first contains, $\bd(\sigma)$, which is the same as the largest filtration index to contain any member of $\bd(\sigma)$, must contain $\bd(\sigma)$ in it's kernel. This knowledge allows us to short circuit significant computation. It is not difficult to see that these techniques can be used together by taking advantage of the previously described parallelism. This was recently written down by Bauer et. al~\cite{clear_n_compress}.
+
+The authors provide an algorithm with complexity $O(foobarbaz)$. 
+
+This is not the only method for computing persistent homology in parallel. Many times extra information, in the form of a cover on a space, is available while computing persistence. It is natural to try and glue the local connectivity data of a cover together to provide the persistent homology of the entire filtration. Classically the mayer vietoris sequence is used for this purpose.
+  

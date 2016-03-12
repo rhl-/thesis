@@ -1,0 +1,11 @@
+num_partitions,max memory (MB),complex dimension,Voluntary context switches,num_edges,Minor (reclaiming a frame) page faults,pure_cover_balance,blowup_size,Elapsed (wall clock) time (h:mm:ss or m:ss),speedup,build cover,System time (seconds),persistence,User time (seconds),complex size,edgecut,Percent of CPU this job got,cover_balance_ratio,filter complex,initialize_cascade_boundary,Involuntary context switches,smallest_cover,build_cover,largest_cover,graph_balance_ratio,num_threads,blowup_factor,total time,closed_cover_balance,re-filter complex,build_blowup,I/O Time
+1,5520.746,,11,,2648664.8,,,,1.0,,6.94,8.8,93.55,,,99,,,,10219.6,,,,,1,,,,,,80.76
+2,4681.469,,41.2,,2677259.1,,,,0.9503239740820736,,7.365,9.26,97.519,,,103,,,,10774.6,,,,,3,,,,,,80.82
+3,4681.475,,64.4,,2828674.4,,,,1.1027568922305764,,7.821,7.98,98.023,,,105,,,,10893.3,,,,,4,,,,,,80.81
+4,4681.486,,87.7,,2617708.2,,,,1.2535612535612537,,7.382,7.02,98.265,,,106,,,,10891.2,,,,,5,,,,,,80.82
+5,4681.494,,111.9,,2662418.2,,,,1.3114754098360657,,7.714,6.71,98.745,,,107,,,,10812.6,,,,,6,,,,,,80.81
+6,4681.559,,137.7,,2869881.8,,,,1.375,,7.702,6.4,99.401,,,108,,,,10898.2,,,,,7,,,,,,81.06
+7,4681.571,,163.2,,2616132.4,,,,1.4035087719298247,,7.493,6.27,100.384,,,108.9,,,,11011.1,,,,,8,,,,,,81.02
+8,4681.577,,188.8,,2727916.4,,,,1.4379084967320261,,7.475,6.12,100.963,,,109.9,,,,11046.3,,,,,9,,,,,,80.7
+9,4681.584,,223.9,,2581708.5,,,,1.4497528830313016,,7.66,6.07,102.342,,,111,,,,11235.9,,,,,10,,,,,,81.1
+10,4681.597,,256.4,,2877877.9,,,,1.4497528830313016,,7.654,6.07,103.458,,,112.3,,,,11401.1,,,,,11,,,,,,80.98

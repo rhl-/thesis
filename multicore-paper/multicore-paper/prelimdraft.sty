@@ -1,0 +1,41 @@
+% ============================-*- LaTeX -*-=============================
+%
+%   prelimdraft.sty -- stolen from jeffe's 'jeffe.sty'.
+%
+%
+% ======================================================================
+
+% ----------------------------------------------------------------------
+%  \now  -- Current time in h:mm AM/PM format
+%  \mdyy -- Today's date in m/d/yy format.  Forget Y2K; this is for humans!
+% ----------------------------------------------------------------------
+\newcount\timehh\timehh=\time
+\divide\timehh by 60
+\newcount\timemm\timemm=\time
+\count255=\timehh
+\multiply\count255 by -60
+\advance\timemm by \count255
+\newif\iftimePM
+\ifnum\timehh>11 \timePMtrue\else\timePMfalse\fi
+\ifnum\timehh<1 \advance\timehh by 12\fi
+\ifnum\timehh>12 \advance\timehh by -12\fi
+\def\now{\number\timehh:\ifnum\timemm<10 0\fi\number\timemm
+         \iftimePM pm\else am\fi}
+\newcount\mdYY\mdYY=\year
+\count255=\year
+\divide\count255 by 100
+\multiply\count255 by 100
+\advance\mdYY by -\count255
+\def\mdyy{\number\month/\number\day/\ifnum\mdYY<10 0\fi\number\mdYY}
+
+% ----------------------------------------------------------------------
+%  Draft notice.  Put \DRAFT on the title page, in place of \date.
+% ----------------------------------------------------------------------
+\def\draftnotice{Preliminary Draft --- \mdyy}
+
+\def\DRAFT{
+\date{\fbox{\textsf{\textbf{\draftnotice}}}}
+\def\@oddfoot{\footnotesize\hss\fbox{\textbf{\textsf{\draftnotice~--- Page \thepage}}}\hss}
+%\def\@oddfoot{\footnotesize\hss\fbox{\textbf{\textsf{\draftnotice}}}\hss}
+\let\@evenfoot\@oddfoot
+}

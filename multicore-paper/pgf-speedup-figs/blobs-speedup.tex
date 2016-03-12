@@ -1,0 +1,13 @@
+\begin{tikzpicture}[scale=1]
+\begin{axis}[xlabel=\# of threads,  ylabel=speedup factor, legend style={legend pos=north west, font=\small}]
+\addplot table [x=num_threads, y=speedup, col sep=comma, skip coords between index={0}{1}] {pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_threads, y=speedup, col sep=comma, skip coords between index={0}{1}] {pgf-speedup-figs/results/cover_homology/clique.11.22720.csv};
+\addplot table [draw = none, dash pattern=on, x=num_threads, y={create col/linear regression={y=speedup}}, col sep=comma, skip coords between index={0}{12}] {pgf-speedup-figs/results/cover_homology/clique.11.22720.csv};
+ \addlegendentry{} %
+\addplot table [draw = off, dash pattern=on, x=num_threads, y={create col/linear regression={y=speedup}}, col sep=comma, skip coords between index={0}{12}] {pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+ \addlegendentry{partition algorithm $\pgfmathprintnumber{\pgfplotstableregressiona}$} %
+ %\addlegendentry{reduction with blowup complex best fit $\pgfmathprintnumber{\pgfplotstableregressiona}$} 
+
+\addlegendentry{ideal speedup}
+\end{axis}
+\end{tikzpicture}

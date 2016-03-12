@@ -1,0 +1,11 @@
+.DS_Store
+.multicore.tex.swp
+figs/.DS_Store
+figs/speedup-figs/.DS_Store
+multicore.dvi
+multicore.out
+multicore.synctex.gz
+*.bbl
+*.blg
+*.log
+*.aux

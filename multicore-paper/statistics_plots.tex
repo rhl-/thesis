@@ -1,0 +1,84 @@
+\begin{figure}
+\centering
+\begin{subfigure}[b]{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.65]
+\begin{axis}[xlabel=\# of partitions, ylabel={$\hat{\alpha}= \max_i \card{P_i} / \card{\K}$}, legend style={legend pos=north east, font=\small}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere, ideal}
+\addplot table [x=num_partitions, y=graph_balance_ratio, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, y=graph_balance_ratio, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/bunny..05.csv};
+\addplot table [x=num_partitions, y=graph_balance_ratio, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/clique.20.csv};
+\addplot table [x=num_partitions, y=graph_balance_ratio, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, y=graph_balance_ratio, col sep=comma] {pgf-speedup-figs/results/concurrent_homology/sphere.csv};
+\addplot[dash pattern=on 4pt off 1pt on 4pt off 4pt, domain=2:10]{1/x};
+\end{axis}
+\end{tikzpicture}
+\caption{Partition Balance Ratio $\hat{\alpha}$}
+\label{fig:graph-balance}
+\end{subfigure}
+\begin{subfigure}[b]{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.65]
+%\pgfplotsset{ymax=5}
+\begin{axis}[xlabel=\# of partitions, ymax=50000, ylabel={\# of edges}, legend style={legend pos=north west, font=\small}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere, ideal}
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=edgecut, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=edgecut, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/bunny..05.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=edgecut, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/clique.20.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=edgecut, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1}, y=edgecut, col sep=comma, ignore chars=']
+{pgf-speedup-figs/results/concurrent_homology/sphere.csv};
+\end{axis}
+\end{tikzpicture}
+\caption{Edgecut}
+\label{fig:graph-edgecut}
+\end{subfigure}
+\begin{subfigure}[b]{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.65]
+\begin{axis}[xlabel=\# of partitions, ylabel={$\alpha = \max_i \card{\C_i} / \card{\K}$}, legend style={legend pos=north east, font=\small},legend style={at={(.95,.55)},anchor=east}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere, ideal}
+\addplot table [x=num_partitions, y=cover_balance_ratio, col sep=comma,skip coords between index={0}{1}] 
+{pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, y=cover_balance_ratio, col sep=comma, skip coords between index={0}{1}] 
+{pgf-speedup-figs/results/concurrent_homology/bunny..05.csv};
+\addplot table [x=num_partitions,skip coords between index={0}{1}, y=cover_balance_ratio, col sep=comma] 
+{pgf-speedup-figs/results/concurrent_homology/clique.20.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1},y=cover_balance_ratio, col sep=comma] 
+{pgf-speedup-figs/results/concurrent_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1},y=cover_balance_ratio, col sep=comma] 
+{pgf-speedup-figs/results/concurrent_homology/sphere.csv};
+\addplot[dash pattern=on 4pt off 1pt on 4pt off 4pt, domain=2:10]{1/x};
+\end{axis}
+\end{tikzpicture}
+\caption{Balance Ratio for $\C$}
+\label{fig:balance-factors}
+\end{subfigure}
+\begin{subfigure}[b]{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.65]
+\begin{axis}[xlabel=\# of partitions, ylabel=$\ratio$, legend style={legend pos=north east, font=\small},legend style={at={(.95,.55)},anchor=east}]
+\legend{\multiblob, \bunny, \clique, \gnp, \sphere, worst case}
+\addplot table [x=num_partitions, y=blowup_factor, col sep=comma,skip coords between index={0}{1}] 
+{pgf-speedup-figs/results/concurrent_homology/clique.11.22720.csv};
+\addplot table [x=num_partitions, y=blowup_factor, col sep=comma, skip coords between index={0}{1}] 
+{pgf-speedup-figs/results/concurrent_homology/bunny..05.csv};
+\addplot table [x=num_partitions,skip coords between index={0}{1}, y=blowup_factor, col sep=comma] 
+{pgf-speedup-figs/results/concurrent_homology/clique.20.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1},y=blowup_factor, col sep=comma] 
+{pgf-speedup-figs/results/concurrent_homology/gnp.1250.047.csv};
+\addplot table [x=num_partitions, skip coords between index={0}{1},y=blowup_factor, col sep=comma] 
+{pgf-speedup-figs/results/concurrent_homology/sphere.csv};
+\addplot[dash pattern=on 4pt off 1pt on 4pt off 4pt, domain=2:10]{3};
+\end{axis}
+\end{tikzpicture}
+\caption{Blowup Factor}
+\label{fig:blowup-factors}
+\end{subfigure}
+\caption{Statistics for partitions and covers generated}
+\label{fig:statistics}
+\end{figure}
