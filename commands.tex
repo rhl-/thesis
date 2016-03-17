@@ -1,7 +1,7 @@
 % commands.tex
 % Afra Zomorodian
 % August 20, 2009
-%\usepackage{lineno}
+\usepackage{lineno}
 
 %\usepackage[usenames,dvipsnames]{color}
 %\usepackage{subfig}
@@ -22,11 +22,14 @@
 \usepackage{tikz-cd}
 \usepackage{epsfig}
 \usepackage{subcaption}
-%\usepackage{shortlst}
+\usepackage{shortlst}
 %\usepackage{rotating}
 %\usepackage{enumitem}
 %\setlist{nolistsep}
-
+\usepackage{multicol}
+\usepackage{prelimdraft}
+\usepackage{siunitx}
+\setcounter{page}{0}
 
 %% units are in inches
 %\setlength{\unitlength}{1in}
@@ -258,13 +261,3 @@
 	    \def\@currentlabel{#2}%
 	    \phantomsection\label{#1}\endgroup
 	}
-	
-\pgfdeclarelayer{ball}    % declare background layer
-\pgfdeclarelayer{edge}
-\pgfdeclarelayer{triangle}
-\pgfdeclarelayer{edges}
-\pgfdeclarelayer{quadcell}
-\pgfsetlayers{quadcell,edges,ball,triangle,edge,main}  % set the order of the layers (main is the standard layer)
-
-\DeclareMathOperator{\coker}{coker}
-
