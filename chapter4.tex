@@ -1,0 +1,72 @@
+
+\chapter{The Mayer Vietoris Spectral Sequence}
+\begin{figure}
+\begin{subfigure}[b]{.45\textwidth}
+\begin{tikzcd}[scale=.5,
+execute at end scope={
+\begin{pgfonlayer}{edges}
+\node[xshift=-1em,yshift=.5em] (c2) at (e20.north west) {\footnotesize$C_2\left(\K^{\C}\right)$};
+\node[xshift=-1em,yshift=.5em] (c1) at (e10.north west) {\footnotesize$C_1\left(\K^{\C}\right)$};
+\node[xshift=-1em,yshift=.5em] (c0) at (e00.north west) {\footnotesize$C_0\left(\K^{\C}\right)$};
+\draw[opacity=.5,line width=7mm,line cap=round,color=afrablue] (e20.center) to (e02.center); 
+\draw[opacity=.5,line width=7mm,line cap=round,color=afragreen] (e10.center) to (e01.center); 
+\draw[opacity=.5,line width=7mm,line cap=round,color=afrapurple] (e00.center) to (e00.center);
+\end{pgfonlayer} 
+ }]
+|[alias=e30]|  \vdots \arrow{d}{\partial_{\K}}& |[alias=e31]| \vdots \arrow{d}{\partial_{\K}}& |[alias=e32]| \vdots \arrow{d}{\partial_{\K}} \\
+|[alias=e20]|E_{2,0}  \arrow{d}{\partial_{\K}}                     &  |[alias=e21]| E_{2,1} \arrow{l}{\partial_{\N}} \arrow{d}{\partial_{\K}}&|[alias=e22]|  E_{2,2} \arrow{l}{\partial_{\N}}  \arrow{d}{\partial_{\K}}& \ldots \arrow{l}{\partial_{\N}} \\
+|[alias=e10]|E_{1,0} \arrow{d}{\partial_{\K}}                     & |[alias=e11]| E_{1,1} \arrow{l}{\partial_{\N}}  \arrow{d}{\partial_{\K}}& |[alias=e12]| E_{1,2} \arrow{l}{\partial_{\N}} \arrow{d}{\partial_{\K}}& \ldots \arrow{l}{\partial_{\N}} \\
+|[alias=e00]|E_{0,0}                                      & |[alias=e01]| E_{0,1} \arrow{l}{\partial_{\N}}                & |[alias=e02]| E_{0,2} \arrow{l}{\partial_{\N}}                   & \ldots \arrow{l}{\partial_{\N}} 
+\end{tikzcd}
+\end{subfigure}
+\qquad
+\begin{subfigure}[b]{.45\textwidth}
+\begin{tikzcd}[scale=.5]
+|[alias=e30]|  \vdots \arrow{d}& |[alias=e31]| \vdots \arrow{d}& |[alias=e32]| \vdots \arrow{d} \\
+|[alias=e20]| 0 \arrow{d}  &  |[alias=e21]| 0 \arrow{l} \arrow{d}&|[alias=e22]|  0 \arrow{l}  \arrow{d}& \ldots \arrow{l} \\
+|[alias=e10]|
+   \begin{tikzpicture}[scale=.5]
+     \draw[fill=white,draw = afrablue, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (0,0) circle (2pt);
+     \draw[fill=white,draw = afrablue, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (1,0) circle (2pt);     
+     \draw[fill=white,draw = afrablue, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (1.2,0) circle (2pt);   
+     \draw[fill=white,draw = afrablue, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (2.2,0) circle (2pt); 
+     \draw[fill=white,draw = afrapurple, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (1.2,1) circle (2pt);   
+     \draw[fill=white,draw = afrapurple, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (2.2,1) circle (2pt); 
+     \draw[fill=white,draw = afrapurple, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (2.4,1) circle (2pt); 
+     \draw[fill=white,draw = afrapurple, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (3.4,1) circle (2pt); 
+      \begin{pgfonlayer}{edges}
+      \path[draw=afrablue,fill=black,line width=.5] (0,0) -- (1, 0); 
+      \path[draw=afrablue,fill=black,line width=.5] (1.2,0) -- (2.2, 0); 
+      \path[draw=afrapurple,fill=black,line width=.5] (1.2,1) -- (2.2, 1); 
+      \path[draw=afrapurple,fill=black,line width=.55] (2.4,1) -- (3.4, 1); 
+      \end{pgfonlayer} 
+   \end{tikzpicture}
+\arrow{d} & |[alias=e11]|    
+\begin{tikzpicture}[scale=.5]
+\fill [afragreen,  preaction={fill, afragreen}, pattern=north west lines, pattern color=black] (0,0) rectangle (1,1);
+   \end{tikzpicture}
+    \arrow{l}  \arrow{d}& |[alias=e12]| 0 \arrow{l} \arrow{d}& \ldots \arrow{l} \\
+|[alias=e00]|  
+   \begin{tikzpicture}[scale=.5]
+     \draw[fill=afrablue, draw = black, line width=.25]  (0,0) circle (2pt);  
+     \draw[fill=afrablue, draw = black, line width=.25]  (1,0) circle (2pt);   
+     \draw[fill=afrablue, draw = black, line width=.25]  (2,0) circle (2pt); 
+     \draw[fill=afrapurple, draw = black, line width=.25]  (1,1) circle (2pt);   
+     \draw[fill=afrapurple, draw = black, line width=.25]  (2,1) circle (2pt); 
+     \draw[fill=afrapurple, draw = black, line width=.25]  (3,1) circle (2pt); 
+   \end{tikzpicture}
+& |[alias=e01]| \arrow{l} 
+   \begin{tikzpicture}[scale=.5]
+        \draw[fill=white,draw = afrablue, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (1.2,0) circle (2pt); 
+        \draw[fill=white,draw = afrablue, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (2.2,0) circle (2pt); 
+     \draw[fill=white,draw = afrapurple, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (1.2,1) circle (2pt);   
+     \draw[fill=white,draw = afrapurple, line width=.25, dash pattern=on \pgflinewidth off .25pt]  (2.2,1) circle (2pt);
+   \begin{pgfonlayer}{edges}
+      \path[draw=afragreen,fill=black,line width=.5] (1.2,0) -- (1.2, 1); 
+      \path[draw=afragreen,fill=black,line width=.55] (2.2,0) -- (2.2, 1); 
+      \end{pgfonlayer} 
+   \end{tikzpicture}
+& |[alias=e02]| 0 \arrow{l}  & \ldots \arrow{l} 
+\end{tikzcd}
+\end{subfigure}
+\end{figure}

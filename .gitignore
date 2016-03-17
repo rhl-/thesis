@@ -1,0 +1,9 @@
+thesis.synctex.gz
+*.toc
+*.blg
+*.lof
+*.lot
+*.pdf
+*.aux
+*.log
+*.bbl
