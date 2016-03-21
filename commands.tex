@@ -166,6 +166,7 @@
 
 \renewcommand{\Im}[1]{\operatorname{Im}{#1}}
 \newcommand{\Ker}[1]{\operatorname{Ker}{#1}}
+\newcommand{\coker}[1]{\operatorname{Coker}{#1}}
 %\newcommand{\rank}[1]{\operatorname{rank}{#1}}
 \newcommand{\Dim}[1]{\operatorname{dim}{#1}}
 \newcommand{\bd}{\ensuremath{\partial}}
@@ -185,6 +186,7 @@
 \newcommand{\C}{U}
 \newcommand{\N}{N}
 \newcommand{\M}{M}
+\newcommand{\col}[1]{\operatorname{col}{#1}}
 \newcommand{\factor}{\card{\K^{\C}}/\card{\K}}
 \newcommand{\ratio}{\factor}
 \newcommand{\Parfor}{\kw{parallel for}}
@@ -218,9 +220,10 @@
 \usepackage{filecontents}
 \usetikzlibrary{calc, fit, shadows, arrows, positioning, patterns, external, matrix}
 % if these lines are commented out, the box draws.
+\pgfdeclarelayer{ball}
 \pgfdeclarelayer{edges}
 \pgfdeclarelayer{quadcell}
-\pgfsetlayers{quadcell,edges,main}
+\pgfsetlayers{quadcell,edges,ball,main}
 \pgfplotsset{compat=newest}
 
 %%%%%%%%%%%

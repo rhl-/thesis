@@ -13,7 +13,7 @@
  \end{tikzpicture}
  \caption{Point Cloud sampled from annulus}
  \end{figure}
-Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field: persistent homology and mapper have been used in image processing, chemistry, astronomy, business, and medicine. Unlike traditional data analysis, in which one concerns itself with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in yet some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ \cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This implies providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{mayer-vietoris principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via mayer-vietoris, and the second which improves and extends it to this result persistent setting. We connect the first procedure to \emph{spectral sequences} a manual calculation tool used for computing algebraic structures by hand. 
+Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field: persistent homology and mapper have been used in image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, cosmology~\cite{cosmic-web}, business, and medicine. Unlike traditional data analysis, in which one concerns itself with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in yet some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ \cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This implies providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{mayer-vietoris principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via mayer-vietoris, and the second which improves and extends it to this result persistent setting. We connect the first procedure to \emph{spectral sequences} a manual calculation tool used for computing algebraic structures by hand. 
 
 The structure of the thesis as as follows. First, we introduce general background material on algebraic topology. Then, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Second, we will then show how we can use this construction to further derive the standard persistence algorithm,  with its optimizations, along with a parallel persistence algorithm. Next, we will show how one can leverage \emph{mayer-vietoris spectral sequence}, to compute ordinary homology in parallel. We will take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on mayer-vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
 
@@ -132,8 +132,8 @@ partial ordering on the simplices of $\K$ such that the $i^{th}$ prefix of the o
 \section{Algebra}
 In this section we provide a review of algebra. An \emph{abelian group} $(S,+)$ is a set $S$ together with an associative, commutative binary operation $+: S \times S \rightarrow S$, which has:
 \begin{itemize}
-\item a element $0$, such that for each $s \in S$, $s+0 = 0+s = 0$. \textsc{additive identity}
-\item For each element $s \in S$, an element $t$ such that $s+t = 0$.   \textsc{additive inverse}
+\item[additive identity] a element $0$, such that for each $s \in S$, $s+0 = 0+s = 0$.
+\item[additive inverse] For each element $s \in S$, an element $t$ such that $s+t = 0$.
 \end{itemize}
 \begin{example}
 The set $\Z$ of integers are a group under the operation of addition. The set of all invertible $n \times $ matrices, are a group, the \emph{general linear group}.
@@ -141,8 +141,8 @@ The set $\Z_n$ of integers modulo $n$ is a group under addition modulo $n$.
 \end{example}
 A \emph{commutative ring with unit} $(S,+,\cdot)$ is an abelian group $(S,+)$  together with another associative, commutative, binary operation $\cdot$ for which:
 \begin{itemize}
-\item for all $a,x,y \in S$ $a \cdot (x + y)  = a \cdot x + a \cdot y$ \textsc{distributivity}
-\item $1 \in S$ such that for all $s \in S$ $1 \cdot s = s \cdot 1 = s$.  \textsc{multiplicative identity}
+\item[distributivity] for all $a,x,y \in S$ $a \cdot (x + y)  = a \cdot x + a \cdot y$ 
+\item[multiplicative identity] $1 \in S$ such that for all $s \in S$ $1 \cdot s = s \cdot 1 = s$. 
 \end{itemize}
 In this work all rings are considered to be a commutative ring with unit, unless otherwise specified.  
 \begin{example}
@@ -162,8 +162,8 @@ even over fields $R[x,y]$ the ring of polynomials in two variables is not a prin
 \end{example}
 For any ring $R$ an \emph{R-module} $M$ is an \emph{abelian group} together with an associative, scalar multiplication by $R$: 
 \begin{itemize}
-\item for all $r \in R$ and $x,y \in M$ $a \cdot (x + y)  = a \cdot x + a \cdot y$ \textsc{distributivity}
-\item $1_R \cdot x = x$ \textsc{identity}
+\item[distributivity] for all $r \in R$ and $x,y \in M$ $a \cdot (x + y)  = a \cdot x + a \cdot y$
+\item[identity] $1_R \cdot x = x$
 \end{itemize}
 In particular, when $R$ is a field $k$, the concept of $k$-module and $k$-vector space are identical.
 \begin{example}
@@ -252,52 +252,77 @@ in the sum with opposing signs.
 If $X$ is a simplicial complex and $A$ is any subcomplex we define the \emph{relative homology} of $X$ by $A$ as $H_d(X,A) = H(C_d(X)/C_d(A))$. We will write $C_d(X,A)$ to refer to $C_d(X)/C_d(A)$. Note, some authors provide an alternative definition of $C_d(X,A)$ which is isomorphic to the definition stated here.
 
 \subsection{Computing Homology}
-Over field coefficients, homology is a vector space characterized by its dimension, so we may compute homology using \emph{Gaussian Eliminaton}. However, when the coefficient ring is taken to be an \emph{principal ideal domain}, we may use a similar technique, known as the \emph{Smith Normal Form}~\cite{uhlig}. Smith Normal Form, is a matrix reduction technique similar to Gaussian Elimination~\cite{uhlig}. This algorithm was written down first by Smith~\cite{smith}, and then republished four decades later by Poincare~\cite{poincare-smith}. Of course, as previously mentioned this is a variant of Gaussian Elimination, which was known to the Chinese mathematical community in $\approx$ 100AD~\cite{chinese-ge}.
+Over field coefficients, homology is a vector space characterized by its dimension, so we may compute homology using \emph{Gaussian Elimination}. However, when the coefficient ring is taken to be an \emph{principal ideal domain}, we may use a similar technique, known as the \emph{Smith Normal Form}~\cite{uhlig}. Smith Normal Form, is a matrix reduction technique similar to Gaussian Elimination~\cite{uhlig}. This algorithm was written down in western mathematical literature by Smith~\cite{smith}, and then republished four decades later by Poincare~\cite{poincare-smith}. Of course, as previously mentioned this is a variant of Gaussian Elimination, which was known to the Chinese mathematical community in $\approx$ 100AD~\cite{chinese-ge}.
 
-The smith normal form of an $m \times n$ matrix $M$ over a principal ideal domain $R$, is a factorization $M = SDU$ where $S$ and $U$ are invertible $m \times m$ and $n \times n$ matrices respectively, and $D$ is a diagonal matrix, of the same shape as $M$. Note that neither $S$ nor $U$ is unique. The nonzero diagonal entries of $D$ are entries in $R$. In the case that $M = \partial_k$ the $k^{th}$  boundary operator, we have that $d_i \mid d_{i+1}$. If $d_1, \ldots d_r, = 1$, then $\betti_k = \dim(H_k(X)) = r$. The remaining nonzero elements of $D$ are referred to as \emph{torsion}. If $R$ is a field then there is no torsion elements. We present the smith normal form algorithm below:
+The smith normal form of an $m \times n$ matrix $M$ over a principal ideal domain $R$, is a factorization $M = SDU$ where $S$ and $U$ are invertible $m \times m$ and $n \times n$ matrices respectively, and $D$ is a diagonal matrix, of the same shape as $M$. Note that neither $S$ nor $U$ is unique. The nonzero diagonal entries of $D$ are entries in $R$. In the case that $M = \partial_k$ the $k^{th}$  boundary operator, we have that $d_i \mid d_{i+1}$. If $d_1, \ldots d_r, = 1$, then $\betti_k = \dim(H_k(X)) = r$. The remaining nonzero elements of $D$ are referred to as \emph{torsion}. If $R$ is a field then there is no torsion elements. We present an algorithm for producing the smith normal form below:
 
-%$\alg{SMITH}(M)$:
-%WRITE ME DOWN.
-We  present a variant of the algorithm which produces a factorization $\partial = RU$ where $R = (SD)$: 
-%\begin{algorithm*}[t]
-%$\alg{ELZ}(\partial)$:
-%\begin{algorithmic}
-%\State $R = \partial$, $U = I$
-%\ForAll{columns $\col{R}{i}$}
-%\While{$\col{R}{i} \neq 0$ and $\Exists j < i$ with $\Youngest[\col{R}{i}]= \Youngest[\col{R}{j}]$}
-%    \State $\col{R}{i} = \col{R}{i} - \alpha^{-1}_{ij}\col{R}{j}$
-%    \State $U[j,i] = \alpha_{ij}$
-%\EndWhile
-%\EndFor
-%\end{algorithm}
-%\end{algorithmic}
-This algorithm uses only column operations. This is advantageous as the matrix $\partial$ is \emph{sparse} containing at most $O(\operatorname{dim}{(X)})$ nonzeros per column. Recall that in the case of a complex embedded in $R^d$ this means at most $O(d)$ nonzeros. It turns out however that for a complex of size $m$ the worst case complexity of this procedure is still $O(m^3)$, and in particular, there is now a matching lower bound for homology computation~\cite{parsa}. Despite this, it is well known that these bounds are pessimistic, and that on many examples, homology computation does not scale cubically~\cite{stuff}.
+\begin{figure}
+\begin{codebox}
+\Procname{\proc{SMITH}($\partial$):}
+\li $S \gets \partial$, $U \gets I$
+\li $D \gets 0$
+\li \For{columns $R_i$}
+\li \Do \While{$R_i \neq 0$ and $\exists j < i$ with $\operatorname{Youngest}[R_i]= \operatorname{Youngest}[R_j]$}
+\li \Do
+\li   $R_i \gets R_i - R_{ij}\alpha^{-1}_{ij}R_j$
+\li   $U[j,i] \gets R_{ij}\alpha^{-1}_{ij}$
+    \End
+\li   $\tau \gets \operatorname{Youngest}[R_i]$
+\li   $D_{ii} \gets R_{i,\tau}$
+\li   $R_{i} \gets D_{ii}^{-1}R_{i}$
+\End
+\end{codebox}
+\caption{Standard Reduction algorithm}
+\label{alg:elz}
+\end{figure}
 
-However, when reducing boundary matrices, the algorithm specializes further. In particular, we may drop any rows $\partial_k$ that correspond to elements in the image of $\partial_{k+1}$~\cite{elz-tps-02,zc-cph-05}. This can be expanded to show that any column in $\partial_k$ corresponding to \emph{any} pivot row in $\partial_{k+1}$ can be immediately zeroed out.
-\begin{itemize}
-\item Clearing
-\item Compressing
-\end{itemize}
-%However, because we reduce boundary matrices and not general matrices, we may perform specific optimizations to improve the practical running time of these procedures 
-%The first key ingredient is the observation that $\partial_{k-1}(\partial_k(\sigma)) = 0$. Suppose we order $\partial_k(\sigma) = \sum_{i=0}^k \alpha_i c_i$. Then, the identity $\partial^2=0$ implies that we may write $\partial(c_k)$= -\sum_{i=0}^{k-1} \partial(c_i)$. If we order the columns of $\partial$ so that the column corresponding  to $\partial_(c_k)$ appears to the right of the remaining boundary elements, then we have concluded that $\partial(c_k)$ is linearly dependent on the previous columns, in other words, the persistence algorithm will reduce this column to be zero! We may save $O(m)$ column additions by simply immediately zeroing out this column. 
-%
-%On the other hand, we have written $\partial_k(\sigma)$ in terms of the elements $c_i$. This suggests that if we order the rows of $\partial_k$ in the same order as the columns of $\partial_{k-1}$ that whenever we find a pivot in row $j$, that column $j$ may be eliminated.
-%\subsection{Homological Algebra} 
-%Suppose we are given two module homomorphims $f: A \rightarrow B$ and $g: B \rightarrow C$. we say that $A \rightarrow B \rightarrow C$
-%is \emph{exact} at $B$ if $\im{f} =  \ker{g}$. Such a sequence is called a \emph{short exact sequence}. As an example, suppose that $f: M \rightarrow N$ is a group homomorphism, then we have a short exact sequence:
-%\[ 
-%\begin{tikzcd}
-%0 \arrow{r} & \ker{f} \arrow{r} & M \arrow{r}{f} & N \arrow{r} & \coker{f} \arrow{r}& 0
-%\end{tikzcd}
-%\] 
-%If $\ker{f} = 0$ we would say that the map $f$ is injective. If $\coker{f} = 0$ we would say that $f$ is surjective. $f$ is an isomorphism when it is injective and surjective. 
-%
-%Suppose that $X$ is a simplicial complex and $A \subset X$ is a subcomplex. We have a short exact sequence 
-%\[
-%0 \arrow{r}& C_d(A) \arrow{r}{i} & C_d(X) \arrow{r}{j} & C_d(X)/\Im{C_d(A)} \arrow{r} & 0 
-%\]
-%When we pass to homology there turns out to be more structure in the form of the \emph{connected homomorphism}  $\delta: H_d(X,A) \rightarrow H_{d-1}(A)$. More generally, whenver we have a short exact sequence of chain complexes this gives rise to a \emph{long exact sequence} at the level of homology. 
-% For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. One needs to show that the arbitrary choices made in this construction do not affect the definition of $\delta$. We omit these arguments. 
-% With the addition of this map we can turn a short exact sequence of chain complexes into a \emph{long exact sequence} of homology modules:
-%\[ \ldots \rightarrow H_d(A) \rightarrow H_d(X) \rightarrow H_d(X,A) \rightarrow H_{d-1}(A) \rightarrow \ldots \]
-%This long exact sequence allows us to compute the homology of a space from a subspace and it's quotient. This will be a key ingredient in deriving persistent homology in the next chapter
+The worst case complexity of this algorithm for an $m \times n$ matrix is $O(mn^2)$. When computing homology as the matrix $\partial$ is \emph{sparse} containing at most $O(\operatorname{dim}{(X)})$ nonzeros per column. Recall that in the case of a complex embedded in $R^d$ this means at most $O(d)$ nonzeros. It turns out however that for a complex of size $m$ the worst case complexity of this procedure is still $O(m^3)$, and in particular, there is now a matching lower bound for homology computation~\cite{parsa}. Despite this, it is well known that these bounds are pessimistic, and that on many examples, homology computation does not scale cubically~\cite{elz-tps-02}. 
+
+However, when reducing a sequence of boundary matrices, these algorithm specializes further. To see this we interpret the work done at iteration $i$ in terms of the chain complex. 
+\begin{lemma}
+The introduction of any $d$-simplex into a space $K$ either created homology in dimension $d$, or destroys homology in dimension $d-1$.
+\end{lemma}
+This implies that whenever we have a nonzero column after reducing $\partial_k$, we know that the corresponding row in $\partial_{k+1}$ is never a pivot row. That is, the pivot rows of the matrix $\partial_{k+1}$ matrix, are exactly a basis for $\ker{\partial_k}$. This implies that we may simply drop these rows from $\partial_{k+1}$ as this will not affect the result of the algorithm. On the other hand, if row $j$ is a pivot in $\partial_{k+1}$, this implies that column $j$ in $\partial_k$, may be immediately set to zero. These optimizations are referred to as \emph{clearing} and \emph{compressing}.
+
+We present another variant of the algorithm which produces a factorization $\partial = RU$ where $R = (SD)$: Here $\partial$ is taken to represent the square matrix $\bigoplus_i \partial_i$, whose $i^{th}$ block diagonal is the boundary matrix in dimension $i$
+\begin{figure}
+\begin{codebox}
+\Procname{\proc{ELZ}($\partial$):}
+\li $R \gets \partial$, $U \gets I$
+\li \For{columns $R_j$}
+\li \For $i \gets 0 \ldots j$ 
+\li \If $R_i \neq 0$
+\li $R[i,j] \gets 0$
+\li \End
+\li \Do \While{$R_i \neq 0$ and $\exists j < i$ with $\operatorname{Youngest}[R_i]= \operatorname{Youngest}[R_j]$}
+\li \Do
+\li   $R_i \gets R_i - R_{ij}\alpha^{-1}_{ij}R_j$
+\li   $U[j,i] \gets R_{ij}\alpha^{-1}_{ij}$
+    \End
+\End
+\end{codebox}
+\caption{The standard persistence algorithm.}
+\label{alg:elz}
+\end{figure}
+
+\subsection{Homological Algebra} 
+Suppose we are given two module homomorphims $f: A \rightarrow B$ and $g: B \rightarrow C$. we say that $A \rightarrow B \rightarrow C$
+is \emph{exact} at $B$ if $\im{f} =  \ker{g}$. Such a sequence is called a \emph{short exact sequence}. As an example, suppose that $f: M \rightarrow N$ is a group homomorphism, then we have a short exact sequence:
+\[ 
+\begin{tikzcd}
+0 \arrow{r} & \ker{f} \arrow{r} & M \arrow{r}{f} & N \arrow{r} & \coker{f} \arrow{r}& 0
+\end{tikzcd}
+\] 
+If $\ker{f} = 0$ we would say that the map $f$ is injective. If $\coker{f} = 0$ we would say that $f$ is surjective. $f$ is an isomorphism when it is injective and surjective. 
+
+Suppose that $X$ is a simplicial complex and $A \subset X$ is a subcomplex. We have a short exact sequence 
+\[
+\begin{tikzcd}
+0 \arrow{r}& C_d(A) \arrow{r}{i} & C_d(X) \arrow{r}{j} & C_d(X)/\Im{C_d(A)} \arrow{r} & 0 
+\end{tikzcd}
+\]
+When we pass to homology there turns out to be more structure in the form of the \emph{connected homomorphism}  $\delta: H_d(X,A) \rightarrow H_{d-1}(A)$. More generally, whenver we have a short exact sequence of chain complexes this gives rise to a \emph{long exact sequence} at the level of homology. 
+ For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. One needs to show that the arbitrary choices made in this construction do not affect the definition of $\delta$. We omit these arguments. 
+ With the addition of this map we can turn a short exact sequence of chain complexes into a \emph{long exact sequence} of homology modules:
+\[ \ldots \rightarrow H_d(A) \rightarrow H_d(X) \rightarrow H_d(X,A) \rightarrow H_{d-1}(A) \rightarrow \ldots \]
+This long exact sequence allows us to compute the homology of a space from a subspace and it's quotient. This will be a key ingredient in deriving persistent homology in the next chapter
