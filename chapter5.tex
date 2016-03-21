@@ -1,0 +1,25 @@
+\chapter{Mayer Vietoris \& Persistent Homology}
+In the previous two chapters we explored how to compute homology using the \mv spectral sequence and the equivalent \mvb{}, it's total complex. In this chapter we expand on this, to show how we can adapt these procedures to compute persistent homology.
+
+Recall that we computed the homology of the blowup complex, computing persistent homology of a filtration, which ordered product cells $\sigma \otimes \tau \leq \sigma'  \otimes \tau'$
+where $\sigma,\sigma' \in \K$ and $\tau, \tau' \in N$ by first comparing $\tau, \tau'$ and then breaking ties by comparing $\sigma$ and $\sigma'$ by a filtration on the underlying complex. The main issue with the algorithm in the previous chapter is that the persistent homology of the filtration on the blowup complex, using the specified filtration, differs from the homology of the underlying space. For example, irrespective of the length of bars in dimension 0, we have that the this filtration has one ``long" bar in dimension 0 per element of the cover. It is apparent however, that reversing the order of comparison in this definition, namely first comparing product cells by the base complex, breaking ties by the nerve, produces a filtration on the blowup whose persistent homology agrees with that of the underlying space. To make this formal, we present the following theorem which characterizes when two sequences of homology modules produce the same persistence homology.
+\begin{theorem}{Persistence Equivalence Theorem}
+    Given two filtrations $L_0 \subseteq \ldots \subseteq L_n$ and
+    $K_0 \subseteq \ldots \subseteq K_n$, the induced sequences of homology
+    groups produce the same persistence pairs,
+    if the there are vertical isomorphisms $H(K_i) \to H(L_i)$ that makes the entire diagram commute.
+\[
+\begin{tikzcd}[row sep=large, column sep=small]
+    H_*(K_1) \arrow{r}\arrow{d} & \ldots \arrow{r} & H_*(K_i)  \arrow{r}\arrow{d} & \ldots \arrow{r} & H(K_n) \arrow{d} \\
+    H_*(L_1) \arrow{r} & \ldots \arrow{r} & H_*(L_i)  \arrow{r} & \ldots \arrow{r} & H(L_n) \\
+\end{tikzcd}
+\]
+\end{theorem}
+\begin{proof}
+See Zomorodian and Carlsson~\ref{zc-cph-2005}
+\end{proof}
+Recall that the projection map, $\pi: \K^\C \to \K$, is also a homotopy equivalence, so the map $\pi^*: H(\K^\C) \to H(K)$,
+induced on homology modules, is an isomorphism.
+
+While this filtration on the blowup complex has identical persistent homology to that of the base complex, it is no longer clear how to perform matrix reductions in parallel using the blowup complex. 
+
