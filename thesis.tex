@@ -15,6 +15,16 @@
 
 \documentclass[12pt,twsoside]{report}
 \input{commands}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\renewcommand{\algorithmiccomment}[1]{\hspace{.5in} {\tt \#} {#1}}
+\newcommand{\low}   {\operatorname{low}}
+\newcommand{\Exists}{\operatorname{\exists}}
+\newcommand{\Forall}{\operatorname{\forall}}
+\newcommand{\alg}[1]{{\bf #1}}
+
+\newcommand{\row}[2]{#1[#2,\cdot]}
+
 \input{data}
 % Note that the documentclass can take other options such as
 %   twoside - for double sided printing
@@ -84,7 +94,7 @@ Shape matters for data analysis. In this thesis we investigate the utility of sp
 % The last preface section (e.g., acknowledgement.tex)
 % should look like
  \prefacesection{Acknowledgement}
-This thesis could not have existed without my advisor Gunnar Carlsson. Without his mentorship I do not know where I would be. He has am amazing ability to push people far beyond there mathematical comfort levels. I am grateful to Leonidas Guibas, Dmitry Morozov, Andras Vasy and Michael Saunders for serving on my thesis committee. I also would like to acknowledge Afra Zomorodian for his guidance in my early years of graduate school. The work in this thesis began in his lab at Dartmouth College. I would like to thank the Stanford Computational Topology group, whose lively meetings have made my time at Stanford truly world class. In particular, conversations with Anthony Bak, Michael Kerber, Michael Lesnick, and Pawin Vongmasa have shown me that creativity can get you quite far. I would like to especially thank Henry Adams, who has consistently instilled me with the confidence to work harder, and do more math. Because of my friends in ICME including Austin Benson, Victor Minden, Bradley Nelson, and Xiaotong Suo. I have many happy memories of my time in Graduates School. 
+This thesis could not have existed without my advisor Gunnar Carlsson. Without his mentorship I do not know where I would be. He has am amazing ability to push people far beyond there mathematical comfort levels. I am grateful to Leonidas Guibas, Dmitry Morozov, Andras Vasy and Michael Saunders for serving on my thesis committee. I also would like to acknowledge Afra Zomorodian for his guidance in my early years of graduate school. The work in this thesis began in his lab at Dartmouth College. I would like to thank the Stanford Computational Topology group, whose lively meetings have made my time at Stanford truly world class. In particular, conversations with Anthony Bak, Michael Kerber, Michael Lesnick, and Pawin Vongmasa have shown me that creativity can get you quite far. I would like to especially thank Henry Adams, who has consistently instilled me with the confidence to work harder, and do more math. Because of my friends in ICME including Austin Benson, Victor Minden, Bradley Nelson, and Xiaotong Suo. I have many happy memories of my time in Graduatess School. 
 
 I am indebted to my soon to be wife, Elena, as well as my family for there patience and support.
 
@@ -103,7 +113,7 @@ I am indebted to my soon to be wife, Elena, as well as my family for there patie
 \include{chapter3} %the mayer vietoris spectral sequence
 \include{chapter4} %ordinary homology & mayer vietoris
 \include{chapter5} %persistent homology & mayer vietoris
-%\include{chapter6} %conclusion
+\include{chapter6} %conclusion
 
 % and the end material
 

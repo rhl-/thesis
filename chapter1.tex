@@ -13,9 +13,9 @@
  \end{tikzpicture}
  \caption{Point Cloud sampled from annulus}
  \end{figure}
-Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field: persistent homology and mapper have been used in image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, cosmology~\cite{cosmic-web}, business, and medicine. Unlike traditional data analysis, in which one concerns itself with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in yet some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ \cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This implies providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{mayer-vietoris principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via mayer-vietoris, and the second which improves and extends it to this result persistent setting. We connect the first procedure to \emph{spectral sequences} a manual calculation tool used for computing algebraic structures by hand. 
+Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field: persistent homology and mapper have been used in a wide variety of applications, including image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, and cosmology~\cite{cosmic-web}. Unlike traditional data analysis, in which one concerns itself with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in yet some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ using information about $X$ and $Z$~\cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This implies providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{\mv principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via mayer-vietoris, and the second which improves and extends it to this result persistent setting. We connect the first procedure to \emph{spectral sequences} a manual calculation tool used for computing algebraic structures by hand. To this end we also introduce persistent homology with the language of spectral sequences.
 
-The structure of the thesis as as follows. First, we introduce general background material on algebraic topology. Then, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Second, we will then show how we can use this construction to further derive the standard persistence algorithm,  with its optimizations, along with a parallel persistence algorithm. Next, we will show how one can leverage \emph{mayer-vietoris spectral sequence}, to compute ordinary homology in parallel. We will take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on mayer-vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
+The structure of the thesis as as follows. First, we introduce general background material on algebraic topology. Second, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Next, we will show how one can leverage the \emph{\mv spectral sequence}, to compute ordinary homology in parallel. Instead of introducing this spectral sequence, we provide a description using the \mvb{} an analogous topological space. We take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on mayer-vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
 
 \section{Background}
 Suppose someone asked you describe the shape of this point cloud. One might be inclined to propose that the point cloud looks quite disconnected. Indeed, the topology of a set of points in $\R^n$ is not all that interesting. Perhaps, however, if you were to squint your eyes, you might be inclined to describe the shape as something like an annulus. Persistence is a tool for modeling this phenomenon. As an example, for any \emph{metric space} $(X,d)$ and  $\epsilon > 0$ we can define a space: \[ M_\epsilon = \bigcup_{x \in X} B_{\epsilon}(x) \] where $B_{\epsilon}(x) = \{ y \mid d(x,y) < \epsilon\} $ is the \emph{ball of radius $\epsilon$ around x}. Notice that by varying the scale parameter $M_\epsilon$ has different topologies. The collection $\{M_\epsilon\}_\epsilon$ of spaces together with the inclusion maps between $M_\epsilon$ and $M_{\epsilon'}$ for any $\epsilon < \epsilon'$ is called a \emph{one parameter family} of spaces.   
@@ -109,11 +109,11 @@ Let $\K$ be any topological space $\C$ be an cover of it, and $\N$ be the nerve 
 Recall from the previous section that a sequence of spaces connected by continuous maps is referred to as a one-parameter family. Let $M = \{M_\epsilon\}$ be the one-parameter family defined in the previous section. Let $\C = \{\C_\epsilon\}$ be the collection of open sets in $\R^n$, defining every member of $M$. We may define another one parameter family $\{ \N_\epsilon \}$ where $\N_\epsilon$ is the nerve of $\C_\epsilon$. Observe that whenever $\epsilon < \epsilon'$ there is an inclusion map: $\N_\epsilon \rightarrow \N_{\epsilon'}$.
 
 We now redefine $N_{\epsilon}$ geometrically. Specifically we define the \emph{Cech}-Complex at scale $\epsilon$ as the set:
-\[ C_\epsilon = \{ [ x_0, \ldots x_k] \mid \bigcap_i B_\epsilon(x_i)  \neq \emptyset \} \].
+\[ C_\epsilon = \{ [ x_0, \ldots x_k] \mid \bigcap_i B_\epsilon(x_i)  \neq \emptyset \}. \]
 Unfortunately, determining membership in $C_\epsilon$ can be quite complicated. A simpler, construction is the Vietoris-Rips complex:
-\[ V_\epsilon = \{ [x_0, \ldots x_k] \mid d(x_i, x_j) < \epsilon \textrm{ for all } i,j  \} \].
+\[ V_\epsilon = \{ [x_0, \ldots x_k] \mid d(x_i, x_j) < \epsilon \textrm{ for all } i,j  \}. \]
 
-These two simplicial complexes are related. The following result is due to Ghrist \& Desilva.
+These two simplicial complexes are related. The following result is due to Ghrist \& DeSilva.
 \begin{theorem}
 \[ C_\epsilon \rightarrow V_\epsilon \rightarrow C_{2\epsilon} \]
 \end{theorem}
@@ -124,10 +124,6 @@ See $\cite{ghrist-n-desilva}$
 We define a \emph{filtration} of topological spaces to be a finite sequence of topological spaces connected by
 continuous maps. Given a filtration of simplicial complexes, whose final space is $\K$ we can create a  
 partial ordering on the simplices of $\K$ such that the $i^{th}$ prefix of the ordering is the image in $\K$ of the $i^{th}$ map. Each prefix is itself a sub complex of $\K$, so in practice we consider only filtrations of spaces connected by inclusion maps.
-
-%TODO: Use this in a later section.
-%It is sometimes convenient to encode the cover $\C$ as a map $N: \K \rightarrow \Delta^[\card{\C}]$ where each 
-%simplex $\sigma \in \K$ is mapped to the list of the cover sets containing $\sigma$.
 
 \section{Algebra}
 In this section we provide a review of algebra. An \emph{abelian group} $(S,+)$ is a set $S$ together with an associative, commutative binary operation $+: S \times S \rightarrow S$, which has:
@@ -241,12 +237,12 @@ $f_\sharp$ commutes with the $\partial$ operator.
 Assume first that $f(v_i) \neq f(v_j)$ for $i \neq j$.
 \begin{align*}
 f_\sharp(\partial([v_0, \ldots v_d])) &= \\
-f_{\sharp}(\sum_i (-1)^i[v_0 \ldots \hat{v_i} v_d]) &= \\
-\sum_i(-1)^i [f_{\sharp}(v_0) \ldots \hat{f_{\sharp}(v_i)} f_{\sharp}(v_d)] &= \\
-\partial(f_\sharp([v_0, \ldots v_d]))
+&= f_{\sharp}(\sum_i (-1)^i[v_0 \ldots \hat{v_i} v_d])  \\
+&=  \sum_i(-1)^i [f_{\sharp}(v_0) \ldots \hat{f_{\sharp}(v_i)} f_{\sharp}(v_d)] \\
+&=  \partial(f_\sharp([v_0, \ldots v_d]))
 \end{align*}
 Observe now that if there is more than two repeated elements, that the result holds trivially as all terms are zero. If there are exactly two repeated elements, then they appear
-in the sum with opposing signs. 
+in the sum with opposing signs.
 \end{proof}
 
 If $X$ is a simplicial complex and $A$ is any subcomplex we define the \emph{relative homology} of $X$ by $A$ as $H_d(X,A) = H(C_d(X)/C_d(A))$. We will write $C_d(X,A)$ to refer to $C_d(X)/C_d(A)$. Note, some authors provide an alternative definition of $C_d(X,A)$ which is isomorphic to the definition stated here.
@@ -254,27 +250,30 @@ If $X$ is a simplicial complex and $A$ is any subcomplex we define the \emph{rel
 \subsection{Computing Homology}
 Over field coefficients, homology is a vector space characterized by its dimension, so we may compute homology using \emph{Gaussian Elimination}. However, when the coefficient ring is taken to be an \emph{principal ideal domain}, we may use a similar technique, known as the \emph{Smith Normal Form}~\cite{uhlig}. Smith Normal Form, is a matrix reduction technique similar to Gaussian Elimination~\cite{uhlig}. This algorithm was written down in western mathematical literature by Smith~\cite{smith}, and then republished four decades later by Poincare~\cite{poincare-smith}. Of course, as previously mentioned this is a variant of Gaussian Elimination, which was known to the Chinese mathematical community in $\approx$ 100AD~\cite{chinese-ge}.
 
-The smith normal form of an $m \times n$ matrix $M$ over a principal ideal domain $R$, is a factorization $M = SDU$ where $S$ and $U$ are invertible $m \times m$ and $n \times n$ matrices respectively, and $D$ is a diagonal matrix, of the same shape as $M$. Note that neither $S$ nor $U$ is unique. The nonzero diagonal entries of $D$ are entries in $R$. In the case that $M = \partial_k$ the $k^{th}$  boundary operator, we have that $d_i \mid d_{i+1}$. If $d_1, \ldots d_r, = 1$, then $\betti_k = \dim(H_k(X)) = r$. The remaining nonzero elements of $D$ are referred to as \emph{torsion}. If $R$ is a field then there is no torsion elements. We present an algorithm for producing the smith normal form below:
-
+The smith normal form of an $m \times n$ matrix $M$ over a principal ideal domain $R$, is a factorization $M = SDU$ where $S$ and $U$ are invertible $m \times m$ and $n \times n$ matrices respectively, and $D$ is a diagonal matrix, of the same shape as $M$. Note that neither $S$ nor $U$ is unique. The nonzero diagonal entries of $D$ are entries in $R$. In the case that $M = \partial_k$ the $k^{th}$  boundary operator, we have that $d_i \mid d_{i+1}$. If $d_1, \ldots d_r = 1$, then $\betti_k = \dim(H_k(X)) = r$. The remaining nonzero elements of $D$ are referred to as \emph{torsion}. If $R$ is a field then there is no torsion elements. 
 \begin{figure}
 \begin{codebox}
 \Procname{\proc{SMITH}($\partial$):}
 \li $S \gets \partial$, $U \gets I$
 \li $D \gets 0$
-\li \For{columns $R_i$}
-\li \Do \While{$R_i \neq 0$ and $\exists j < i$ with $\operatorname{Youngest}[R_i]= \operatorname{Youngest}[R_j]$}
+\li \For{columns $R_i$} 
+\li \Do 
+\li \While{$R_i \neq 0$ and $\exists j < i$ with $\operatorname{Lowest}[R_i]= \operatorname{Lowest}[R_j]$}
 \li \Do
 \li   $R_i \gets R_i - R_{ij}\alpha^{-1}_{ij}R_j$
 \li   $U[j,i] \gets R_{ij}\alpha^{-1}_{ij}$
     \End
-\li   $\tau \gets \operatorname{Youngest}[R_i]$
+\li   $\tau \gets \operatorname{Lowest}[R_i]$
 \li   $D_{ii} \gets R_{i,\tau}$
 \li   $R_{i} \gets D_{ii}^{-1}R_{i}$
 \End
 \end{codebox}
 \caption{Standard Reduction algorithm}
-\label{alg:elz}
+\label{alg:smith}
 \end{figure}
+
+We present an algorithm for computing the smith normal form in Figure~\ref{alg:smith}. Given a column $c$ the function $\operatorname{Lowest}[c]$, 
+returns the position of the nonzero of largest row index.
 
 The worst case complexity of this algorithm for an $m \times n$ matrix is $O(mn^2)$. When computing homology as the matrix $\partial$ is \emph{sparse} containing at most $O(\operatorname{dim}{(X)})$ nonzeros per column. Recall that in the case of a complex embedded in $R^d$ this means at most $O(d)$ nonzeros. It turns out however that for a complex of size $m$ the worst case complexity of this procedure is still $O(m^3)$, and in particular, there is now a matching lower bound for homology computation~\cite{parsa}. Despite this, it is well known that these bounds are pessimistic, and that on many examples, homology computation does not scale cubically~\cite{elz-tps-02}. 
 
@@ -284,24 +283,29 @@ The introduction of any $d$-simplex into a space $K$ either created homology in 
 \end{lemma}
 This implies that whenever we have a nonzero column after reducing $\partial_k$, we know that the corresponding row in $\partial_{k+1}$ is never a pivot row. That is, the pivot rows of the matrix $\partial_{k+1}$ matrix, are exactly a basis for $\ker{\partial_k}$. This implies that we may simply drop these rows from $\partial_{k+1}$ as this will not affect the result of the algorithm. On the other hand, if row $j$ is a pivot in $\partial_{k+1}$, this implies that column $j$ in $\partial_k$, may be immediately set to zero. These optimizations are referred to as \emph{clearing} and \emph{compressing}.
 
-We present another variant of the algorithm which produces a factorization $\partial = RU$ where $R = (SD)$: Here $\partial$ is taken to represent the square matrix $\bigoplus_i \partial_i$, whose $i^{th}$ block diagonal is the boundary matrix in dimension $i$
-\begin{figure}
+We present Algorithm~\ref{alg:elz} another variant of the smith normal form algorithm which produces a factorization $\partial = RU$ where $R = (SD)$: Here we view $\partial$ as a square matrix, such as $\bigoplus_i \partial_i$, or the result of applying any permutation to the columns of that matrix. This algorithm incorporates both of the above optimizations, although, as stated only one of them will ever be employed since the algorithm moves across the matrix in a left to right fashion.
+\begin{figure}[h]
 \begin{codebox}
 \Procname{\proc{ELZ}($\partial$):}
 \li $R \gets \partial$, $U \gets I$
 \li \For{columns $R_j$}
-\li \For $i \gets 0 \ldots j$ 
-\li \If $R_i \neq 0$
-\li $R[i,j] \gets 0$
-\li \End
-\li \Do \While{$R_i \neq 0$ and $\exists j < i$ with $\operatorname{Youngest}[R_i]= \operatorname{Youngest}[R_j]$}
+\li \Do \For $i \gets 0 \ldots j$ 
+\li \Do  \If $R_i \neq 0$ 
+\li \Then $R[i,j] \gets 0$
+\End
+\li \Do \While{$R_i \neq 0$ and $\exists j < i$ with $\operatorname{Lowest}[R_i]= \operatorname{Lowest}[R_j]$}
 \li \Do
 \li   $R_i \gets R_i - R_{ij}\alpha^{-1}_{ij}R_j$
 \li   $U[j,i] \gets R_{ij}\alpha^{-1}_{ij}$
     \End
+\li \If $R_i \neq 0$
+\li \Then 
+\li $j \gets \operatorname{Lowest}[R_i]$
+\li $R_{j} \gets 0$
+\End
 \End
 \end{codebox}
-\caption{The standard persistence algorithm.}
+\caption{The persistence algorithm.}
 \label{alg:elz}
 \end{figure}
 

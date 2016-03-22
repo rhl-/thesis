@@ -63,7 +63,7 @@ In the following diagram each row contains the terms on a given page of the spec
 \end{example}
 \begin{tikzcd}
 \end{tikzcd}
-What we can see is that that the $E_\infty$ page of the spectral sequence contains represents $H(D^1)$. There is also an obvious $k[t]$-module structure on $E_\infty$. In particular that is: $E_\infty = \bigoplus t^j E_{\infty,j}$. However, we originally wanted to show that this construction produced the invariant decomposition of the persistent homology module. It turns out that we have already done that. Along the way to the $E_\infty$ page we actually have computed the persistence homology of the filtration itself. Specifically we build an \emph{associated graded complex} $H(K) = E_\infty \oplus \bigoplus_p H_p(K)$ where $H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p} \bigoplus E_\infty$. Note that the term associated graded complex is used differently in other contexts.
+What we can see is that that the $E_\infty$ page of the spectral sequence contains represents $H(D^1)$. There is also an obvious $k[t]$-module structure on $E_\infty$. In particular that is: $E_\infty = \bigoplus t^j E_{\infty,j}$. However, we originally wanted to show that this construction produced the invariant decomposition of the persistent homology module. It turns out that we have already done that. Along the way to the $E_\infty$ page we actually have computed the persistence homology of the filtration itself. Specifically we build an \emph{associated graded module} $H(K) = E_\infty \oplus \bigoplus_p H_p(K)$ where $H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p} \bigoplus E_\infty$. Note that the term associated graded complex is used in other contexts, and is not related.
 \begin{theorem}
 For any field $F$ the persistent homology module $H(K,F)$ is isomorphic to $H(K)$.
 \end{theorem}
@@ -72,36 +72,22 @@ We know that since $F$ is a field $H(K,F)$ can be decomposed. It remains to show
 \end{proof}
 \section{The Spectral Sequence Algorithm}
 \label{sec:persistence-algorithm}
-Recall from Chapter 1, that computing ordinary homology with field coefficients is equivalent to gaussian elimination therefore writing $\partial_k$ as a matrix, we may employ the following procedure.
+Recall from Chapter 1, that computing ordinary homology with field coefficients is equivalent to gaussian elimination, and that that we may reduce the matrices in each dimension independently. The spectral sequence of a filtration suggests an iterative, parallel approach to computing persistent homology in which at iteration $p$ the barcode of length at most $p$ is resolved. The following psuedo code summarizes this construction.
+\begin{figure}
+\begin{codebox}
+\Procname{\proc{Spectral-Sequence}($K_1, \ldots K_m)$}
+\li \For{ $p \gets 0 \ldots m-1$} \Comment{Iterate over pages of spectral sequence} 
+\li \Do
+\li \Parfor{ $r \gets p \ldots m-1$} \Comment{Iterate over terms left to be reduced}
+\li \Do
+\li  \proc{Reduce}($d_{p,r} : E_{p,r} \rightarrow E_{p,r+p}$)
+\End
+\End
+\end{codebox}
+\caption{Spectral Sequence Algorithm}
+\label{alg:ss-alg}
+\end{figure}
+This algorithm essentially breaks the boundary matrix into blocks, and reduces each block in order, but some blocks may now be processed out of the normal order. This is important
+because it allows the two optimizations mentioned in Chapter 1, clearing and compressing, to be utilized at the same time. The trouble with this procedure as stated is that at each page, the work to reduce the differentials of the later terms increases, while the work for the lower terms vanishes. In practice this is handled by redistributing the data in a chunk across the cluster.  This approach was recently implemented by Bauer et. al~\cite{bkr-cccph-13}. If there are $m$ cells in the complex, divided into $n$ chunks of size at most $l$, and $g$ is the $\dim(\ker(d_1))$ , then the authors provide an algorithm with a $O(nl^3 + glm + g^3)$ worst case time complexity. 
 
-Observe that we may reduce the matrices in each dimension independently.
-The spectral sequence of a filtration suggests an iterative approach to computing persistent homology in which at iteration $p$ the barcode of length at most $p$ is resolved. The following algorithm summarizes this construction.
-%\begin{figure}
-%\begin{codebox}
-%\Procname{\proc{SS}($\partial$, K_1, \ldots K_m)}
-%\begin{algorithm}
-%\li \For{ p \gets 1 \ldots m}
-%\li \For { r \gets p \ldots m}
-%\li \ParFor
-%\li R_p, U_p \gets \proc{ELZ}(\partial[ , ])
-%\li \textsc{ Emit persistence pairs in R_p}
-%\li \partial(0:K_{p-1},K_p) \gets  \partial(0:K_{p-1}, K_p)*U_p
-%\End
-%\end{algorithm}
-%\end{figure}
-This algorithm is stated in Figure~\ref{alg:ss-alg}. However, it is important to note the following facts:
-\begin{enumerate}
-\item When moving from page $p$ to page $p+1$ distinct differentials on the $p^{th}$ page may be reduced completely independently. 
-\item The optimizations stated in the standard persistence algorithm may now be combined.
-\end{enumerate}
-This was recently written down by Bauer et. al~\cite{bkr-cccph-13}. We summarize these results.
-\begin{theorem}
-Any rows of a boundary matrix, which correspond to an elementary simplex $\sigma$ whose insertion did not generate a new cycle, may be dropped.
-\end{theorem}
-\begin{proof}
-As we move from page $p$ to page $p+1$ we quotient by the elements of $\Im(d_p)$. Therefore, in all future differentials the co-domain of the map does not need to contain a basis element for any member of $\Im(d_p)$.
-\end{proof}
-This is sometimes referred to as the \emph{compressing} optimization~\cite{bkr-cccph-13}. In addition, we see that in order for a pairing to occur, we must eventually match a cycle in the kernel of a differential to a later element which has this cycle as it's boundary. This statement is extremely powerful in terms of computation of persistence. In other words, we know that $\bd(\bd(\sigma)) = 0$, and as such we know that the first term on the first page spectral sequence, which first contains, $\bd(\sigma)$, which is the same as the largest filtration index to contain any member of $\bd(\sigma)$, must contain $\bd(\sigma)$ in it's kernel. This knowledge allows us to short circuit significant computation. It is not difficult to see that these techniques can be used together by taking advantage of the previously described parallelism. The authors provide an algorithm with complexity $O(foobarbaz)$. 
-
-This is not the only method for computing persistent homology in parallel. Many times extra information, in the form of a cover on a space, is available while computing persistence. It is natural to try and glue the local connectivity data of a cover together to provide the persistent homology of the entire filtration. Classically the mayer vietoris sequence is used for this purpose.
-  
+This is not the only method for computing persistent homology in parallel. Many times extra information, in the form of a cover on a space, is available while computing persistence. It is natural to try and glue the local connectivity data of a cover together to provide the persistent homology of the entire filtration. Classically the mayer vietoris sequence is used for this purpose. In the next chapter, we explore algorithms which utilize this principal and compare them to algorithms using the spectral sequence of a filtration.  
