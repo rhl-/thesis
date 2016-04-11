@@ -1,20 +1,6 @@
-\chapter{Mayer Vietoris \& Homology}
-Any parallel computation of homology would require a decomposition of the
-space into pieces. In the previous chapter we discussed a way of computing homology from a 
-nested sequence of inclusions. While this procedure is straightforward in theory, it can suffer it practice
-because it potentially requires communication between all pairs of processors. To address this
-we aim to decompose our input space input space into pieces using a \emph{cover}. Again in this setting, 
-there is classical theory which explains how and when one can reconstruct the homology of a space
-from the elements of a cover and there intersections. In the case of a cover by two sets this is referred to as
-the \mv long exact sequence. When there are more than two sets in the cover, 
-there is too much algebraic data to form a long exact sequence. 
-In the case of a cover with three or more elements, the \mv spectral sequence expresses 
-the relationship between the homology of these pieces of a space and the homology of the space itself.
-This makes the \mv spectral sequence a natural gadget to study when developing algorithms for parallel homology~\cite{hatcher}. 
-
-In this chapter we design and implement a framework for the parallel computation of field homology using the \mv principle. Instead of directly
-treating the \mv spectral sequence, we discuss the algorithm in terms of a topological analogue, the \mvb{}.  For completeness, we provide a description
-of the \mv spectral sequence, in Chapter~\ref{chap:mvss}
+\section{Mayer Vietoris \& Homology}
+In this chapter we design and implement a framework for the parallel computation of field homology using the \mv principle. Instead of defining this
+algorithm directly in terms of the \mv spectral sequence, we discuss the algorithm in terms of a topological analogue, the \mvb{}, it's total complex.  
 The \mvb{} is used by Zomorodian and Carlsson to compute localized homology~\cite{zc-lh-08}.  The procedures discussed in this section 
 are a framework, in the sense that we provide an algorithm, which takes as input a cover. Any cover may be used with this algorithm,
 and the results will be identical, with the only observable difference being the running time and space usage. 
@@ -38,7 +24,7 @@ $\K^J = \bigcap_{k \in J} \C_j$. The \emph{Mayer-Vietoris blowup complex} is:
 \K^\C &= \bigcup_{\emptyset \not = J \subseteq [n-1]} \K^J \times \Delta^J,
 \end{align*}
 \end{linenomath*}
-where $\times$ is the Cartesian product~\cite{zc-lh-08} and $\Delta^J$ is a face of $\N(\C)$.
+where $\times$ is the Cartesian product~\cite{zc-lh-08} and $\Delta^J$ is a face of $\N(\C)$. The blowup complex is an example of cellular complex. 
  % Do example here before any further talk.
 \begin{example}
 \label{ex:blowup}
@@ -68,7 +54,7 @@ If $\K$ is a simplicial complex and $\C$ is any cover by subcomplexes then:
 $H_d(\K^\C) \cong H_d(\K)$ for any $d$
 \end{theorem}
 \begin{proof}
-Define the map $\pi: \K^\C \rightarrow \K$ which projects an element in the blowup complex to an element in the base complex. One may triangulate $\K^\C$ to produce a larger, homotopic simplicial complex. It then follows by functorality that $\pi^*$ is an induced surjective linear map on homology.  To find an explicit homotopy inverse, one takes a \emph{partition of unity} $\{\phi_\alpha\}$ subordinate to $\C$ to produce a map: $\phi: \K \rightarrow \K^\C$. it is not difficult to see that $\phi$ and $\pi$ are homotopy equivalent.
+See Segal~\cite{segal}
 \end{proof}
 Our approach then is to compute homology of the blowup complex 
 instead of the base complex. The blowup has a structure that allows 

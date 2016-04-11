@@ -58,14 +58,9 @@ In the following diagram each row contains the terms on a given page of the spec
 \begin{tikzcd}
 \end{tikzcd}
 
-\begin{example}
-\[ \textrm{pt} \rightarrow S^1 \rightarrow S^1 \rightarrow \ldots \rightarrow S^2 \] 
-\end{example}
-\begin{tikzcd}
-\end{tikzcd}
-What we can see is that that the $E_\infty$ page of the spectral sequence contains represents $H(D^1)$. There is also an obvious $k[t]$-module structure on $E_\infty$. In particular that is: $E_\infty = \bigoplus t^j E_{\infty,j}$. However, we originally wanted to show that this construction produced the invariant decomposition of the persistent homology module. It turns out that we have already done that. Along the way to the $E_\infty$ page we actually have computed the persistence homology of the filtration itself. Specifically we build an \emph{associated graded module} $H(K) = E_\infty \oplus \bigoplus_p H_p(K)$ where $H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p} \bigoplus E_\infty$. Note that the term associated graded complex is used in other contexts, and is not related.
+What we can see is that that the $E_\infty$ page of the spectral sequence contains represents $H(D^1)$. There is also an obvious $k[t]$-module structure on $E_\infty$. In particular that is: $E_\infty = \bigoplus t^j E_{\infty,j}$. However, we originally wanted to show that this construction produced the invariant decomposition of the persistent homology module. It turns out that we have already done that. Along the way to the $E_\infty$ page we actually have computed the persistence homology of the filtration itself. Specifically we build an associated graded module called the $\emph{spectral persistent homology module}$ $H(K) = E_\infty \oplus \bigoplus_p H_p(K)$ where $H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p} \bigoplus E_\infty$.
 \begin{theorem}
-For any field $F$ the persistent homology module $H(K,F)$ is isomorphic to $H(K)$.
+For any field $F$ the persistent homology module $H(K,F)$ is isomorphic to the spectral persistent homology module $H(K)$.
 \end{theorem}
 \begin{proof}
 We know that since $F$ is a field $H(K,F)$ can be decomposed. It remains to show that and indecomposable $I_{[b,d]}$ appears on page $p = (d-b)$. Take any representative cycle $x$ and let $x = \partial(y)$ such that $y$ appears in the filtration at index $d$. Observe that $[x] \notin E_{p,k}$ for $k < b$. For $b < k < d$ Observe that $[x]  = [0]$ for $[x] \in E_{p,k}$  since each term $E_{p,k}$ can viewed as a sub quotient of $E_{1,k} = H(X_k, X_{k-1})$ and since $[x] \in X_{k-1}$ then we can say that $[x] = [0] \in E_{1,k} $. It follows that for $[x] \in E_{p,k}$ that $[x] = [0]$. Therefore $d_l([y]) = 0$ for all $l < p$, and $d_p([y])=[x]$. So it follows that $H_p$ encodes all length p summands of $H(K,F)$.

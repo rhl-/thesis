@@ -68,6 +68,8 @@ A topological space on a set $X$ is the pair $(X,T)$ where $T$ is a subcollectio
 closed under countable unions, and finite intersections. 
 Elements of $T$ are referred to as open sets. The complement of an open set is a closed set.
 
+Some examples of topological spaces are, the $D^n$ the unit disk in $R^n$, $S^n$ the unit sphere in $R^{n+1}$. and $\partial D^n = S^{n-1}$ the boundary of the $n$-disk.  
+
 A \emph{simplicial complex} is a collection $\K$ of finite sets called
 \emph{simplices} such that if $\sigma \in \K$ and $\tau \subseteq \sigma$ then 
 $\sigma \in \K$. We say that $\tau$ is a \emph{face} of $\sigma$, its \emph{coface}. A simplex
@@ -93,7 +95,9 @@ identify $\Delta^n$ with the set $[n] = \{1, \ldots, n\}$ of natural numbers, an
 A simplicial complex may be viewed as the result of gluing simplices of 
 different dimensions along common faces. Other types of complexes are defined 
 similarly using different types of \emph{cells}. Such \emph{cellular} complexes include \emph{cubical} complexes, \emph{simplicial sets}. $\Delta$-complexes, and \emph{CW-complexes}, 
-to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. 
+to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. We end this section by defining finite dimensional CW-complexes.
+
+ A finite dimensional CW-Complex $X$ is defined as the finite union $X = \bigcup_n X_n$, where $X_0$ is a given set of $0$-cells. One defines the $k$-cells $X_k$ inductively from $X_{k-1}$. To attach a $k$-cell $\sigma_\alpha$ construct an \emph{attaching map} $\phi_\alpha: S^{k-1} \rightarrow X_{k-1}$. We then define $X_k = X_{k-1} \sqcup D^k_\alpha / \sim$ where we quotient by the relation $x ~\sim \phi_\alpha(x)$ for $x \in \partial D^k_\alpha$. In practice we only consider the class of  \emph{computable CW complexes} which are finite dimensional CW-complexes with computable attaching maps.
 
 \subsection{Maps, covers, and filtrations}
 A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is (open/closed) in $X$. A pair of maps $f,g: X \rightarrow X$ are \emph{homotopic}, denoted $f \tilde g$, if there is a continuous map $F: X \times [0,1] \rightarrow X$ with $F(x,0) = f(x)$ and $F(x,1) = g(x)$. Two spaces are said to be \emph{homotopy equivalent}, denoted $X \sim Y$, if there exists maps $f: X \rightarrow Y$ and $g: Y \rightarrow X$ such that $f \circ g \sim 1_Y$ and $g \circ f \sim 1_X$.
@@ -325,7 +329,7 @@ Suppose that $X$ is a simplicial complex and $A \subset X$ is a subcomplex. We h
 0 \arrow{r}& C_d(A) \arrow{r}{i} & C_d(X) \arrow{r}{j} & C_d(X)/\Im{C_d(A)} \arrow{r} & 0 
 \end{tikzcd}
 \]
-When we pass to homology there turns out to be more structure in the form of the \emph{connected homomorphism}  $\delta: H_d(X,A) \rightarrow H_{d-1}(A)$. More generally, whenver we have a short exact sequence of chain complexes this gives rise to a \emph{long exact sequence} at the level of homology. 
+When we pass to homology there turns out to be more structure in the form of the \emph{connecting homomorphism}  $\delta: H_d(X,A) \rightarrow H_{d-1}(A)$. More generally, whenver we have a short exact sequence of chain complexes this gives rise to a \emph{long exact sequence} at the level of homology. 
  For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. One needs to show that the arbitrary choices made in this construction do not affect the definition of $\delta$. We omit these arguments. 
  With the addition of this map we can turn a short exact sequence of chain complexes into a \emph{long exact sequence} of homology modules:
 \[ \ldots \rightarrow H_d(A) \rightarrow H_d(X) \rightarrow H_d(X,A) \rightarrow H_{d-1}(A) \rightarrow \ldots \]

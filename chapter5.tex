@@ -23,13 +23,14 @@ Denote the two filtrations $\leq_N$ and $\leq_K$ respectively
 Fix any $\tau \in N$, if $\alpha, \beta \in K$ such that $\alpha \times \tau, \beta \times \tau \in \K^\C$ then $\alpha \times \tau \leq_K \beta \times \tau$ if and only if $\alpha \times \tau \leq_N \beta \times \tau$
 \end{lemma}
 
-This suggests the following algorithm:
+This implies that the following reduction algorithm would be correct.:
 \begin{enumerate}
-\item Break the complex up according to the intersection pattern given by $N$ as before
-\item combine partially reduced pieces and then reduce using the $\leq_K$ filtration order.
+\item First, reduce all submatrices corresponding to product cells with a fixed nerve factor in parallel. 
+\item Further reduce the matrix in the correct $\leq_K$ filtration order.
 \end{enumerate}
+The goal will be to begin the procedure the same way as we did in the previous chapter, first reduce the columns, corresponding to the boundaries of the cells $_ \times \tau$ for fixed $\tau$ independently, and then merge these results together. In particular, the important observation, is that each of these subsets of columns, are by themselves, respecting the filtration order. Therefore if we naively just reduced the remaining matrix sequentially, this would result in the correct algorithm. However, this would be inefficient.
 
-The trouble here is that the second step may require $O(n^2)$ space and $O(n^3)$ time. However, we now take advantage of the sparsity pattern to reduce the space complexity.
+The trouble here is that as stated, performing only column operations, we have no control over the fill in of the resulting matrix. However, we may now take advantage of the sparsity pattern to reduce the space complexity. Over each submatrix corresponding to a vertex in the nerve, we may perform row operations in a specific order signficantly reduce the fill in. The algorithm $\proc{Sparsify}$ is used on the submatrix whose rows fall in the disjoint union.
 
 \begin{figure}
 \begin{codebox}
@@ -48,8 +49,9 @@ $\Procname{\proc{Sparsify}(R)}$
 \label{alg:sparsify}
 \end{figure}
 
-\begin{figure}
+After applying $\proc{Sparsify}$ we make use of the algorithm $\proc{Cascade}$ to finish the reduction. This is similar to the standard algorithm, in that columns are still added in order, but, when a pivot is found, we perform row operations to sparsify the final column.
 
+\begin{figure}
 \begin{codebox}
 $\Procname{\proc{Cascade}(T)}$
 \li    \For{rows $\row{T}{i}$, from bottom up}
@@ -68,10 +70,7 @@ $\Procname{\proc{Cascade}(T)}$
 \label{alg:cascade}
 \end{figure}
 
-
-The goal will be to begin the procedure the same way as we did in the previous chapter, first reduce the columns, corresponding to the boundaries of the cells $_ \times \tau$ for fixed $\tau$ independently, and then somehow merge these results together. In particular, the important observation, is that each of these subsets of columns, are by themselves, respecting the filtration order. Therefore if we naively just reduced the remaining matrix sequentially, this would result in the correct algorithm. However, this would be inefficient.
-
-
+We can now state the following result:
 
 \begin{theorem}
     \label{thm:complexity}
@@ -90,53 +89,43 @@ The goal will be to begin the procedure the same way as we did in the previous c
     $O((n+m)^2 m) = O(n^2 m)$ operations.
 \end{proof}
 
-
+So far we have considered the case of a single cover of the domain, a collection
+of simplicial complexes $K = \{ K^i \}_I$ with domain $K = \bigcup \C$. But in many
+applications, it is natural to build a hierarchy of such covers. 
+For example, if the domain $K$ triangulates a cube or a flat torus, both exceedingly common scenarios for
+simulation data, one can build a refinement of covers following an oct-tree
+partition of the cube. The closures of the sub complexes identified by the cubes at each level of the oct-tree 
+become the cover sets. It is natural to utilize spatial locality in a covering to try and perform less communication.
+In the next section we explore how to utilize this hierarchy in the algorithm.
 
 \section{Hierarchy}
 \label{sec:hierarchy}
-
-So far we have considered the case of a single cover of the domain, a collection
-of simplicial complexes $K = \{ K^i \}_I$ with domain $K = \bigcup \C$. But in many
-applications, it is natural to build a hierarchy of such covers. For example, if
-the domain $K$ triangulates a cube or a flat torus (a cube with periodic
-boundary conditions), both exceedingly common scenarios for
-simulation data, one can build a refinement of covers following an oct-tree
-partition of the cube. The cubes at each level of the oct-tree become the cover
-sets.
-(Technically, the cover sets are the closures of the subcomplexes of $K$ that
-intersect those cubes.)
-
-Given such a hierarchy, it becomes possible to follow the standard reduction
-pattern and merge sets together in pairs (or, more generally, in small groups) and
-thus to extend the amount of useful work a processor can do. It also limits how
-many dense columns $m$ a single processor has to handle at once.
-%
-Consider the prototypical oct-tree example.
-If we have $p = 8^k$ processors and descend down to the $k$-th level in the
-tree, we end up with $p$ cubes and $m = 3 \cdot 2^k \cdot c$ shared simplices,
-where $c$ is the number of simplices in a side of the cube.
-On the other hand, if we merge the cubes in pairs (proceeding to a higher level
-in the oct-tree after each merge), $m$ never exceeds $c$, the size of the
-initial cut that splits the domain into two.
-
-We can abstract the hierarchical partition of an oct-tree as a nested collection of
+Suppose that we have a nested collection of
 covers $\C_0, \C_1, \ldots$, such that $K = \bigcup \C_0 = \bigcup \C_1 = \ldots$
 and every cover set $L^i \in \C_a$ is contained in exactly one cover set
-$K^j \in \C_{a-1}$, $L^i \subseteq K^j$.
+$K^j \in \C_{a-1}$, $L^i \subseteq K^j$
 
-%\Remark{Explain the relationship between the boundary matrices. I.e., how to get
-%        to one from the other.}
+One may reduce the boundary matrixes restricted to local groups in this hierarchy,
+extending the amount of useful work a processor can do. This also limits how
+many dense columns a single processor has to handle at once.
+%
+Consider the case of an oct-tree with $p = 8^k$ processors. At the $k$-th level in the
+tree, we end up with $p$ cubes and an intersection of size $m = 3 \cdot 2^k \cdot c$,
+where $c$ is the number of simplices in a side of the cube. By merging the cubes in pairs, e.g,  higher level
+in the heirarchy after each merge, $m$ never exceeds $c$, the size of the
+initial cut that splits the domain into two.
+
 Consider the structure of the boundary matrix for two consecutive levels in the
 cover, illustrated in Figure~\ref{fig:hierarchy}. Suppose at level $i+1$ the
 cover consists of four sets, $\C_{i+1} = \{ K^1, K^2, K^3, K^4 \}$, and at level
 $i$ the cover consists of two sets $\C_i = \{ K^1 \cup K^2, K^3 \cup K^4 \}$.
 %
-The procedure outlined in
-Sections~\ref{sec:algorithm}~and~\ref{sec:cascade} would operate independently
+The procedures $\proc{Sparsify}$ and $\proc{Cascade}$ would operate independently
 on the matrices $D^1, D^2, D^3,$ and $D^4$ (on four different processors). The first
 two results would then be combined by first performing row updates on the matrices $Q^1$ and
 $Q^2$, then reordering the matrix and reducing it using the {\bf Cascade}
 algorithm.
+
 The second pair of results would be combined similarly.
 The two combined matrices contain the same information as the reduced boundary
 matrices $R^{12}$ and $R^{34}$ for the cover sets $K^1 \cup K^2$
@@ -149,14 +138,14 @@ full rows, rather than on their restriction to the given level.
 The only information necessary to construct such rows is knowing which sets of
 the cover contain any given simplex.
 
-%\begin{figure}
-%    \centering
-%    \includegraphics{figs/hierarchy}
-%    %\includegraphics[width=.46\textwidth]{figs/boundary-hierarchy}
-%    \caption{The structure of the boundary matrix for three consecutive levels of
-%             the hierarchy.}
-%    \label{fig:hierarchy}
-%\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics{figs/hierarchy}
+    %\includegraphics[width=.46\textwidth]{figs/boundary-hierarchy}
+    \caption{The structure of the boundary matrix for three consecutive levels of
+             the hierarchy.}
+    \label{fig:hierarchy}
+\end{figure}
 
 \section{Experiments}
 \label{sec:experiments}
@@ -170,8 +159,7 @@ with 64KB and 256KB of L1 and L2 cache, respectively; the 24 cores share 64GB of
 Our input is a snapshot of a combustion simulation, a $256^2 \times 512$ scalar
 field.
 %of density \Remark{of what} during a burning of methane.
-The input
-simplicial complex is a Freudenthal triangulation of the grid,
+The input simplicial complex is a Freudenthal triangulation of the grid,
 with $\sim 870 \cdot 10^6$ simplices. It is covered hierarchically via an
 oct-tree.
 
@@ -184,67 +172,67 @@ surprising: past 64 processes the binary reduction used to merge
 different cover sets is top-heavy, i.e., it's dominated by the merge of the
 information from the final two sets. As a result, adding more processes only
 speeds up the initial computation, which is already plenty fast.
-%
-%\pgfplotstableread{data/plt07895.dat}\pltCombustionMed
-%
-%\begin{figure}
-%    \centering
-%    \begin{tikzpicture}
-%    \begin{axis}[
-%                    %ybar,
-%                    %xtick=data,
-%                    ymode=log,
-%                    %log basis y=2,
-%                    tick align=inside,
-%                    %ymax=100,
-%                    ymin=580,
-%                    symbolic x coords={8,16,32,64,128,256,512},
-%                    height=3in,
-%                    width=.5\textwidth,
-%                    xlabel={Number of processes},
-%                    ylabel={Seconds},
-%                ]
-%        \addlegendentry{\hspace{.3in} Persistence ($256^2 \times 512$):}
-%        \addplot+[] table[x=proc,y=time]
-%                  {\pltCombustionMed};
-%        \addlegendentry{\hspace{.3in}Perfect scaling:}
-%        %\addplot+[dashed, red, mark=none] table[x=proc,y=perfect]
-%        %          {\pltCombustionMed};
-%        \addplot+[dashed, red, mark=none] coordinates
-%                  {
-%                      (8,  4096)
-%                      (16, 2048)
-%                      (32, 1024)
-%                      (64, 512)
-%                  };
-%    \end{axis}
-%    \end{tikzpicture}
-%
-%    \caption{Times to compute persistence diagram for the $256^2 \times 512$
-%             combustion data set. The measurements are in Table~\ref{tbl:times}.}
-%    \label{fig:times}
-%\end{figure}
-%
-%\begin{table}
-%    \centering
-%    \pgfplotstabletypeset
-%    [
-%        every head row/.style={
-%            before row={
-%                \toprule
-%            },
-%            after row=\midrule,
-%        },
-%        columns={proc, time},
-%        columns/proc/.style         ={column name=processors, int detect, column type={r}},
-%        columns/time/.style         ={column name=seconds, fixed, column type={|r}},
-%    ]
-%    {\pltCombustionMed}
-%    \caption{Times to compute persistence diagram for the $256^2 \times 512$
-%             combustion data set. The data is presented visually in
-%             Figure~\ref{fig:times}.}
-%    \label{tbl:times}
-%\end{table}
+
+\pgfplotstableread{data/plt07895.dat}\pltCombustionMed
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    \begin{axis}[
+                    %ybar,
+                    %xtick=data,
+                    ymode=log,
+                    %log basis y=2,
+                    tick align=inside,
+                    %ymax=100,
+                    ymin=580,
+                    symbolic x coords={8,16,32,64,128,256,512},
+                    height=3in,
+                    width=.5\textwidth,
+                    xlabel={Number of processes},
+                    ylabel={Seconds},
+                ]
+        \addlegendentry{\hspace{.3in} Persistence ($256^2 \times 512$):}
+        \addplot+[] table[x=proc,y=time]
+                  {\pltCombustionMed};
+        \addlegendentry{\hspace{.3in}Perfect scaling:}
+        %\addplot+[dashed, red, mark=none] table[x=proc,y=perfect]
+        %          {\pltCombustionMed};
+        \addplot+[dashed, red, mark=none] coordinates
+                  {
+                      (8,  4096)
+                      (16, 2048)
+                      (32, 1024)
+                      (64, 512)
+                  };
+    \end{axis}
+    \end{tikzpicture}
+
+    \caption{Times to compute persistence diagram for the $256^2 \times 512$
+             combustion data set. The measurements are in Table~\ref{tbl:times}.}
+    \label{fig:times}
+\end{figure}
+
+\begin{table}
+    \centering
+    \pgfplotstabletypeset
+    [
+        every head row/.style={
+            before row={
+                \toprule
+            },
+            after row=\midrule,
+        },
+        columns={proc, time},
+        columns/proc/.style         ={column name=processors, int detect, column type={r}},
+        columns/time/.style         ={column name=seconds, fixed, column type={|r}},
+    ]
+    {\pltCombustionMed}
+    \caption{Times to compute persistence diagram for the $256^2 \times 512$
+             combustion data set. The data is presented visually in
+             Figure~\ref{fig:times}.}
+    \label{tbl:times}
+\end{table}
 
 What is worse is what the figure does not show. We have tried our code on larger
 data sets, but ran out of memory because the merge reduction is dominated by its
@@ -252,7 +240,44 @@ final stages. Although the $(n+m)$ term in the space analysis of the
 \alg{Cascade} algorithm is a gross worst-case overestimate, the growth of this
 term does follow the growth of $n$, the size of the domain, in many practical
 examples. So our technique does not solve the memory limitations of the
-persistence algorithm for the large data set. We address this issue in the next
-section.
+persistence algorithm for large data sets.
+
+Despite the limitations of these new reduction techniques, we believe our theoretical
+results have a place as building blocks of a practical parallel persistence algorithm.
+
+In particular, an interesting promising research direction is
+combining the domain decomposition approach of our paper with the spectral sequence
+algorithm~\cite{EH-book,dipha}.
 
 
+One could initially distribute the data with respect to a domain decomposition:
+often such a distribution is either very cheap to compute, or entirely
+free in the cases when the data is supplied already decomposed directly from a simulation code,
+or it is stored decomposed (for I/O-efficiency). In this case, much processing
+could be performed on the individual chunks of the data; this part of our
+algorithm scales perfectly. Then, when combining the individual results, one
+could redistribute the remaining matrix (the input to the $\alg{Cascade}$
+algorithm) with respect to the diagonal block partition of the spectral sequence
+algorithm. This way we could limit the space needed on any given processor.
+
+%\Remark{Open issues: translating this construction to the cohomology algorithm;
+%        understanding which optimizations are applicable and useful.}
+Another important research topic is adapting our algorithm to the computation of
+persistent cohomology. Although the resulting pairing is the same, algorithms
+that keep track of cocycles rather than cycles have been reported to perform
+significantly better in practice~\cite{dualities,compressed-annotation-matrix}.
+On the other hand, they are built around tracking the matrix $U^{-1}$ in the $D=RU$
+decomposition, while the algorithm that we've presented depends on manipulating
+the matrix $R$.
+
+Similarly, it would be fruitful to understand the relationship of our algorithm
+to various practical optimizations~\cite{parallel-phat}.
+Unexpectedly to us, the original optimization~\cite{ELZ02} that removes negative
+simplices from the columns of the matrix $R$ cannot be used in our context.
+The reason is that a simplex that is
+negative in the filtration of a cover subcomplex $K^i$ may be positive in the
+filtration of the entire space $K$.
+On the other hand, if a simplex creates a cycle in the filtration of $K^i$
+(i.e., it is positive), it must be positive in the filtration of the entire $K$.
+Thus the clearing optimization of Chen and Kerber~\cite{clearing-optimization}
+is readily applicable.
