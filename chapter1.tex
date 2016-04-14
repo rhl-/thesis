@@ -63,59 +63,101 @@ Persistent topology concerns itself with capturing topological features which ca
 
 \section{Preliminaries}
 We begin with a review of algebraic topology. We refer the reader to Hatcher for further background material in algebraic topology~\cite{hatcher}.
-\subsection{Topological Spaces \& Simplicial Complexes}
-A topological space on a set $X$ is the pair $(X,T)$ where $T$ is a subcollection of $P(X)$, containing $\emptyset$ and $X$, and is further 
-closed under countable unions, and finite intersections. 
-Elements of $T$ are referred to as open sets. The complement of an open set is a closed set.
-
-Some examples of topological spaces are, the $D^n$ the unit disk in $R^n$, $S^n$ the unit sphere in $R^{n+1}$. and $\partial D^n = S^{n-1}$ the boundary of the $n$-disk.  
-
+\subsection{Topological Spaces}
+\begin{definition}{Topological Space}
+A \emph{topological space} on a set $X$ is the pair $(X,T)$ where $T$ is a subcollection of $P(X)$, containing $\emptyset$ and $X$, and is further closed under countable unions, and finite intersections. 
+\end{definition}
+Elements of $T$ are referred to as open sets. The complement of an open set is a closed set. Some examples of topological spaces are, the $D^n$ the unit disk in $R^n$, $S^n$ the unit sphere in $R^{n+1}$. and $\partial D^n = S^{n-1}$ the boundary of the $n$-disk.  
+\begin{definition}{Simplicial Complex}
 A \emph{simplicial complex} is a collection $\K$ of finite sets called
-\emph{simplices} such that if $\sigma \in \K$ and $\tau \subseteq \sigma$ then 
-$\sigma \in \K$. We say that $\tau$ is a \emph{face} of $\sigma$, its \emph{coface}. A simplex
-is \emph{maximal} if it has no proper coface in $\K$. The set of maximal cells of a 
-simplicial complex $\K$ is $\M(\K)$. If $\card{\sigma} = k+1$
-then $\sigma$ is a $k$-simplex, it has \emph{dimension} $k$, denoted 
+\emph{simplices} such that if $\sigma \in \K$ and $\tau \subseteq \sigma$ then $\sigma \in \K$. 
+\end{definition}
+In what follows, $\K$ is a simplicial complex, $\sigma \in \K$ and $\tau \subset \sigma$.
+\begin{definition}{dimension}
+If $\card{\sigma} = k+1$ then $\sigma$ is a $k$-simplex, it has \emph{dimension} $k$, denoted 
 $\dim{\sigma} = k$. We say that $\K$ is \emph{$d$-dimensional} if 
-$d = \max_{\sigma \in \K} \dim{\sigma}$. A simplicial complex is a topological space, where the 
-usual topology specified by specifying that a closed set is the closure of any simplex.
-
+$d = \max_{\sigma \in \K} \dim{\sigma}$.
+\end{definition}
+\begin{definition}{Faces \& Co-faces}
+We say that $\tau$ is a \emph{face} of $\sigma$, its \emph{coface}. A simplex is \emph{maximal} if it has no proper coface in $\K$. The set of maximal cells of a simplicial complex $\K$ is $\M(\K)$. 
+ \end{definition}
+\begin{definition}{Closure}
 Suppose we have a subset $L \subseteq K$.  $L$ is a \emph{subcomplex}
 if it is a simplicial complex. The \emph{closure} of $L$ is 1
 $\Cl(L) = \{ \tau \mid \tau \subseteq \sigma \in L\}$ and it is a simplicial complex. The 
 \emph{$k$-skeleton} of a complex $\K$ is the set of all simplices
 of dimension less than or equal to $k$. Note that the 1-skeleton of
 any complex is as a graph.
-
+\end{definition}
+A simplicial complex is a topological space, where the closed sets are specified by the closure of each simplex.
+\begin{definition}{Standard $n$-simplex}
 Let $\Delta^n$ be the standard $n$-simplex~\cite{hatcher}. For any
 \emph{indexing set} $J \subseteq [n]$, $\Delta^J$ is the $(\card{J}-1)$ 
 dimensional face of $\Delta^n$  that is defined on $J$. In the abstract setting we may
 identify $\Delta^n$ with the set $[n] = \{1, \ldots, n\}$ of natural numbers, and $\Delta^J$ with the set $J$.
-
+\end{definition}
 A simplicial complex may be viewed as the result of gluing simplices of 
 different dimensions along common faces. Other types of complexes are defined 
 similarly using different types of \emph{cells}. Such \emph{cellular} complexes include \emph{cubical} complexes, \emph{simplicial sets}. $\Delta$-complexes, and \emph{CW-complexes}, 
-to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. We end this section by defining finite dimensional CW-complexes.
+to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. We end this section by defining finite dimensional the.
 
- A finite dimensional CW-Complex $X$ is defined as the finite union $X = \bigcup_n X_n$, where $X_0$ is a given set of $0$-cells. One defines the $k$-cells $X_k$ inductively from $X_{k-1}$. To attach a $k$-cell $\sigma_\alpha$ construct an \emph{attaching map} $\phi_\alpha: S^{k-1} \rightarrow X_{k-1}$. We then define $X_k = X_{k-1} \sqcup D^k_\alpha / \sim$ where we quotient by the relation $x ~\sim \phi_\alpha(x)$ for $x \in \partial D^k_\alpha$. In practice we only consider the class of  \emph{computable CW complexes} which are finite dimensional CW-complexes with computable attaching maps.
+\begin{definition}{CW-Complex}
+ A finite dimensional CW-Complex $X$ is defined as the finite union $X = \bigcup_n X_n$, where $X_0$ is a given set of $0$-cells. One defines the $k$-cells $X_k$ inductively from $X_{k-1}$. To attach a $k$-cell $\sigma_\alpha$ construct an \emph{attaching map} $\phi_\alpha: S^{k-1} \rightarrow X_{k-1}$. We then define $X_k = X_{k-1} \sqcup D^k_\alpha / \sim$ where we quotient by the relation $x ~\sim \phi_\alpha(x)$ for $x \in \partial D^k_\alpha$. 
+\end{definition}
+In practice we only consider the class of  \emph{computable CW complexes} which are finite dimensional CW-complexes with computable attaching maps.
+\begin{lemma}
+Every simplicial complex is a CW-complex
+\ref{lem:simp-is-cw}
+\end{lemma}
+\begin{proof}
+If $\K$ is a simplicial complex, it is identified with the CW-Complex which has a single $k$-cell per simplex $\sigma$, and an attaching map attaching map $\phi_\sigma$ whose image is $\partial(\sigma)$.  
+\end{proof}
+\begin{lemma}
+The product of two CW-Complexes is a CW-Complex.
+\ref{lem:cw-complex-product}
+\end{lemma}
+\begin{proof}
+If $X$ and $Y$ are CW-Complexes, then $X \times Y$ is a CW-Complex where the cells are the products of the cells in $X$ and $Y$ and the attaching maps are specified as the products of the attaching maps.
+\end{proof}
 
 \subsection{Maps, covers, and filtrations}
-A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is (open/closed) in $X$. A pair of maps $f,g: X \rightarrow X$ are \emph{homotopic}, denoted $f \tilde g$, if there is a continuous map $F: X \times [0,1] \rightarrow X$ with $F(x,0) = f(x)$ and $F(x,1) = g(x)$. Two spaces are said to be \emph{homotopy equivalent}, denoted $X \sim Y$, if there exists maps $f: X \rightarrow Y$ and $g: Y \rightarrow X$ such that $f \circ g \sim 1_Y$ and $g \circ f \sim 1_X$.
+\begin{definition}
+A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is (open/closed) in $X$. A pair of maps $f,g: X \rightarrow X$ are \emph{homotopic}, denoted $f \tilde g$, if there is a continuous map $F: X \times [0,1] \rightarrow X$ with $F(x,0) = f(x)$ and $F(x,1) = g(x)$. 
+Two spaces are said to be \emph{homotopy equivalent}, denoted $X \sim Y$, if there exists maps $f: X \rightarrow Y$ and $g: Y \rightarrow X$ such that $f \circ g \sim 1_Y$ and $g \circ f \sim 1_X$.
+\end{definition}
 
+\begin{definition}{Contractible}
 If a space $X$ is \emph{contractible} if it is homotopy equivalent to a point.
+\end{definition}
 
-Given a simplicial complex $\K$, An \emph{open cover} of $\K$ is a collection of subsets $\{\C_i\}_i$ of $\K$ where $K = \bigcup_i \C_i$. Similarly, we call a cover closed if each element of the cover is closed.
+\begin{definition}{Cover}
+Given a simplicial complex $\K$, An \emph{open cover} of $\K$ is a collection of open sets $\{\C_i\}_i$ of $\K$ where $K = \bigcup_i \C_i$. Similarly, we call a cover closed if each element of the cover is a closed set.
+\end{definition}
 
+\begin{definition}{Nerve}
 The \emph{nerve} $\N(\C)$ of a cover $\C$ is the simplicial complex on $[\card{\C}]$ whose $k$-simplices represent the non-trivial intersections of subsets of $\C$ of size $k+1$. The nerve may be regarded as a subcomplex of $\Delta^n$ and so we may denote its simplices by $\Delta^J$ where $J \subseteq [\card{\C}-1]$.
+\end{definition}
 
-Let $\K$ be any topological space $\C$ be an cover of it, and $\N$ be the nerve of $\C$. If every element of $\C$, as well as all non-empty intersections of elements in $\C$, are contractible, then $\N$ is homotopy equivalent to $\K$. This is the \emph{Nerve Lemma}~\cite{hatcher}.
+Let $\K$ be any topological space $\C$ be an cover of it, and $\N$ be the nerve of $\C$. 
+\begin{lemma}{Nerve Lemma}
+If every element of $\C$, as well as all non-empty intersections of elements in $\C$, are contractible, then $\N$ is homotopy equivalent to $\K$.
+\end{lemma}
+\begin{proof}
+See~\cite{hatcher}.
+\end{proof}
 
 Recall from the previous section that a sequence of spaces connected by continuous maps is referred to as a one-parameter family. Let $M = \{M_\epsilon\}$ be the one-parameter family defined in the previous section. Let $\C = \{\C_\epsilon\}$ be the collection of open sets in $\R^n$, defining every member of $M$. We may define another one parameter family $\{ \N_\epsilon \}$ where $\N_\epsilon$ is the nerve of $\C_\epsilon$. Observe that whenever $\epsilon < \epsilon'$ there is an inclusion map: $\N_\epsilon \rightarrow \N_{\epsilon'}$.
 
-We now redefine $N_{\epsilon}$ geometrically. Specifically we define the \emph{Cech}-Complex at scale $\epsilon$ as the set:
+We now redefine $N_{\epsilon}$ geometrically.
+\begin{definition}{Cech Complex}
+The \emph{Cech}-Complex at scale $\epsilon$ is the set:
 \[ C_\epsilon = \{ [ x_0, \ldots x_k] \mid \bigcap_i B_\epsilon(x_i)  \neq \emptyset \}. \]
-Unfortunately, determining membership in $C_\epsilon$ can be quite complicated. A simpler, construction is the Vietoris-Rips complex:
+\end{definition}
+Unfortunately, determining membership in $C_\epsilon$ can be quite complicated. A simpler construction is the 
+Vietoris-Rips complex.
+\begin{definition}{Vietoris-Rips}
 \[ V_\epsilon = \{ [x_0, \ldots x_k] \mid d(x_i, x_j) < \epsilon \textrm{ for all } i,j  \}. \]
+\end{definition}
 
 These two simplicial complexes are related. The following result is due to Ghrist \& DeSilva.
 \begin{theorem}
@@ -124,26 +166,33 @@ These two simplicial complexes are related. The following result is due to Ghris
 \begin{proof}
 See $\cite{ghrist-n-desilva}$
 \end{proof}
-
+\begin{definition}
 We define a \emph{filtration} of topological spaces to be a finite sequence of topological spaces connected by
-continuous maps. Given a filtration of simplicial complexes, whose final space is $\K$ we can create a  
+continuous maps.
+\end{definition} 
+Given a filtration of simplicial complexes, whose final space is $\K$ we can create a  
 partial ordering on the simplices of $\K$ such that the $i^{th}$ prefix of the ordering is the image in $\K$ of the $i^{th}$ map. Each prefix is itself a sub complex of $\K$, so in practice we consider only filtrations of spaces connected by inclusion maps.
 
 \section{Algebra}
-In this section we provide a review of algebra. An \emph{abelian group} $(S,+)$ is a set $S$ together with an associative, commutative binary operation $+: S \times S \rightarrow S$, which has:
+In this section we provide a review of algebra. 
+\begin{definition}{Abelian Group}
+An \emph{abelian group} $(S,+)$ is a set $S$ together with an associative, commutative binary operation $+: S \times S \rightarrow S$, which has:
 \begin{itemize}
 \item[additive identity] a element $0$, such that for each $s \in S$, $s+0 = 0+s = 0$.
 \item[additive inverse] For each element $s \in S$, an element $t$ such that $s+t = 0$.
 \end{itemize}
+\end{definition}
 \begin{example}
 The set $\Z$ of integers are a group under the operation of addition. The set of all invertible $n \times $ matrices, are a group, the \emph{general linear group}.
 The set $\Z_n$ of integers modulo $n$ is a group under addition modulo $n$.
 \end{example}
+\begin{definition}{Ring}
 A \emph{commutative ring with unit} $(S,+,\cdot)$ is an abelian group $(S,+)$  together with another associative, commutative, binary operation $\cdot$ for which:
 \begin{itemize}
 \item[distributivity] for all $a,x,y \in S$ $a \cdot (x + y)  = a \cdot x + a \cdot y$ 
 \item[multiplicative identity] $1 \in S$ such that for all $s \in S$ $1 \cdot s = s \cdot 1 = s$. 
 \end{itemize}
+\end{definition}
 In this work all rings are considered to be a commutative ring with unit, unless otherwise specified.  
 \begin{example}
 $\Z$, $\Z_n$, $\Q$, $\R$ and $\C$ are rings. Another important example is the set $R[t]$ of polynomials in $t$ which coefficients in any other ring $R$.
@@ -152,36 +201,58 @@ A \emph{field} $F$ is a ring which further has \emph{multiplicative inverses}.
 \begin{example}
 $\Q$, $\R$ and $\C$ are rings.  $Z_n$ is a field whenever $n = p^k$ for some prime $p$ and $k > 0$.
 \end{example}
+\begin{definition}{Ideal}
 An \emph{ideal} $I$ of a ring $R$ is an additive subgroup with the following additive property:
 \[ \textrm{ for each } x \in I, \textrm{ and each } r \in R, x \dot r, r \cdot x \in I  \]
 And ideal $I$ is \emph{principal} if for some $a \in I$, we have: $I = Ra \{ ra \mid r \in R\} = \langle a \rangle$.
 A ring $R$ is an \emph{principal ideal domain} if every ideal in $R$ is principal.
+\end{definition}
 \begin{example}
 $\Z$, $\Z_n$, $\Q$ $\R$ and $\C$ are principal ideal domains. $\Z[x]$ is not a principal ideal domain. $R[t]$ is a principal ideal domain if and only if $R$ is a field. However
 even over fields $R[x,y]$ the ring of polynomials in two variables is not a principal ideal domain.
 \end{example}
+\begin{definition}{Module}
 For any ring $R$ an \emph{R-module} $M$ is an \emph{abelian group} together with an associative, scalar multiplication by $R$: 
 \begin{itemize}
 \item[distributivity] for all $r \in R$ and $x,y \in M$ $a \cdot (x + y)  = a \cdot x + a \cdot y$
 \item[identity] $1_R \cdot x = x$
 \end{itemize}
+\end{definition}
 In particular, when $R$ is a field $k$, the concept of $k$-module and $k$-vector space are identical.
 \begin{example}
 Any ring is a module over itself.  All groups are $\Z$-modules. $R[t]$, the ring of polynomials with coefficients in a ring $R$, is an $R$-module. If $S$ is any set and $M$ is any $R$-module, then the collection of linear functions from $S$ to $M$, denoted $M^S$, is an $R$-module where the action $(rf)(s) =  r \cdot f(s)$.
 \end{example}
+\begin{definition}{Sums, Summands, and Submodules}
 Given two $R$-modules $M$ and $N$ there are the \emph{direct sum} of modules $M \oplus N = \{ (m,n) \mid m \in M and n \in N \}$.
 An $R$-module $N$ is said to be a \emph{direct summand} of $M$ if $M = N \oplus E$ for some $R$-module $E$. 
 A \emph{submodule} $N$ of an $R$-module $M$ is a subset of the module that is itself an $R$-module. Clearly, all summands are submodules, but the converse is not true.
+\end{definition}
+\begin{definition}{Decomposables and Indecomposables}
 If a module $M$ is said to be \emph{decomposable} if it can be written as a direct sum of two non-trivial summands, modules which are not decomposable are \emph{indecomposable}. 
-\begin{theorem}
-Any(?) finitely generated $k[x_1, \ldots x_n]$-module can be decomposed into indecomposables in polynomial time in the description of the module. 
+\end{definition}
+The following result explains when we can find a representation of a module as indecomposables.
+\begin{theorem}{Decomposibility}
+Any finitely generated $k[x_1, \ldots x_n]$-module can be decomposed into indecomposables in polynomial time in the description of the module. 
 \end{theorem}
+\begin{proof}
+See~\cite{paper-from-the-90s}
+\end{proof}
+Importantly when we have a finitely generated module over a principal ideal domain, we have a structure theorem. We state it in slightly less generality:
+\begin{theorem}{Structure Theorem}
+Any finitely generated $k[x]$-module can be decomposed into indecomposables, which are of a specific form: 
+\end{theorem}
+\begin{proof}
+See~\cite{}.
+\end{proof}
+\begin{definition}{Module Homomorphisms}
 A \emph{module homomorphism} is a group homomorphism respecting scalar multiplication. Given an $R$-module homomorphism $f: X \rightarrow Y $, we define the \emph{kernel} of $f$, the \emph{image} of $f$ and the co-kernel of $f$, as follows: 
 \begin{itemize}
 \item $\ker{f} = \{ x \mid f(x) = 0 \}$. 
 \item The \emph{image} of $f$ $\Im{f} = \{ f(x) \mid x \in X\}$, 
 \item The \emph{co-kernel} of $f$ = $Y/\Im{f}$.
 \end{itemize}
+\end{definition}
+
 Module homomorphisms provide two more important example of $R$-modules. That is if $M$ and $N$ are $R$-modules then the set $\operatorname{Hom}(M,N)$ of $R$-module homomorphisms, is itself an $R$-module under addition of functions, and the obvious scalar multiplication. Now suppose that $\{M_i\}$ are a sequence of $R$-modules connected by module homomorphisms. Certainly there is an $R$-module structure on $M = \bigoplus M_i$, but there is also a $R[t]$-module structure, where the action of $t$ on an element in $M_i$ applies the map $f_i$. Such a module is referred to as a \emph{graded module}.
 
 \subsection{Homology}
@@ -314,7 +385,7 @@ We present Algorithm~\ref{alg:elz} another variant of the smith normal form algo
 \end{figure}
 
 \subsection{Homological Algebra} 
-Suppose we are given two module homomorphims $f: A \rightarrow B$ and $g: B \rightarrow C$. we say that $A \rightarrow B \rightarrow C$
+Suppose we are given two module homomorphism $f: A \rightarrow B$ and $g: B \rightarrow C$. we say that $A \rightarrow B \rightarrow C$
 is \emph{exact} at $B$ if $\im{f} =  \ker{g}$. Such a sequence is called a \emph{short exact sequence}. As an example, suppose that $f: M \rightarrow N$ is a group homomorphism, then we have a short exact sequence:
 \[ 
 \begin{tikzcd}
