@@ -60,8 +60,8 @@ If $\K$ is a simplicial complex and $\C$ is any cover by subcomplexes then:
 $H_d(\K^\C) \cong H_d(\K)$ for any $d$
 \end{theorem}
 \begin{proof}
-The projection map $\pi : \K^\C \rightarrow \K$ is continuous. We need to construct a homotopy inverse. To do this we will take our cover $\C$ and produce a cover $\tilde{C}$ where $\tilde{C_i} = B(C_i)$ is a thickening of each cover set. (todo: this is not perfect).
-Now $\tilde{C}_i$ is an open cover of $\K$. Now lets let $P = \{\phi_i\}$ be a partition of unity subordinate to the cover $\tilde{C}$. For a cell $\sigma \in \K$ there is a subset of functions in $P$ which it supports. The indices of those functions form a simplex $\tau \in \N(\tilde{C}$. and $\sigma \times \tau \in \K^\C$. We construct the function which sends $\psi: \sigma \mapsto \sigma \times \tau$. Observe that $\pi \circ \psi = Id_\K$. The function $\psi \circ \pi(\sigma \times \tau) = \sigma \times \rho$ where $\rho$ is a co-face of $\tau$. (todo: finish the proof).
+The original proof is due to Segal~\cite{segal}, where covers are prescribed by open sets. However, in our setting our covers are closed sets. To resolve this technicality we observe that $\K$ certainly has the same topology of $\K'$ where $\K'$ is the barycentric subdivision of $\K$. We will find a cover of $\K'$ by open sets. 
+
 \end{proof}
 Our approach then is to compute homology of the blowup complex 
 instead of the base complex. The blowup has a structure that allows 

@@ -64,10 +64,13 @@ Persistent topology concerns itself with capturing topological features which ca
 \section{Preliminaries}
 We begin with a review of algebraic topology. We refer the reader to Hatcher for further background material in algebraic topology~\cite{hatcher}.
 \subsection{Topological Spaces}
-\begin{definition}{Topological Space}
-A \emph{topological space} on a set $X$ is the pair $(X,T)$ where $T$ is a subcollection of $P(X)$, containing $\emptyset$ and $X$, and is further closed under countable unions, and finite intersections. 
+\begin{definition}{Topological Space.}
+A \emph{topological space} on a set $X$ is the pair $(X,T)$ where $T$ is a subcollection of $P(X)$, containing $\emptyset$ and $X$, and is further closed under countable unions, and finite intersections. Elements of $T$ are referred to as \emph{open sets.}
 \end{definition}
-Elements of $T$ are referred to as open sets. The complement of an open set is a closed set. Some examples of topological spaces are, the $D^n$ the unit disk in $R^n$, $S^n$ the unit sphere in $R^{n+1}$. and $\partial D^n = S^{n-1}$ the boundary of the $n$-disk.  
+\begin{definition}{Closed Set.}
+ The complement of an open set is a \emph{closed} set.
+\end{definition}
+Some examples of topological spaces are, the $D^n$ the unit disk in $R^n$, $S^n$ the unit sphere in $R^{n+1}$. and $\partial D^n = S^{n-1}$ the boundary of the $n$-disk.  
 \begin{definition}{Simplicial Complex}
 A \emph{simplicial complex} is a collection $\K$ of finite sets called
 \emph{simplices} such that if $\sigma \in \K$ and $\tau \subseteq \sigma$ then $\sigma \in \K$. 
@@ -107,14 +110,14 @@ to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. We end this section 
 In practice we only consider the class of  \emph{computable CW complexes} which are finite dimensional CW-complexes with computable attaching maps.
 \begin{lemma}
 Every simplicial complex is a CW-complex
-\ref{lem:simp-is-cw}
+\label{lem:simp-is-cw}
 \end{lemma}
 \begin{proof}
 If $\K$ is a simplicial complex, it is identified with the CW-Complex which has a single $k$-cell per simplex $\sigma$, and an attaching map attaching map $\phi_\sigma$ whose image is $\partial(\sigma)$.  
 \end{proof}
 \begin{lemma}
 The product of two CW-Complexes is a CW-Complex.
-\ref{lem:cw-complex-product}
+\label{lem:cw-complex-product}
 \end{lemma}
 \begin{proof}
 If $X$ and $Y$ are CW-Complexes, then $X \times Y$ is a CW-Complex where the cells are the products of the cells in $X$ and $Y$ and the attaching maps are specified as the products of the attaching maps.
