@@ -1,16 +1,3 @@
-\section{Mayer Vietoris \& Homology}
-In this chapter we design and implement a framework for the parallel computation of field homology using the \mv principle. Instead of defining this
-algorithm directly in terms of the \mv spectral sequence, we discuss the algorithm in terms of a topological analogue, the \mvb{}, it's total complex.  
-The \mvb{} is used by Zomorodian and Carlsson to compute localized homology~\cite{zc-lh-08}.  The procedures discussed in this section 
-are a framework, in the sense that we provide an algorithm, which takes as input a cover. Any cover may be used with this algorithm,
-and the results will be identical, with the only observable difference being the running time and space usage. 
-
-We present a simplistic model for the problem of finding covers which will lend themselves to parallelism and show that finding such covers is \NPH{}.
-We describe an algorithm for producing covers with a simple structure and bounded overlap based on graph partitions. This approach allows
-us to avoid the explicit construction of the blowup complex saving time and space. We implement our algorithms for multicore computers, 
-and demonstrate their efficacy with a suite of experiments.  For example, we achieve roughly an 8$\times$ 
-speedup of the homology computations on a 3-dimensional complex with about 10 million simplices using 11 cores.
-
 \section{Blowup Complex}
 \input{vignette}
 Like homology, the blowup complex may be defined for arbitrary topological 
@@ -291,14 +278,12 @@ In the next section we show how given a complex $\K$ and a partition of its 1-sk
 \label{sec:partition-based-covers}
 \label{sec:pcover}
 \begin{figure}[h!]
-\centering
-\begin{minipage}[b]{.45\textwidth}
 \begin{description}
 \addtolength{\itemsep}{-.65\baselineskip}
 \item[\small\textbf{Input:}] \small A complex $\K$, and a graph partition $P$.
 \item[\small\textbf{Output:}] \small A cover $\C$, of size $\card{P}+1$.
 \end{description}
-%\vspace{-.6cm}
+\vspace{-.6cm}
 \begin{codebox}
 \Procname{$\proc{Open-Cover}(\K,P)$}
  \li	$\id{\C} \gets \emptyset$
@@ -308,14 +293,18 @@ In the next section we show how given a complex $\K$ and a partition of its 1-sk
  \li \Return \id{\C}
   \End
 \end{codebox}
-\end{minipage}
-\begin{minipage}[b]{.45\textwidth}
+\label{alg:open-cov}
+\caption{The pseudocode for $\proc{Open-Cover}$ which runs in $O(md/p)$ time, where $m$ is the 
+number of simplices in $\K$ a $d$-dimensional complex, and $p$ is the 
+maximum number of available cores.}
+\end{figure}
+\begin{figure}[h!]
 \begin{description}
 \addtolength{\itemsep}{-.65\baselineskip}
 \item[\small \textbf{Input:}] \small A graph partition $P$ of size $p$, and simplex $\sigma$
 \item[\small \textbf{Output:}] \small The index $i \in [p]$ of  $\tilde{\C}$ to place $\sigma$.
 \end{description}
-%\vspace{-.65cm}
+\vspace{-.65cm}
 \begin{codebox}
 \Procname{$\proc{Partition-Cell}(P, \sigma = [v_0, \ldots, v_d])$}
  \li	$R \gets \emptyset$
@@ -325,13 +314,8 @@ In the next section we show how given a complex $\K$ and a partition of its 1-sk
  \li	\If $\card{R} = 1$ \Return $R[0]$
  \li    \Else \Return $\card{P}$
 \end{codebox}
-\end{minipage}
-\caption{The pseudocode for $\proc{Open-Cover}$ which runs in $O(md/p)$ time, where $m$ is the 
-number of simplices in $\K$ a $d$-dimensional complex, and $p$ is the 
-maximum number of available cores. $P$ is indexed starting at 0. For a vertex $v$, $P(v)$ 
-denotes the index of the partition set of $P$ containing $v$.
-}
-\label{alg:open-cov}
+\caption{The pseudocode for $\proc{Partition-Cell}$. $P$ is indexed starting at 0. For a vertex $v$, $P(v)$ 
+denotes the index of the partition set of $P$ containing $v$.}
 \end{figure}
 In this section we describe an algorithm for generating covers on an 
 arbitrary complex from a partition of its one skeleton. We emphasize that while we propose a specific
