@@ -1,16 +1,3 @@
-\section{Mayer Vietoris \& Homology}
-In this chapter we design and implement a framework for the parallel computation of field homology using the \mv principle. Instead of defining this
-algorithm directly in terms of the \mv spectral sequence, we discuss the algorithm in terms of a topological analogue, the \mvb{}, it's total complex.  
-The \mvb{} is used by Zomorodian and Carlsson to compute localized homology~\cite{zc-lh-08}.  The procedures discussed in this section 
-are a framework, in the sense that we provide an algorithm, which takes as input a cover. Any cover may be used with this algorithm,
-and the results will be identical, with the only observable difference being the running time and space usage. 
-
-We present a simplistic model for the problem of finding covers which will lend themselves to parallelism and show that finding such covers is \NPH{}.
-We describe an algorithm for producing covers with a simple structure and bounded overlap based on graph partitions. This approach allows
-us to avoid the explicit construction of the blowup complex saving time and space. We implement our algorithms for multicore computers, 
-and demonstrate their efficacy with a suite of experiments.  For example, we achieve roughly an 8$\times$ 
-speedup of the homology computations on a 3-dimensional complex with about 10 million simplices using 11 cores.
-
 \section{Blowup Complex}
 \input{vignette}
 Like homology, the blowup complex may be defined for arbitrary topological 
@@ -24,13 +11,8 @@ $\K^J = \bigcap_{k \in J} \C_j$. The \emph{Mayer-Vietoris blowup complex} is:
 \K^\C &= \bigcup_{\emptyset \not = J \subseteq [n-1]} \K^J \times \Delta^J,
 \end{align*}
 \end{linenomath*}
-where $\times$ is the Cartesian product~\cite{zc-lh-08} and $\Delta^J$ is a face of $\N(\C)$. The blowup complex is an example of cellular complex. 
-\begin{lemma}
-$\K^\C$ is a CW-Complex
-\end{lemma}
-\begin{proof}
-Recall from Lemma~\cite{lem:simp-is-cw} that any simplicial complex is a CW-complex. Any so by Lemma~\ref{lem:cw-complex-product} $\K^\C$ is a subset of the CW complex: $\K \times \Delta^\card{\C}$. We need to only verify that it is closed. This follows since if $\sigma \times \tau \in \K^\C$ then $\sigma \in \cap_{v \in \tau} \C_{v}$ So therefore $\sigma \in \cap_{v \in \rho} \C_v$ for any $\rho \subset \tau$. Similarly since each cover set is closed if $\alpha$ is a face of $\sigma$ then $\alpha \times \tau \in \K^\C$.  Therefore $\sigma \times \rho \in \K^\C$. So therefore $\K^\C$ is a CW-Complex.
-\end{proof}
+where $\times$ is the Cartesian product~\cite{zc-lh-08} and $\Delta^J$ is a face of $\N(\C)$. 
+
  % Do example here before any further talk.
 \begin{example}
 \label{ex:blowup}
@@ -51,35 +33,47 @@ brevity.
 \end{align*}
 \end{linenomath*}
 \end{example}
+
+% simplicial
+While we may then triangulate the blowup complex to get a simplicial complex in order 
+to compute its homology, this is computationally prohibitive, due to the need for triangulation. 
+Luckily this approach is also not necessary. To compute the homology of the blowup complex, we may interpret the definition 
+above in another way.  At the space level, we may view each cell of the blowup complex as a product 
+of two simplices $\sigma \times \tau$, where $\sigma \in \K$ and $\tau \in \N(\C) \subseteq \Delta^{[n]}$.  
+For example, the product of two edges, $bc \times 01$, gives us a quadrilateral cell in Example~\ref{ex:blowup}.  
+That is the definition specified is an example of a cellular complex. 
+\begin{lemma}
+$\K^\C$ is a CW-Complex
+\end{lemma}
+\begin{proof}
+Recall from Lemma~\ref{lem:simp-is-cw} that any simplicial complex is a CW-complex. Any so by Lemma~\ref{lem:cw-complex-product} $\K^\C$ is a subset of the CW complex: $\K \times \Delta^\card{\C}$. We need to only verify that it is closed. This follows since if $\sigma \times \tau \in \K^\C$ then $\sigma \in \cap_{v \in \tau} \C_{v}$ So therefore $\sigma \in \cap_{v \in \rho} \C_v$ for any $\rho \subset \tau$. Similarly since each cover set is closed if $\alpha$ is a face of $\sigma$ then $\alpha \times \tau \in \K^\C$.  Therefore $\sigma \times \rho \in \K^\C$. So therefore $\K^\C$ is a CW-Complex.
+\end{proof}
+
 % key property
 Our work is based on the following key property.
 The blowup complex $\K^\C$ has the same homology as its base complex $\K$ in any 
 dimension: 
 \begin{theorem}
 If $\K$ is a simplicial complex and $\C$ is any cover by subcomplexes then:
-$H_d(\K^\C) \cong H_d(\K)$ for any $d$
+$H_d(\K^\C) \cong H_d(\K)$ for any $d \geq 0$.
 \end{theorem}
 \begin{proof}
-The original proof is due to Segal~\cite{segal}, where covers are prescribed by open sets. However, in our setting our covers are closed sets. To resolve this technicality we observe that $\K$ certainly has the same topology of $\K'$ where $\K'$ is the barycentric subdivision of $\K$. We will find a cover of $\K'$ by open sets. 
+The original proof is due to Segal~\cite{segal}, where covers are prescribed by open sets. However, in our setting our covers are closed sets. To resolve this technicality we invoke this theorem on an open cover $\C'$ of the space $\K'$, the barycentric subdivision of $\K$. The cover $\C' = \{\C'_i\}$ is defined by \[ \C'_i = \bigcup_{v \in \C_i, \textrm{ a vertex}} \operatorname{St(v)}. \] Observe that $\K$ is homotopically equivalent to $\K'$ and that $\C_J$, is a deformation retract of $\C'_J$ for any subset $J \subseteq [\card{C}]$.
+The latter holds since the operator $\operatorname{St}(\_)$ commutes with intersection, and any set is a deformation retract of its open star. 
+Therefore there is a homotopy equivalence between $\C'_J \times \Delta^J$ and $\C_J \times \Delta^J$ for each $J \subset \Delta^n$. Therefore we have that $\K'^{\C'}$ and $\K$ are homotopy equivalent. It remains to show that $\K^\C$ and $\K'^{\C'}$ produce the same homology in each dimension. 
 
+Define $\K_i = \bigcup_{\sigma \in \Delta^n, \dim{\sigma} \leq i} \C_\sigma \times \sigma$ and similarly for $\K'$. Observe that  we have already shown that $\K_0$ is homotopy equivalent to $\K'_0$ because we have produced a homotopy equivalence on each element of the disjoint union. Now assume that for any fixed $d > 0$ we have shown the result for all $i < d$. We have that the following diagram:
+\[ \begin{tikzcd}
+\ldots \arrow{r} & H_*(\K'_{d-1}) \arrow{r} & H_*(\K'_d) \arrow{r} & H_*(\K'_d, \K'_{d-1}) \arrow{r} & \ldots \\
+\ldots \arrow{r} & H_*(\K_{d-1}) \arrow{r}\arrow{u} & H_*(\K_d) \arrow{r}\arrow{u} & H_*(\K_d, \K_{d-1})\arrow{u}  \arrow{r} & \ldots
+\end{tikzcd} \]
+Where the rows are exact, but, by induction the leftmost and rightmost vertical maps are isomorphisms, and so the middle map must be both surjective and injective, respectively, and as such an isomorphism.
 \end{proof}
-Our approach then is to compute homology of the blowup complex 
-instead of the base complex. The blowup has a structure that allows 
-for computation in parallel, unlike the base complex.
+Our approach then is to compute the cellular homology of the blowup complex 
+instead of the simplicial homology of base complex. The blowup has a structure that allows 
+for computation in parallel, unlike the base complex. 
 
-% simplicial
-To compute the homology of the blowup complex, we may interpret the definition 
-above in two different ways.  
-At the space level, we may view each cell of the blowup complex as a product 
-of two simplices $\sigma \times \tau$, where 
-$\sigma \in \K$ and $\tau \in \N(\C) \subseteq \Delta^{[n]}$.  
-For example, the product of two edges, $bc \times 01$, gives us a 
-quadrilateral cell in Example~\ref{ex:blowup}.  
-While we may then triangulate the blowup complex to get a simplicial complex in order 
-to compute its homology, this is computationally prohibitive, due to the need for triangulation. 
-Luckily this approach is also not necessary. Alternatively, we 
-examine the chain complex attached to the blowup complex.
-
+We now examine the chain complex attached to the blowup complex.
 % chain
 A basis for $C_n(\K^\C)$ is the set composed of elements 
 $\sigma \tensor \Delta^J$ for all $\emptyset \not = J \subseteq [n-1]$ and 
@@ -112,51 +106,12 @@ $bc \tensor 01$: in Example~\ref{ex:blowup} is:
 \end{linenomath*}
 \end{example}
 Having specified the basis for the chain complex and a boundary operator of 
-the blowup complex, we now need a filtration on the basis elements in order to use the 
-persistence algorithm. In principle an arbitrary filtration will do.
-But for computing homology in parallel, we will specify a particular filtration 
-whose structure mirrors the structure of the blowup complex. 
-\section{Blowup Structure}
-\label{sec:blowup_structure}
-%intro
-The filtration of the blowup complex has two phases,  the \emph{local} and the
- \emph{global} phase. In the local phase, the complex explodes into multiple 
-pieces, representing the disjoint union of each set in the cover, as in Figure~(\ref{fig:local-pieces}). 
-This means that we have potentially multiple versions of a simplex 
-if it lies in an intersection of two sets in the cover. For example, since edge $bc$ falls within both sets in the 
-cover in Figure~(\ref{fig:space-n-cover}), it is represented by two cells 
-$bc \times 0$ and $bc \times 1$. The pieces at the local stage are disjoint, so 
-we may compute the homology of the pieces in parallel. 
+the blowup complex, we now can compute the homology of the blowup complex. In the next section we
+outline how to do this in parallel.
 
-The global phase specifies cells that glue the different versions of the 
-original simplices together, rendering them homologically equivalent.  
-For example, in Figure~(\ref{fig:blowup}), the cell 
-$b \times 01$ connects $b \times 0$ and $b \times 1$.  
+\section{Parallel Homology}
+Observe that if we construct a filtration of the blowup complex by increasing nerve dimension, that we have a special case of the spectral sequence of the filtration from Section~\ref{sec:ss-filt}. 
 
-To describe this filtration on the blowup complex, we assume that we have an 
-arbitrary filtration $\Filt{\K}$ on the simplices of our input complex $\K$.  In practice, 
-we often label the vertices of a complex using numbers or letters and use the lexicographic 
-ordering of the vertices to generate a filtration on the complex. We use the same procedure 
-with $\N(\C)$ as its vertices are numbered by definition.
-
-Given a filtration $\Filt{\K}$ on $\K$ and $\Filt{\N(\C)}$ on $\Delta^n$ we define a partial order $\Filt{{\K^\C}}$ by 
-ordering all cells in the local phase before those in the global phase. This amounts to 
-comparing two cells $\sigma \times \Delta^M$ and $\tau \times \Delta^N$ by  
-comparing the second factor according to $\Filt{\N(\C)}$. We may complete this partial order to a filtration by then comparing the 
-first factor according to $\Filt{\K}$. 
-\begin{example}
-Figure~(\ref{fig:blowup}) has the following filtration: 
-\begin{linenomath*}
-\begin{equation*}
-(\overbrace{a \times 0, b \times 0 ,c \times 0,  ab \times 0, bc \times 0}^
-{\textrm{Local Piece \#0 } (t=0)},
-\overbrace{b \times 1 , c \times 1, d \times 1, bc \times 1, cd \times 1}^
-{\textrm{Local Piece \#1 }(t=0)},
-\overbrace{b \times 01, c \times 01, bc \times 01}^
-{\textrm{Global Piece } (t=1)}).
-\end{equation*}
-\end{linenomath*}
-\end{example}
 %%algorithms figure
 \begin{figure}
 \centering
@@ -187,7 +142,7 @@ Figure~(\ref{fig:blowup}) has the following filtration:
 \footnotetext{When the list of cells given as input to \proc{Pair-Cells} is not a sub complex computation should be interpreted as relative homology computation by ignoring
 elements of the boundary which are not given in the input.}
 The Algorithm in Figure~(\ref{fig:multicore-code}) shows how to build the blowup complex and compute its homology in parallel. 
-The procedure $\proc{Build-Blowup-Complex}$ runs in parallel and has parallel running time $O(2m/p + p)$ time where $m = \card{\K^{\C}}$ and $p$ is the number of processors available. In practice $\proc{Build-Blowup-Complex}$ not only produces a blowup complex but also the filtration of the blowup complex prescribed above. 
+The procedure $\proc{Build-Blowup-Complex}$ runs in parallel and has parallel running time $O(2m/p + p)$ time where $m = \card{\K^{\C}}$ and $p$ is the number of processors available. In practice $\proc{Build-Blowup-Complex}$ not only produces a blowup complex but also its skeletal filtration.
 
 The size of the blowup complex depends on the cover. In the worst case, all of 
 the simplices in a space $\K$ are contained within all $n$ sets of the cover 
@@ -291,14 +246,12 @@ In the next section we show how given a complex $\K$ and a partition of its 1-sk
 \label{sec:partition-based-covers}
 \label{sec:pcover}
 \begin{figure}[h!]
-\centering
-\begin{minipage}[b]{.45\textwidth}
 \begin{description}
 \addtolength{\itemsep}{-.65\baselineskip}
 \item[\small\textbf{Input:}] \small A complex $\K$, and a graph partition $P$.
 \item[\small\textbf{Output:}] \small A cover $\C$, of size $\card{P}+1$.
 \end{description}
-%\vspace{-.6cm}
+\vspace{-.6cm}
 \begin{codebox}
 \Procname{$\proc{Open-Cover}(\K,P)$}
  \li	$\id{\C} \gets \emptyset$
@@ -308,14 +261,18 @@ In the next section we show how given a complex $\K$ and a partition of its 1-sk
  \li \Return \id{\C}
   \End
 \end{codebox}
-\end{minipage}
-\begin{minipage}[b]{.45\textwidth}
+\label{alg:open-cov}
+\caption{The pseudocode for $\proc{Open-Cover}$ which runs in $O(md/p)$ time, where $m$ is the 
+number of simplices in $\K$ a $d$-dimensional complex, and $p$ is the 
+maximum number of available cores.}
+\end{figure}
+\begin{figure}[h!]
 \begin{description}
 \addtolength{\itemsep}{-.65\baselineskip}
 \item[\small \textbf{Input:}] \small A graph partition $P$ of size $p$, and simplex $\sigma$
 \item[\small \textbf{Output:}] \small The index $i \in [p]$ of  $\tilde{\C}$ to place $\sigma$.
 \end{description}
-%\vspace{-.65cm}
+\vspace{-.65cm}
 \begin{codebox}
 \Procname{$\proc{Partition-Cell}(P, \sigma = [v_0, \ldots, v_d])$}
  \li	$R \gets \emptyset$
@@ -325,13 +282,8 @@ In the next section we show how given a complex $\K$ and a partition of its 1-sk
  \li	\If $\card{R} = 1$ \Return $R[0]$
  \li    \Else \Return $\card{P}$
 \end{codebox}
-\end{minipage}
-\caption{The pseudocode for $\proc{Open-Cover}$ which runs in $O(md/p)$ time, where $m$ is the 
-number of simplices in $\K$ a $d$-dimensional complex, and $p$ is the 
-maximum number of available cores. $P$ is indexed starting at 0. For a vertex $v$, $P(v)$ 
-denotes the index of the partition set of $P$ containing $v$.
-}
-\label{alg:open-cov}
+\caption{The pseudocode for $\proc{Partition-Cell}$. $P$ is indexed starting at 0. For a vertex $v$, $P(v)$ 
+denotes the index of the partition set of $P$ containing $v$.}
 \end{figure}
 In this section we describe an algorithm for generating covers on an 
 arbitrary complex from a partition of its one skeleton. We emphasize that while we propose a specific
@@ -380,7 +332,6 @@ It follows by Lemma~\ref{lem:char-blowup-sol} that $\factor < 3$.
 Since we are interested only in the homology of $\K$ and not it's persistent homology we may avoid the construction of the blowup complex and use the open cover generated to place a filtration on $\K$. In particular, consider the filtration on $\K$ obtained by ordering $\tilde{\C}_i < \tilde{\C}_p$ for $i \in [p-1]$. It is clear that before including $\tilde{\C}_p$ the complex is again disconnected and thus these columns of the matrix may be reduced in parallel. Finally, we reduce this last set of columns against the columns from the first $p$ cover sets. We call this procedure $\proc{Heuristic-MH}$.
  
 In the next section we compare these two parallel algorithms against the standard serial algorithm as well as the algorithm $\proc{Chunk}$ of Bauer et. al\@ on a series of examples. The $\proc{Chunk}$ algorithm is based on the spectral sequence of a filtration~\cite{bkr-cccph-13}.
-
 \section{Experiments}
 \input{speedup_factors}
 \label{sec:exp}
@@ -395,7 +346,7 @@ library for homology computation. Our parallel implementation of $\proc{Multicor
 an initial filtration on $\K$, a cover $\C$, builds a blowup complex $\K^{\C}$ 
 with its associated filtration [in parallel], and then reduces $\partial_{\K^{\C}}$.
 For $\proc{Heuristic-MH}$ we reduces a permuted $\partial_\K$, instead of building $\K^{\C}$.
-Unlike the psuedo-code for $\proc{Multicore-Homology}$ when reducing $\partial_{\K^{\C}}$,
+Unlike the pseudo-code for $\proc{Multicore-Homology}$ when reducing $\partial_{\K^{\C}}$,
 our implementation reduces the columns corresponding to cells of the form $\sigma \times \tau$ with $\dim{(\tau)} > 0$ in serial
 after the parallel reduction of all other cells. Preliminary experiments suggested that
 this added parallelism would not produce speedup. Our serial implementation only 
@@ -404,11 +355,11 @@ computes an identical initial filtration, and then reduces $\partial_\K$.
 We now provide details on how these experiments were carried out.
 As previously mentioned all of our experiments are done 
 using 11 cores on a 2 CPU, 12 Core, x86-64 Linux Machine, with 2.93 GHz Intel 
-Xeon X5670 Processors, 74 GB of RAM, and hyperthreading disabled.
+Xeon X5670 Processors, 74 GB of RAM, and hyper-threading disabled.
 We time both parallel and serial programs in wall-clock time using the tbb::clock. 
 We measure the total amount of memory requested by a process, its \emph{resident set size},
 via the \emph{process filesystem}. This is an upper bound on the total memory used.  
-Each time measured is the \emph{makespan} or longest running thread time within a section of code. 
+Each time measured is the \emph{make span} or longest running thread time within a section of code. 
 Time is always reported in seconds, and all reported measurements are averaged over 10 trials.
 We remind the reader that while we may spawn $p$ threads we only ever have at most $p-1$ of the total $p$ cores 
 in order to leave room for system processes. In this work we use at most one thread per available 
@@ -485,7 +436,7 @@ when the resulting blowup complex is similar in size to the original space, It m
 by building the blowup complex simply because the process of sorting may end up being slower than building the blowup.
 
 We end this section by comparing the \mv algorithm to $\proc{Chunk}$ and \proc{Spectral-Sequence} algorithms available in PHAT.
-$\proc{Spectral-Sequence}$ and $\proc{Chunk}$ are parallel implementations of the spectral sequence algorithm based on the spectral sequence of a filtration~\cite{bkr-cccph-13}.
+$\proc{Spectral-Sequence}$ and $\proc{Chunk}$ are parallel implementations of the spectral sequence algorithm based on the spectral sequence of a filtration~\cite{bkr-cccph-13}.s
 We plot the time to reduce $\partial_{\K}$ and $\partial_{\K^\C}$ with $p$ threads versus the time for the each algorithm from PHAT to reduce 
 $\partial_{\K}$ in Figure~(\ref{fig:ctl_vs_phat}). 
 Figure~(\ref{fig:memory-usage}) compares the total memory usage for these algorithms. Recall that PHAT takes as input

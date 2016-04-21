@@ -11,6 +11,7 @@ Carlsson \& Zomorodian~\cite{zc-cph-04}.
 The collection of intervals is referred to as a barcode. In the next section we make use of a \emph{spectral sequence} to decompose $H(X)$ into its invariant form. This exposition allows us to derive persistent homology constructively, using only linear algebra. It also lends itself to deriving \emph{the persistence algorithm}, and provides it's correctness proof. This connection of persistent homology to spectral sequences is not new~\cite{zc-cph-04}, however there does not seem to be any source which proves this relationship. A spectral sequence is a sequence of chain complexes $(E_i, d_i)$ called \emph{pages}. The elements of $E_i$ are referred to as \emph{terms}, and the operators $d_i$ are referred to as \emph{differentials}. The terms on page $E_{i+1}$ are defined to be the homology of the chain complex on the previous page.
 
 \section{The Spectral Sequence of a Filtration}
+\label{sec:ss-filt}
 The \emph{spectral sequence of a filtration} generalizes the long exact sequence of a pair, to the case of a filtration.
 
 Let $R$ be a commutative ring and $0 \rightarrow \K_0 \rightarrow \K_1 \rightarrow  \ldots \rightarrow  \K_n$ 
