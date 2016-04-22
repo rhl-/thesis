@@ -240,7 +240,7 @@ final stages. Although the $(n+m)$ term in the space analysis of the
 \alg{Cascade} algorithm is a gross worst-case overestimate, the growth of this
 term does follow the growth of $n$, the size of the domain, in many practical
 examples. So our technique does not solve the memory limitations of the
-persistence algorithm for large data sets.
+persistence algorithm for large data sets covered by many relatively small cover sets.
 
 Despite the limitations of these new reduction techniques, we believe our theoretical
 results have a place as building blocks of a practical parallel persistence algorithm.
@@ -248,7 +248,6 @@ results have a place as building blocks of a practical parallel persistence algo
 In particular, an interesting promising research direction is
 combining the domain decomposition approach of our paper with the spectral sequence
 algorithm~\cite{EH-book,dipha}.
-
 
 One could initially distribute the data with respect to a domain decomposition:
 often such a distribution is either very cheap to compute, or entirely
