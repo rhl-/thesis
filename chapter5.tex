@@ -109,7 +109,7 @@ One may reduce the boundary matrixes restricted to local groups in this hierarch
 extending the amount of useful work a processor can do. This also limits how
 many dense columns a single processor has to handle at once.
 %
-Consider the case of an oct-tree with $p = 8^k$ processors. At the $k$-th level in the
+Consider an oct-tree with $p = 8^k$ processors. At the $k$-th level in the
 tree, we end up with $p$ cubes and an intersection of size $m = 3 \cdot 2^k \cdot c$,
 where $c$ is the number of simplices in a side of the cube. By merging the cubes in pairs, e.g,  higher level
 in the heirarchy after each merge, $m$ never exceeds $c$, the size of the
@@ -234,43 +234,20 @@ speeds up the initial computation, which is already plenty fast.
     \label{tbl:times}
 \end{table}
 
-What is worse is what the figure does not show. We have tried our code on larger
-data sets, but ran out of memory because the merge reduction is dominated by its
-final stages. Although the $(n+m)$ term in the space analysis of the
+We have tried our code on larger data sets, but ran out of memory during the
+final stages of the merge reduction. Although the $(n+m)$ term in the space analysis of the
 \alg{Cascade} algorithm is a gross worst-case overestimate, the growth of this
 term does follow the growth of $n$, the size of the domain, in many practical
 examples. So our technique does not solve the memory limitations of the
-persistence algorithm for large data sets covered by many relatively small cover sets.
+persistence algorithm for large data sets covered by many relatively small cover sets. This is
+intuitive, as the Mayer Vietoris principle is most effective when we can cover a space by large open sets, which do not
+have relatively deep intersections. 
 
 Despite the limitations of these new reduction techniques, we believe our theoretical
 results have a place as building blocks of a practical parallel persistence algorithm.
 
-In particular, an interesting promising research direction is
-combining the domain decomposition approach of our paper with the spectral sequence
-algorithm~\cite{EH-book,dipha}.
-
-One could initially distribute the data with respect to a domain decomposition:
-often such a distribution is either very cheap to compute, or entirely
-free in the cases when the data is supplied already decomposed directly from a simulation code,
-or it is stored decomposed (for I/O-efficiency). In this case, much processing
-could be performed on the individual chunks of the data; this part of our
-algorithm scales perfectly. Then, when combining the individual results, one
-could redistribute the remaining matrix (the input to the $\alg{Cascade}$
-algorithm) with respect to the diagonal block partition of the spectral sequence
-algorithm. This way we could limit the space needed on any given processor.
-
-%\Remark{Open issues: translating this construction to the cohomology algorithm;
-%        understanding which optimizations are applicable and useful.}
-Another important research topic is adapting our algorithm to the computation of
-persistent cohomology. Although the resulting pairing is the same, algorithms
-that keep track of cocycles rather than cycles have been reported to perform
-significantly better in practice~\cite{dualities,compressed-annotation-matrix}.
-On the other hand, they are built around tracking the matrix $U^{-1}$ in the $D=RU$
-decomposition, while the algorithm that we've presented depends on manipulating
-the matrix $R$.
-
-Similarly, it would be fruitful to understand the relationship of our algorithm
-to various practical optimizations~\cite{parallel-phat}.
+It would be fruitful to understand the relationship of our algorithm
+to various practical optimizations~\cite{parallel-phat}. 
 Unexpectedly to us, the original optimization~\cite{ELZ02} that removes negative
 simplices from the columns of the matrix $R$ cannot be used in our context.
 The reason is that a simplex that is
@@ -280,3 +257,25 @@ On the other hand, if a simplex creates a cycle in the filtration of $K^i$
 (i.e., it is positive), it must be positive in the filtration of the entire $K$.
 Thus the clearing optimization of Chen and Kerber~\cite{clearing-optimization}
 is readily applicable.
+
+More along those lines, an interesting promising research direction is
+combining the domain decomposition approach of our paper with the spectral sequence
+algorithm~\cite{EH-book,dipha}.
+
+One could initially distribute the data with respect to the disjoint union of an open cover:
+often such a distribution is either very cheap to compute, or entirely
+free in the cases when the data is supplied already decomposed directly from a simulation code,
+or it is stored decomposed (for I/O-efficiency). In this case, much processing
+could be performed on the individual chunks of the data; this part of our
+algorithm scales perfectly. Then, when combining the individual results, one
+could redistribute the remaining matrix (the input to the $\alg{Cascade}$
+algorithm) with respect to the diagonal block partition of the spectral sequence
+algorithm. This way we could limit the space needed on any given processor.
+
+Another important research topic is adapting our algorithm to the computation of
+persistent cohomology. Although the resulting pairing is the same, algorithms
+that keep track of cocycles rather than cycles have been reported to perform
+significantly better in practice~\cite{dualities,compressed-annotation-matrix}.
+On the other hand, they are built around tracking the matrix $U^{-1}$ in the $D=RU$
+decomposition, while the algorithm that we've presented depends on manipulating
+the matrix $R$.
