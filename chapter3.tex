@@ -54,6 +54,16 @@ Each of these filtrations of vector spaces gives rise to a spectral sequence as 
 
 Returning the spectral sequence of the double complex, The $d^r$ differential has the following signature $d^r_{p,q}: E^r_{p,q} \rightarrow E^r_{p+r-1, q-r}$. The map $d^r_{p,q}$ is defined as the restriction of the differential $r$ to elements in $E^r_{p,q}$. 
 
+\begin{example}
+Consider the cover of $S^2$ given its four hemispheres. Each of the four sets in the cover is contractible, each pairwise intersection is a copy of $D^1$,  the triple intersections are each a copy of $S^0$, and there is a single four way intersection which is also a copy of $S^0$. We have the following $E_1$ page:
+\begin{tikzcd}
+0    &  0     &   0    &  0 \\
+0    &  0     &   0    &  0 \\
+k^4 & k^4  &  k^6  & k^2
+\end{tikzcd}
+
+\end{example}
+
 It is initially difficult to produce example spaces where even $d^2_{p,q}$ is nontrivial. We provide some here. In a later chapter we will revisit these examples in the context of our algorithms. To do this we introduce the Hopf map.
 
 \begin{example}

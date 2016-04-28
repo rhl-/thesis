@@ -13,7 +13,7 @@ In the chapter we demonstrated how to compute homology using the \mvb{} or equiv
 \]
 \end{theorem}
 \begin{proof}
-See Zomorodian and Carlsson~\ref{zc-cph-2005}
+See Zomorodian and Carlsson~\cite{zc-cph-05}
 \end{proof}
 Now we need to produce a filtration on the blowup complex to use as a row of one of these filtrations. To do this, observe that if $\{K_i\}$ is a filtration on the base space, and $\C =\{ \C_i \}$ is a cover of $K_n$, that by restriction, this provides a cover of all the spaces in the filtration. Now, each of these covers is closed, and there is an associated blowup complex. It is easy to see that these blowup complexes also form a filtration, with the same number of terms as the original space. Recall that the projection map, $\pi: \K_i^\C \to \K_i$, is also a homotopy equivalence, and so the map $\pi^*: H(\K^\C) \to H(K)$, induced on homology modules, is an isomorphism. Also the map $\pi$ clearly commutes with inclusions, by construction, so  the persistence equivalence theorem applies. We now explain this filtration again, using partial orders.
 
@@ -247,35 +247,26 @@ Despite the limitations of these new reduction techniques, we believe our theore
 results have a place as building blocks of a practical parallel persistence algorithm.
 
 It would be fruitful to understand the relationship of our algorithm
-to various practical optimizations~\cite{parallel-phat}. 
-Unexpectedly to us, the original optimization~\cite{ELZ02} that removes negative
+to various practical optimizations~\cite{bkr-cccph-13}. 
+Unexpectedly to us, the original optimization~\cite{elz-tps-02} that removes negative
 simplices from the columns of the matrix $R$ cannot be used in our context.
 The reason is that a simplex that is
 negative in the filtration of a cover subcomplex $K^i$ may be positive in the
 filtration of the entire space $K$.
 On the other hand, if a simplex creates a cycle in the filtration of $K^i$
 (i.e., it is positive), it must be positive in the filtration of the entire $K$.
-Thus the clearing optimization of Chen and Kerber~\cite{clearing-optimization}
+Thus the clearing optimization of Chen and Kerber~\cite{bkr-cccph-13}
 is readily applicable.
 
 More along those lines, an interesting promising research direction is
-combining the domain decomposition approach of our paper with the spectral sequence
-algorithm~\cite{EH-book,dipha}.
+combining the techniques outline here for reducing the disjoint union, with out of order optimizations that one can use when
+employing the spectral sequence algorithm~\cite{bkr-cccph-13}.
 
 One could initially distribute the data with respect to the disjoint union of an open cover:
 often such a distribution is either very cheap to compute, or entirely
 free in the cases when the data is supplied already decomposed directly from a simulation code,
-or it is stored decomposed (for I/O-efficiency). In this case, much processing
-could be performed on the individual chunks of the data; this part of our
-algorithm scales perfectly. Then, when combining the individual results, one
-could redistribute the remaining matrix (the input to the $\alg{Cascade}$
-algorithm) with respect to the diagonal block partition of the spectral sequence
+or for efficiency reasons it is stored decomposed. The part of our algorithm which processes
+the disjoint union scales perfectly. Then, when combining the individual results, one
+could redistribute the remaining matrix, the input to the $\alg{Cascade}$
+algorithm, with respect to the diagonal block partition of the spectral sequence
 algorithm. This way we could limit the space needed on any given processor.
-
-Another important research topic is adapting our algorithm to the computation of
-persistent cohomology. Although the resulting pairing is the same, algorithms
-that keep track of cocycles rather than cycles have been reported to perform
-significantly better in practice~\cite{dualities,compressed-annotation-matrix}.
-On the other hand, they are built around tracking the matrix $U^{-1}$ in the $D=RU$
-decomposition, while the algorithm that we've presented depends on manipulating
-the matrix $R$.

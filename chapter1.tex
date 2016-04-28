@@ -57,6 +57,7 @@ Suppose someone asked you describe the shape of this point cloud. One might be i
 	 }
 \end{tikzpicture}
 \caption{Model spaces at various scales}
+\label{model-spaces}
 \end{figure}
 
 Persistent topology concerns itself with capturing topological features which can be found at multiple scales of a parameterized family of spaces.
@@ -238,14 +239,17 @@ The following result explains when we can find a representation of a module as i
 Any finitely generated $k[x_1, \ldots x_n]$-module can be decomposed into indecomposables in polynomial time in the description of the module. 
 \end{theorem}
 \begin{proof}
-See~\cite{paper-from-the-90s}
+See~\cite{caikm-ptafm-1997}
 \end{proof}
-Importantly when we have a finitely generated module over a principal ideal domain, we have a structure theorem. We state it in slightly less generality:
-\begin{theorem}{Structure Theorem}
-Any finitely generated $k[x]$-module can be decomposed into indecomposables, which are of a specific form: 
+Importantly when we have a finitely generated module over a principal ideal domain, we have a structure theorem. 
+\begin{theorem}{Structure Theorem for modules over a PID}
+Let $M$ be a finitely-generated module over a PID $R$.Then there are uniquely determined ideals:
+$I_k \subset \ldots \subset I_2  \subset I_1$ 
+such that
+\[ M \equiv \bigoplus_i R/I_i \]
 \end{theorem}
 \begin{proof}
-See~\cite{}.
+Carlsson \& Zomorodian~\cite{dummitnfoote}.
 \end{proof}
 \begin{definition}{Module Homomorphisms}
 A \emph{module homomorphism} is a group homomorphism respecting scalar multiplication. Given an $R$-module homomorphism $f: X \rightarrow Y $, we define the \emph{kernel} of $f$, the \emph{image} of $f$ and the co-kernel of $f$, as follows: 
