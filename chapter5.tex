@@ -79,9 +79,8 @@ We can now state the following result:
 \end{theorem}
 \begin{proof}
     The initial number of nonzero elements in the matrix $T$ is in $O{(n + m) m + n} = O(nm)$.
-    Since the number of dense columns is kept constant (or, more accurately, it
-    never increases) thanks to the row operations that clear out column $j$, the
-    space used during the cascade remains in $O(nm)$.
+     By using row operations applied to column $j$ the number of dense columns never increases. So the
+     space used during the cascade remains $O(nm)$.
 
     It takes $O(n+m)$ time to add two dense columns, or to add a dense
     column to a sparse column. How many such operations are there?
@@ -112,7 +111,7 @@ many dense columns a single processor has to handle at once.
 Consider an oct-tree with $p = 8^k$ processors. At the $k$-th level in the
 tree, we end up with $p$ cubes and an intersection of size $m = 3 \cdot 2^k \cdot c$,
 where $c$ is the number of simplices in a side of the cube. By merging the cubes in pairs, e.g,  higher level
-in the heirarchy after each merge, $m$ never exceeds $c$, the size of the
+in the hierarchy after each merge, $m$ never exceeds $c$, the size of the
 initial cut that splits the domain into two.
 
 Consider the structure of the boundary matrix for two consecutive levels in the

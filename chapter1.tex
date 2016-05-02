@@ -120,7 +120,7 @@ of dimension less than or equal to $k$. Note that the 1-skeleton of
 any complex is as a graph.
 \end{definition}
 \begin{definition}{Open Star}
-The open star of a simplex $\sigma$ is the set of simplices which have a face in $\sigma$, it is denoted$\operatorname{St}(\sigma)$. The star of a set $S$ of simplices is the union of the stars of those simplices.
+The open star of a simplex $\sigma$ is the set of simplices which have a face in $\sigma$, it is denoted $\operatorname{St}(\sigma)$. The star of a set $S$ of simplices is the union of the stars of those simplices.
 \end{definition}
 \begin{lemma}
 $\operatorname{St}$ commutes with intersections.
@@ -207,33 +207,37 @@ The \emph{Cech}-Complex at scale $\epsilon$ is the set:
 \[ C_\epsilon = \{ [ x_0, \ldots x_k] \mid \bigcap_i B_{\epsilon/2}(x_i)  \neq \emptyset \}. \]
 \end{definition}
 \begin{figure}
-\begin{tikzpicture}[scale=.5]
-	\node[draw=none, fill=white] at (0, -5.5) {$\check{C}_{.6}$};
-    \foreach[count=\p] \x / \y in \data {
-	\begin{pgfonlayer}{ball}
-        \fill[gray!50,radius= .6 cm] (\x,\y) circle{};
-        \end{pgfonlayer}{ball}
-	\node[draw, circle, scale=.25, fill=white](\p) at (\x, \y) {$\p$};
-    } 
- \end{tikzpicture}
+\centering
  \begin{tikzpicture}[scale=.5]
 	\node[draw=none, fill=white] at (0, -5.5) {$\check{C}_{.6}$};
     \foreach[count=\p] \x / \y in \data {
 	\begin{pgfonlayer}{ball}
         \fill[gray!50,radius= .6 cm] (\x,\y) circle{};
         \end{pgfonlayer}{ball}
-	\node[draw, circle, scale=.25, fill=white](\p) at (\x, \y) {$\p$};
+	\node[draw, circle, scale=.25, fill=white](\p) at (\x, \y) {};
     } 
 \input{cell_5_nerve}
  \end{tikzpicture}
-\caption{The Cech complex at $\epsilon = .6$ for a set of points on the annulus}
+ \hspace{1cm}
+  \begin{tikzpicture}[scale=.5]
+	\node[draw=none, fill=white] at (0, -5.5) {$\textrm{VR}_{.6}$};
+    \foreach[count=\p] \x / \y in \data {
+	\begin{pgfonlayer}{ball}
+        \fill[gray!50,radius= .6 cm] (\x,\y) circle{};
+        \end{pgfonlayer}{ball}
+	\node[draw, circle, scale=.25, fill=white](\p) at (\x, \y) {};
+    } 
+\input{cell_5_vr}
+ \end{tikzpicture}
+\caption{(Left) The Cech complex at $\epsilon = .6$. (Right) The 2-skeleton of the Rips complex at $\epsilon = .6$ }
+\label{fig:c-and-r}
 \end{figure}
 Unfortunately, determining membership in $C_\epsilon$ can be quite complicated. A simpler construction is the 
 Vietoris-Rips complex.
 \begin{definition}{Vietoris-Rips}
 \[ V_\epsilon = \{ [x_0, \ldots x_k] \mid d(x_i, x_j) < \epsilon \textrm{ for all } i,j  \}. \]
 \end{definition}
-These two simplicial complexes are related.
+An example of the Cech and Rips complex is shown in Figure~\ref{fig:c-and-r}. These two simplicial complexes are related.
 \begin{theorem}
 \[ C_\epsilon \rightarrow V_\epsilon \]
 \end{theorem}
@@ -247,10 +251,18 @@ When we consider points in $\R^d$ we have the following stronger result due to G
 \begin{proof}
 See $\cite{ghrist-n-desilva}$
 \end{proof}
+\begin{figure}
+\centering
+\includegraphics{filtration}
+\caption{A filtration of complexes}
+\label{fig:rips-filt}
+\end{figure}
 \begin{definition}
 We define a \emph{filtration} of topological spaces to be a finite sequence of topological spaces connected by
 continuous maps.
 \end{definition} 
+An example of a filtration is a one parameter family of spaces. A filtration of rips complexes is shown in Figure~\ref{fig:rips-filt}.
+
 Given a filtration of simplicial complexes, whose final space is $\K$ we can create a  
 partial ordering on the simplices of $\K$ such that the $i^{th}$ prefix of the ordering is the image in $\K$ of the $i^{th}$ map. Each prefix is itself a sub complex of $\K$, so in practice we consider only filtrations of spaces connected by inclusion maps.
 
@@ -258,10 +270,10 @@ partial ordering on the simplices of $\K$ such that the $i^{th}$ prefix of the o
 In this section we provide a review of algebra. 
 \begin{definition}{Abelian Group}
 An \emph{abelian group} $(S,+)$ is a set $S$ together with an associative, commutative binary operation $+: S \times S \rightarrow S$, which has:
-\begin{itemize}
-\item[additive identity] a element $0$, such that for each $s \in S$, $s+0 = 0+s = 0$.
-\item[additive inverse] For each element $s \in S$, an element $t$ such that $s+t = 0$.
-\end{itemize}
+\begin{description}
+\item[Identity:] An element $0$, such that for each $s \in S$, $s+0 = 0+s = 0$.
+\item[Inverse:] For each element $s \in S$, an element $t$ such that $s+t = 0$.
+\end{description}
 \end{definition}
 \begin{example}
 The set $\Z$ of integers are a group under the operation of addition. The set of all invertible $n \times $ matrices, are a group, the \emph{general linear group}.
@@ -269,10 +281,10 @@ The set $\Z_n$ of integers modulo $n$ is a group under addition modulo $n$.
 \end{example}
 \begin{definition}{Ring}
 A \emph{commutative ring with unit} $(S,+,\cdot)$ is an abelian group $(S,+)$  together with another associative, commutative, binary operation $\cdot$ for which:
-\begin{itemize}
-\item[distributivity] for all $a,x,y \in S$ $a \cdot (x + y)  = a \cdot x + a \cdot y$ 
-\item[multiplicative identity] $1 \in S$ such that for all $s \in S$ $1 \cdot s = s \cdot 1 = s$. 
-\end{itemize}
+\begin{description}
+\item[Distributivity] for all $a,x,y \in S$ $a \cdot (x + y)  = a \cdot x + a \cdot y$ 
+\item[Identity]      $1 \in S$ such that for all $s \in S$ $1 \cdot s = s \cdot 1 = s$. 
+\end{description}
 \end{definition}
 In this work all rings are considered to be a commutative ring with unit, unless otherwise specified.  
 \begin{example}
@@ -294,10 +306,10 @@ even over fields $R[x,y]$ the ring of polynomials in two variables is not a prin
 \end{example}
 \begin{definition}{Module}
 For any ring $R$ an \emph{R-module} $M$ is an \emph{abelian group} together with an associative, scalar multiplication by $R$: 
-\begin{itemize}
+\begin{description}
 \item[distributivity] for all $r \in R$ and $x,y \in M$ $a \cdot (x + y)  = a \cdot x + a \cdot y$
 \item[identity] $1_R \cdot x = x$
-\end{itemize}
+\end{description}
 \end{definition}
 In particular, when $R$ is a field $k$, the concept of $k$-module and $k$-vector space are identical.
 \begin{example}
@@ -330,11 +342,11 @@ Carlsson \& Zomorodian~\cite{dummitnfoote}.
 \end{proof}
 \begin{definition}{Module Homomorphisms}
 A \emph{module homomorphism} is a group homomorphism respecting scalar multiplication. Given an $R$-module homomorphism $f: X \rightarrow Y $, we define the \emph{kernel} of $f$, the \emph{image} of $f$ and the co-kernel of $f$, as follows: 
-\begin{itemize}
-\item $\ker{f} = \{ x \mid f(x) = 0 \}$. 
-\item The \emph{image} of $f$ $\Im{f} = \{ f(x) \mid x \in X\}$, 
-\item The \emph{co-kernel} of $f$ = $Y/\Im{f}$.
-\end{itemize}
+\begin{description}
+\item[Kernel] $\ker{f} = \{ x \mid f(x) = 0 \}$. 
+\item[Image] $\Im{f} = \{ f(x) \mid x \in X\}$, 
+\item[Co-kernel] $\operatorname{Coker}{f} = Y/\Im{f}$.
+\end{description}
 \end{definition}
 
 Module homomorphisms provide two more important example of $R$-modules. That is if $M$ and $N$ are $R$-modules then the set $\operatorname{Hom}(M,N)$ of $R$-module homomorphisms, is itself an $R$-module under addition of functions, and the obvious scalar multiplication. Now suppose that $\{M_i\}$ are a sequence of $R$-modules connected by module homomorphisms. Certainly there is an $R$-module structure on $M = \bigoplus M_i$, but there is also a $R[t]$-module structure, where the action of $t$ on an element in $M_i$ applies the map $f_i$. Such a module is referred to as a \emph{graded module}.
@@ -477,15 +489,25 @@ is \emph{exact} at $B$ if $\im{f} =  \ker{g}$. Such a sequence is called a \emph
 \end{tikzcd}
 \] 
 If $\ker{f} = 0$ we would say that the map $f$ is injective. If $\coker{f} = 0$ we would say that $f$ is surjective. $f$ is an isomorphism when it is injective and surjective. 
-
+\begin{definition}{Short exact sequence of a pair}
 Suppose that $X$ is a simplicial complex and $A \subset X$ is a subcomplex. We have a short exact sequence 
 \[
 \begin{tikzcd}
 0 \arrow{r}& C_d(A) \arrow{r}{i} & C_d(X) \arrow{r}{j} & C_d(X)/\Im{C_d(A)} \arrow{r} & 0 
 \end{tikzcd}
 \]
-When we pass to homology there turns out to be more structure in the form of the \emph{connecting homomorphism}  $\delta: H_d(X,A) \rightarrow H_{d-1}(A)$. More generally, whenver we have a short exact sequence of chain complexes this gives rise to a \emph{long exact sequence} at the level of homology. 
- For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. One needs to show that the arbitrary choices made in this construction do not affect the definition of $\delta$. We omit these arguments. 
- With the addition of this map we can turn a short exact sequence of chain complexes into a \emph{long exact sequence} of homology modules:
-\[ \ldots \rightarrow H_d(A) \rightarrow H_d(X) \rightarrow H_d(X,A) \rightarrow H_{d-1}(A) \rightarrow \ldots \]
-This long exact sequence allows us to compute the homology of a space from a subspace and it's quotient. This will be a key ingredient in deriving persistent homology in the next chapter
+known as \emph{short exact sequence of a pair} $(A,X)$.
+\end{definition}
+When we pass to homology there turns out to be more structure:
+\begin{theorem} 
+Whenever we have a short exact sequence of chain complexes: 
+\[  0 \rightarrow C_n(A) \rightarrow C_n(B) \rightarrow C_n(C) \rightarrow 0 \]
+this gives rise to a \emph{long exact sequence} at the level of homology:
+\[ \ldots \rightarrow H_n(A) \rightarrow H_n(B) \rightarrow H_n(C) \rightarrow H_{n-1}(A) \rightarrow \ldots  \]  
+\end{theorem}
+\begin{proof}
+See Hatcher~\ref{hatcher}.
+\end{proof}
+The most important ingredient in this proof is the definition of the \emph{connecting homomorphism}. We discuss this map in terms of the short exact sequence of a pair. For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. To show that this map is well defined one needs to show that all the arbitrary choices made in this construction do not affect the definition of $\delta$. 
+ 
+This long exact sequence allows us to compute the homology of a space, with field coefficients, from a subspace and it's quotient. This will be a key ingredient in deriving persistent homology in the next chapter.

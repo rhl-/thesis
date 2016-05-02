@@ -23,9 +23,10 @@
 \newcommand{\Exists}{\operatorname{\exists}}
 \newcommand{\Forall}{\operatorname{\forall}}
 \newcommand{\alg}[1]{{\bf #1}}
-
 \newcommand{\row}[2]{#1[#2,\cdot]}
-
+\usepackage{mathtools}
+% page 3 of manual
+\SetLabelAlign{center}{\clap{#1}}
 \input{data}
 % Note that the documentclass can take other options such as
 %   twoside - for double sided printing
@@ -88,9 +89,8 @@
  \prefacesection{Abstract}
 % body of the preface
 %\include{abstract}
-Shape matters for data analysis. In this thesis we investigate the utility of spectral sequences for persistent homology, a tool which characterizes the shape of data. We show how to compute p.h. in parallel. 
 
-% Any other preface sections
+Shape matters for data analysis. In this thesis we investigate the utility of spectral sequences for persistent homology, a tool which characterizes the shape of data. We show how to use these spectral sequences to compute persistent homology in parallel. We present two algorithms, one for computing the homology of a simplicial space in parallel using the \mv spectral sequence, and another which uses \mv to compute persistent homology. We implement our algorithms and present preliminary experimental results.
 
 % The last preface section (e.g., acknowledgement.tex)
 % should look like
@@ -110,11 +110,11 @@ I am indebted to my soon to be wife, Elena, as well as my family for there patie
 % command
 
 \include{chapter1} %background 
-%\include{chapter2} %persistence \& s.s. of a filtration
-%\include{chapter3} %the mayer vietoris spectral sequence
-%\include{chapter4} %ordinary homology & mayer vietoris
-%\include{chapter5} %persistent homology & mayer vietoris
-%\include{chapter6} %conclusion
+\include{chapter2} %persistence \& s.s. of a filtration
+\include{chapter3} %the mayer vietoris spectral sequence
+\include{chapter4} %ordinary homology & mayer vietoris
+\include{chapter5} %persistent homology & mayer vietoris
+\include{chapter6} %conclusion
 
 % and the end material
 
