@@ -12,14 +12,14 @@
     } 
  \end{tikzpicture}
  \caption{Point Cloud sampled from annulus}
+\label{fig:point-cloud-annulus}
  \end{figure}
-Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field: persistent homology and mapper have been used in a wide variety of applications, including image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, and cosmology~\cite{cosmic-web}. Unlike traditional data analysis, in which one concerns itself with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in yet some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ using information about $X$ and $Z$~\cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This implies providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{\mv principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via mayer-vietoris, and the second which improves and extends it to this result persistent setting. We connect the first procedure to \emph{spectral sequences} a manual calculation tool used for computing algebraic structures by hand. To this end we also introduce persistent homology with the language of spectral sequences.
+Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field: persistent homology and mapper have been used in a wide variety of applications, including image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, and cosmology~\cite{cosmic-web}. Unlike traditional data analysis, in which one concerns itself with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in yet some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ using information about $X$ and $Z$~\cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This implies providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{\mv principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via \mv, and the second which improves the running time of the algorithm and extends it to the persistent setting. We connect these procedures to \emph{spectral sequences} a manual calculation tool used for computing algebraic structures by hand. To this end we also re-introduce persistent homology within the language of spectral sequences.
 
-The structure of the thesis as as follows. First, we introduce general background material on algebraic topology. Second, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Next, we will show how one can leverage the \emph{\mv spectral sequence}, to compute ordinary homology in parallel. Instead of introducing this spectral sequence, we provide a description using the \mvb{} an analogous topological space. We take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on mayer-vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
+The structure of the thesis as as follows. First, we introduce general background material on algebraic topology and persistent homology. Second, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Next, we will show how one can leverage the \emph{\mv spectral sequence}, to compute ordinary homology. We then provide a description of a parallel algorithm using the \mvb{} an analogous topological space. We take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on mayer-vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
 
 \section{Background}
-Suppose someone asked you describe the shape of this point cloud. One might be inclined to propose that the point cloud looks quite disconnected. Indeed, the topology of a set of points in $\R^n$ is not all that interesting. Perhaps, however, if you were to squint your eyes, you might be inclined to describe the shape as something like an annulus. Persistence is a tool for modeling this phenomenon. As an example, for any \emph{metric space} $(X,d)$ and  $\epsilon > 0$ we can define a space: \[ M_\epsilon = \bigcup_{x \in X} B_{\epsilon}(x) \] where $B_{\epsilon}(x) = \{ y \mid d(x,y) < \epsilon\} $ is the \emph{ball of radius $\epsilon$ around x}. Notice that by varying the scale parameter $M_\epsilon$ has different topologies. The collection $\{M_\epsilon\}_\epsilon$ of spaces together with the inclusion maps between $M_\epsilon$ and $M_{\epsilon'}$ for any $\epsilon < \epsilon'$ is called a \emph{one parameter family} of spaces.   
- 
+
  \begin{figure}
 \centering
  \hspace{.5cm}
@@ -60,6 +60,8 @@ Suppose someone asked you describe the shape of this point cloud. One might be i
 \label{model-spaces}
 \end{figure}
 
+Suppose someone asked you describe the shape of the point cloud show in Figure~\ref{fig:point-cloud-annulus}. One might be inclined to propose that the point cloud looks quite disconnected. Indeed, the topology of a set of points in $\R^n$ is not all that interesting. Perhaps, however, if you were to squint your eyes, you might be inclined to describe the shape as something like an annulus. Persistence is a tool for modeling this phenomenon. As an example, for any \emph{metric space} $(X,d)$ and  $\epsilon > 0$ we can define a space: \[ M_\epsilon = \bigcup_{x \in X} B_{\epsilon}(x) \] where $B_{\epsilon}(x) = \{ y \mid d(x,y) < \epsilon\} $ is the \emph{ball of radius $\epsilon$ around x}. Notice that by varying the scale parameter $\epsilon$ one finds that the model space $M_\epsilon$ has different topologies. $M_\epsilon$ as various scales is shown in Figure~\ref{model-spaces}. The collection $\{M_\epsilon\}_\epsilon$ of spaces together with the inclusion maps between $M_\epsilon$ and $M_{\epsilon'}$ for any $\epsilon < \epsilon'$ is called a \emph{one parameter family} of spaces.   
+ 
 Persistent topology concerns itself with capturing topological features which can be found at multiple scales of a parameterized family of spaces.
 
 \section{Preliminaries}
@@ -71,7 +73,31 @@ A \emph{topological space} on a set $X$ is the pair $(X,T)$ where $T$ is a subco
 \begin{definition}{Closed Set.}
  The complement of an open set is a \emph{closed} set.
 \end{definition}
-Some examples of topological spaces are, the $D^n$ the unit disk in $R^n$, $S^n$ the unit sphere in $R^{n+1}$. and $\partial D^n = S^{n-1}$ the boundary of the $n$-disk.  
+\begin{figure}
+\centering
+\begin{tikzpicture}[y=0.80pt, x=0.8pt,yscale=1, inner sep=0pt, outer sep=0pt]
+    %outer rectangle
+    \path[draw=black,line join=round,miter limit=4.00,line width=2pt,rounded corners=0cm] (155,130) rectangle (555,226);
+    %sphere
+         \shade [ball color=afragreen]  (205,178) circle [radius=1cm];
+  %line 1
+    \path[draw=black,line join=miter,line cap=butt,miter limit=4, line width=2pt] (255,130) -- (255,226);    
+    %torus
+     \toruspicture{afragreen}
+     %line 2 
+     %mickey mouse
+    \path[draw=black,line join=miter,line cap=butt,miter limit=4.00,line width=2pt] (355,130) -- (355,226);
+    \mickeymouse{afragreen}
+     %line 3 
+     %mobius strip
+    \path[draw=black,line join=miter,line cap=butt,miter limit=4.00,line width=2pt] (455,130) -- (455,226);
+    \moebiustrip{afragreen}
+  \end{tikzpicture}
+\caption{Some topological spaces.}
+\label{fig:example-ts}
+\end{figure}
+Some examples of topological spaces are, the $D^n$ the unit $n$-disk in $R^n$, $S^n$ the unit sphere in $R^{n+1}$, the mickey mouse $MM^2$, the torus $T^2$, and the mobius strip. The boundary of the $n$-disk is the $n-1$-ball. $\partial D^n = S^{n-1}$. These spaces are visualized in Figure~\ref{fig:example-ts}
+
 \begin{definition}{Simplicial Complex}
 A \emph{simplicial complex} is a collection $\K$ of finite sets called
 \emph{simplices} such that if $\sigma \in \K$ and $\tau \subseteq \sigma$ then $\sigma \in \K$. 
@@ -93,6 +119,13 @@ $\Cl(L) = \{ \tau \mid \tau \subseteq \sigma \in L\}$ and it is a simplicial com
 of dimension less than or equal to $k$. Note that the 1-skeleton of
 any complex is as a graph.
 \end{definition}
+\begin{definition}{Open Star}
+The open star of a simplex $\sigma$ is the set of simplices which have a face in $\sigma$, it is denoted$\operatorname{St}(\sigma)$. The star of a set $S$ of simplices is the union of the stars of those simplices.
+\end{definition}
+\begin{lemma}
+$\operatorname{St}$ commutes with intersections.
+\label{lem:st-inter}
+\end{lemma}
 A simplicial complex is a topological space, where the closed sets are specified by the closure of each simplex.
 \begin{definition}{Standard $n$-simplex}
 Let $\Delta^n$ be the standard $n$-simplex~\cite{hatcher}. For any
@@ -100,10 +133,27 @@ Let $\Delta^n$ be the standard $n$-simplex~\cite{hatcher}. For any
 dimensional face of $\Delta^n$  that is defined on $J$. In the abstract setting we may
 identify $\Delta^n$ with the set $[n] = \{1, \ldots, n\}$ of natural numbers, and $\Delta^J$ with the set $J$.
 \end{definition}
+We can also define a simplicial complex geometrically. 
+\begin{definition}{Geometric Simplex}
+If $x_0, x_1, \ldots x_k$ are $k+1$ affinely independent points in $\R^d$, then there convex hull is referred to as a \emph{geometric $k$-simplex}. Observe that any subset of affinely independent points is again affinely independent. 
+\end{definition}
+\begin{definition}{Geometric Simplicial Complex}
+A collection $\K$ of geometric simplices, closed under the subset relation, is a \emph{geometric simplicial complex}. $\K$ together with the topology it inherits from $\R^d$ is referred to as the \emph{underlying topological space of $\K$} and is denoted $\card{\K}$. 
+\end{definition}
+\begin{definition}{Subdivision}
+A simplicial complex $G$ is a \emph{subdivision} of a complex $\K$ if every simplex in $G$ is contained in a simplex in $K$. If $G$ and $\K$ are geometric we further require that $\card{G} = \card{K}$.
+\end{definition}
+\begin{definition}{Barycenter}
+The \emph{barycenter} of a geometric simplex is the average of its vertices.
+\end{definition}
+\begin{definition}{Barycentric Subdivision}
+Given a geometric simplicial complex $\K$, its barycentric subdivision $G$ is defined as follows, First define $G_0$ to be the vertex set of $\K$. Then, define $G_i$ for $i > 0$ as follows: $G_i$ contains $G_{i-1}$ and additionally for each $i$-simplex $\sigma  \in \K$ we add its barycenter, and we introduce an $i$-simplex for each simplex $(i-1)$-simplex $\tau$ which bounds $\sigma$.
+\end{definition}
+
 A simplicial complex may be viewed as the result of gluing simplices of 
 different dimensions along common faces. Other types of complexes are defined 
 similarly using different types of \emph{cells}. Such \emph{cellular} complexes include \emph{cubical} complexes, \emph{simplicial sets}. $\Delta$-complexes, and \emph{CW-complexes}, 
-to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. We end this section by defining finite dimensional the.
+to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. We end this section by introducing CW-Complexes.
 
 \begin{definition}{CW-Complex}
  A finite dimensional CW-Complex $X$ is defined as the finite union $X = \bigcup_n X_n$, where $X_0$ is a given set of $0$-cells. One defines the $k$-cells $X_k$ inductively from $X_{k-1}$. To attach a $k$-cell $\sigma_\alpha$ construct an \emph{attaching map} $\phi_\alpha: S^{k-1} \rightarrow X_{k-1}$. We then define $X_k = X_{k-1} \sqcup D^k_\alpha / \sim$ where we quotient by the relation $x ~\sim \phi_\alpha(x)$ for $x \in \partial D^k_\alpha$. 
@@ -125,47 +175,74 @@ If $X$ and $Y$ are CW-Complexes, then $X \times Y$ is a CW-Complex where the cel
 \end{proof}
 
 \subsection{Maps, covers, and filtrations}
-\begin{definition}
-A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is (open/closed) in $X$. A pair of maps $f,g: X \rightarrow X$ are \emph{homotopic}, denoted $f \tilde g$, if there is a continuous map $F: X \times [0,1] \rightarrow X$ with $F(x,0) = f(x)$ and $F(x,1) = g(x)$. 
+\begin{definition}{Continuous functions}
+A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is (open/closed) in $X$. 
+\end{definition}
+\begin{definition}{Homotopic Maps}
+A pair of maps $f,g: X \rightarrow X$ are \emph{homotopic}, denoted $f \tilde g$, if there is a continuous map $F: X \times [0,1] \rightarrow X$ with $F(x,0) = f(x)$ and $F(x,1) = g(x)$. 
+\end{definition}
+\begin{definition}{Homotopy Equivalence}
 Two spaces are said to be \emph{homotopy equivalent}, denoted $X \sim Y$, if there exists maps $f: X \rightarrow Y$ and $g: Y \rightarrow X$ such that $f \circ g \sim 1_Y$ and $g \circ f \sim 1_X$.
 \end{definition}
-
 \begin{definition}{Contractible}
 If a space $X$ is \emph{contractible} if it is homotopy equivalent to a point.
 \end{definition}
-
 \begin{definition}{Cover}
 Given a simplicial complex $\K$, An \emph{open cover} of $\K$ is a collection of open sets $\{\C_i\}_i$ of $\K$ where $K = \bigcup_i \C_i$. Similarly, we call a cover closed if each element of the cover is a closed set.
 \end{definition}
-
 \begin{definition}{Nerve}
 The \emph{nerve} $\N(\C)$ of a cover $\C$ is the simplicial complex on $[\card{\C}]$ whose $k$-simplices represent the non-trivial intersections of subsets of $\C$ of size $k+1$. The nerve may be regarded as a subcomplex of $\Delta^n$ and so we may denote its simplices by $\Delta^J$ where $J \subseteq [\card{\C}-1]$.
 \end{definition}
-
 Let $\K$ be any topological space $\C$ be an cover of it, and $\N$ be the nerve of $\C$. 
-\begin{lemma}{Nerve Lemma}
-If every element of $\C$, as well as all non-empty intersections of elements in $\C$, are contractible, then $\N$ is homotopy equivalent to $\K$.
+\begin{lemma}
+If every element of a finite closed cover $\C$, as well as all non-empty intersections of elements in $\C$, are contractible, then $\N$ is homotopy equivalent to $\K$.
 \end{lemma}
 \begin{proof}
 See~\cite{hatcher}.
 \end{proof}
-
 Recall from the previous section that a sequence of spaces connected by continuous maps is referred to as a one-parameter family. Let $M = \{M_\epsilon\}$ be the one-parameter family defined in the previous section. Let $\C = \{\C_\epsilon\}$ be the collection of open sets in $\R^n$, defining every member of $M$. We may define another one parameter family $\{ \N_\epsilon \}$ where $\N_\epsilon$ is the nerve of $\C_\epsilon$. Observe that whenever $\epsilon < \epsilon'$ there is an inclusion map: $\N_\epsilon \rightarrow \N_{\epsilon'}$.
-
 We now redefine $N_{\epsilon}$ geometrically.
 \begin{definition}{Cech Complex}
 The \emph{Cech}-Complex at scale $\epsilon$ is the set:
-\[ C_\epsilon = \{ [ x_0, \ldots x_k] \mid \bigcap_i B_\epsilon(x_i)  \neq \emptyset \}. \]
+\[ C_\epsilon = \{ [ x_0, \ldots x_k] \mid \bigcap_i B_{\epsilon/2}(x_i)  \neq \emptyset \}. \]
 \end{definition}
+\begin{figure}
+\begin{tikzpicture}[scale=.5]
+	\node[draw=none, fill=white] at (0, -5.5) {$\check{C}_{.6}$};
+    \foreach[count=\p] \x / \y in \data {
+	\begin{pgfonlayer}{ball}
+        \fill[gray!50,radius= .6 cm] (\x,\y) circle{};
+        \end{pgfonlayer}{ball}
+	\node[draw, circle, scale=.25, fill=white](\p) at (\x, \y) {$\p$};
+    } 
+ \end{tikzpicture}
+ \begin{tikzpicture}[scale=.5]
+	\node[draw=none, fill=white] at (0, -5.5) {$\check{C}_{.6}$};
+    \foreach[count=\p] \x / \y in \data {
+	\begin{pgfonlayer}{ball}
+        \fill[gray!50,radius= .6 cm] (\x,\y) circle{};
+        \end{pgfonlayer}{ball}
+	\node[draw, circle, scale=.25, fill=white](\p) at (\x, \y) {$\p$};
+    } 
+\input{cell_5_nerve}
+ \end{tikzpicture}
+\caption{The Cech complex at $\epsilon = .6$ for a set of points on the annulus}
+\end{figure}
 Unfortunately, determining membership in $C_\epsilon$ can be quite complicated. A simpler construction is the 
 Vietoris-Rips complex.
 \begin{definition}{Vietoris-Rips}
 \[ V_\epsilon = \{ [x_0, \ldots x_k] \mid d(x_i, x_j) < \epsilon \textrm{ for all } i,j  \}. \]
 \end{definition}
-
-These two simplicial complexes are related. The following result is due to Ghrist \& DeSilva.
+These two simplicial complexes are related.
 \begin{theorem}
-\[ C_\epsilon \rightarrow V_\epsilon \rightarrow C_{2\epsilon} \]
+\[ C_\epsilon \rightarrow V_\epsilon \]
+\end{theorem}
+\begin{proof}
+Whenever $I = B_{\epsilon/2}(x) \cap B_{\epsilon/2}(y) \neq \emptyset$ we have that $d(x,y) \leq d(x,r) + d(r,y)$ for any $r$ in $I$. Therefore $d(x,y) < 2(\epsilon/2) = \epsilon$. 
+\end{proof}
+\begin{theorem}
+When we consider points in $\R^d$ we have the following stronger result due to Ghrist \& DeSilva.:
+\[ C_\epsilon \rightarrow V_\epsilon \rightarrow C_{2\epsilon}. \]
 \end{theorem}
 \begin{proof}
 See $\cite{ghrist-n-desilva}$
@@ -303,7 +380,7 @@ An important property of homology is \emph{functorality} namely whenever we have
 X \arrow{r}{f}\arrow{d}{H_d} & Y \arrow{d}{H_d} \\
 H_d(X) \arrow{r}{\tilde{f}} & H_d(Y)
 \end{tikzcd} \]
-The map is defined as follows: First we define the \emph{induced chain map} $f_\sharp$ as the linear extension of the following action: 
+For simplicial complexes, the map is defined as follows: First we define the \emph{induced chain map} $f_\sharp$ as the linear extension of the following action: 
 \[ f_\sharp([v_0, \ldots v_d]) = 
 \begin{cases} 
     [f(v_0) \ldots, f(v_d)] \textrm{ unless } f(v_i) = f(v_j) \textrm{ for some } i,j \\

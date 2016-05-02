@@ -54,18 +54,84 @@ Each of these filtrations of vector spaces gives rise to a spectral sequence as 
 
 Returning the spectral sequence of the double complex, The $d^r$ differential has the following signature $d^r_{p,q}: E^r_{p,q} \rightarrow E^r_{p+r-1, q-r}$. The map $d^r_{p,q}$ is defined as the restriction of the differential $r$ to elements in $E^r_{p,q}$. 
 
+Recall that a spectral sequence stabilizes when $d^r_{*,*} = 0$. In this case, we have that the data in position $E^\infty_{i,j}$ is a summand of the homology in dimension $i+j$. 
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\shade[ball color=afrablue,opacity=1] (1,0) circle (1cm);
+\shade[ball color=afragreen,opacity=1] (0cm,0)  arc (180:90:1cm and 1cm) arc (0:90:0cm and -1cm) ;
+\shade[ball color=afrapurple,opacity=1] (2cm,0)  arc (180:90:-1cm and 1cm) arc (0:90:0cm and -1cm) ;
+\end{tikzpicture}
+\caption{$S^2$ TODO: Fix this ugliness}
+%adapt this: http://www.texample.net/tikz/examples/spherical-and-cartesian-grids/
+\label{fig:S2-triangulation}
+\end{figure}
+We now provide a number of examples of the spectral sequence computed by hand.
 \begin{example}
-Consider the cover of $S^2$ given its four hemispheres. Each of the four sets in the cover is contractible, each pairwise intersection is a copy of $D^1$,  the triple intersections are each a copy of $S^0$, and there is a single four way intersection which is also a copy of $S^0$. We have the following $E_1$ page:
-\begin{tikzcd}
-0    &  0     &   0    &  0 \\
-0    &  0     &   0    &  0 \\
-k^4 & k^4  &  k^6  & k^2
+First, consider the cover of $S^2$ given by its four hemispheres. Each of the four sets in the cover is contractible, four of the six pairwise intersections are copies of $D^1$, and two of them are copies of $S^0$. Additionally, there are three triple intersections, each of which are a point. There are no four way intersection. Using the triangulation shown in Figure~\ref{fig:S2-triangulation} we get the an $E_0$ page with vectors spaces of the specified ranks:
+\[ \begin{tikzcd}
+0    &  0     &   0   \\
+4    & \arrow{l}  6     & \arrow{l}   4
+\end{tikzcd} \]
+Of course, in this example the $E_1$ page is the same.
+Passing to the $E_2$ page we compute the homology of the maps induced by chains on the nerve of the cover. The the map $d^2_{0,1}$ has rank 3, and it has a kernel of dimension 3. The map $d^2_{1,1}$ has rank 3 and a kernel of rank $1$.
+\[ \begin{tikzcd}
+0    &  0     &   0   \\
+1    &  0     &   1
+\end{tikzcd} \]
+\end{example}
+
+In an attempt to make a more complex example, that is one in which $d_2$ is non-trivial we will cover the 3-sphere.
+\begin{example}
+As a second example, consider the space $S^1 \star S^1 \sim S^3$ which is covered by three sets. Each element in the set is a copy of $D^1 \star S^1$, where $D^1 \subset S^1$ and each copy of $D^1$ intersects with another on a point. Notice that each of the individual sets, as well as pairwise intersections is contractible. The only three way intersection is a copy of $S^1$. The $E_1$ page is as follows:
+\[ \begin{tikzcd}
+0    &  0     &   1   \\
+3    & \arrow{l} 3     & \arrow{l}   1
+\end{tikzcd} \]
+Once again, by the $E_2$ page the spectral sequence has stabilized.
+\[  \begin{tikzcd}
+0    &  0     &   1   \\
+1    &  0     &   0
 \end{tikzcd}
-
+\]
+Which produces the homology of $S^3$.
 \end{example}
+It is initially difficult to produce example spaces where even $d^2_{p,q}$ is nontrivial. One challenge is that a necessary condition for $d^2_{p,q}$ to be nonzero is that $E_{p,q}$ and $E^r_{p+r-1, q-r}$ must be nonzero. That is we need to have enough nontrivial homology in dimension at least one within the disjoint union, as well as nontrivial homology in an intersection of at least three sets. 
 
-It is initially difficult to produce example spaces where even $d^2_{p,q}$ is nontrivial. We provide some here. In a later chapter we will revisit these examples in the context of our algorithms. To do this we introduce the Hopf map.
+To introduce this example we first introduce the Hopf map. The Hopf map was written about in 1931 by Heinz Hopf~\cite{hopf}, and it is the smallest example of a continuous map $h : S^n \rightarrow S^m$ for $n > m$ which is not null-homotopic. The Hopf map is an example of a \emph{fibration}.
+\begin{definition}
+A map $\pi: E \rightarrow B$ is a \emph{fibration} if it satisfies the \emph{homotopy lifiting property},
+that is, if there exists a map $\tilde{f}$ making this diagram commute:
+\[ \begin{tikzcd}[column sep=1in,row sep=1in]
+X \arrow{d}{X \times \{0\}} \arrow{r}{\tilde{f}_0} & E \arrow{d}{\pi} \\
+X \times I  \arrow{r}{f} \arrow[dotted]{ur}{\tilde{f}} & B
+\end{tikzcd} \]
+Whenever $f$ is a homotopy. $\tilde{f}_0$ is any map such that $f_0 = \pi \circ \tilde{f}_0$ where $f_0 = \restr{f}{X \times \{0\}}$.
+\end{definition}	
 
+The hopf map is a map between $h: S^3 \rightarrow S^2$ whose fiber is $S^1$. That is, by the homotopy lifting property $h^{-1}(U) \simeq U \times S^1$. 
 \begin{example}
+We now revisit our original example, where we covered the $S^2$ by four sets. We turn the cover of $S^2$ into a cover of $S^3$, by considering the inverse image of each set under the hopf map. Now each of the four sets in the cover are homotopic to $S^1 \times D^2$, a solid tori. The pairwise intersections, are become four copies of $S^1 \times D^1$, and two copies of $S^1 \times S^0$. Each three way intersection is homotopic to $S^1$.
+This produces the following $E_1$ page:
+\[ \begin{tikzcd}
+4    &  \arrow{l} 6     & \arrow{l}   4   \\
+4    & \arrow{l}  6     & \arrow{l}   4
+\end{tikzcd} \]
+The $E_2$ page then has the following data
+\[
+\begin{tikzcd}
+1    &  0     &   1   \\
+1   &  0     &   \arrow{llu}1
+\end{tikzcd} 
+\]
+This produces a single nonzero $d^2$ differential $d^2_{0,2}: E^2_{0,2} \rightarrow E^2_{1,0}$.
+The spectral sequence then stabilizes on the third page $E_3 = E_\infty$.
+\[
+\begin{tikzcd}
+0    &  0     &   1   \\
+1   &  0     &    0
+\end{tikzcd} 
+\]
 \end{example}
 
+In the next section we provide another way of studying the mayer vietoris spectral sequence via its total complex. 
