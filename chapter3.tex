@@ -1,6 +1,5 @@
 \chapter{Mayer Vietoris \& Homology}
-Any parallel computation of homology would require a decomposition of the
-space into pieces. So far we discussed a way of computing homology from a 
+So far we discussed a way of computing homology from a 
 nested sequence of inclusions. While this procedure is straightforward in theory, it can suffer it practice
 because it potentially requires communication between all pairs of processors. To address this
 we aim to decompose our input space input space into pieces using a \emph{cover}. Again in this setting, 
@@ -134,4 +133,4 @@ The spectral sequence then stabilizes on the third page $E_3 = E_\infty$.
 \]
 \end{example}
 
-In the next section we provide another way of studying the mayer vietoris spectral sequence via its total complex. 
+Observe that when we utilize the variant of the spectral sequence where we reduce column chain complexes first, the data of the spectral sequence usually localizes into the first row. Equivalently, if we started by reducing the row chain complexes first, we see localization in the first column in many cases. It makes sense to combine the data of the row and the column spectral sequence. In the next section we provide another way of studying the \mv spectral sequence via its total complex the \mvb. 

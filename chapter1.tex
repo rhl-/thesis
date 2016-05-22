@@ -280,17 +280,19 @@ The set $\Z$ of integers are a group under the operation of addition. The set of
 The set $\Z_n$ of integers modulo $n$ is a group under addition modulo $n$.
 \end{example}
 \begin{definition}{Ring}
-A \emph{commutative ring with unit} $(S,+,\cdot)$ is an abelian group $(S,+)$  together with another associative, commutative, binary operation $\cdot$ for which:
+A \emph{commutative ring with unit} $(S,+,\cdot)$ is an abelian group $(S,+)$  together with another associative, commutative, binary operation $\cdot$ for which for all $a,x,y \in S$:
 \begin{description}
-\item[Distributivity] for all $a,x,y \in S$ $a \cdot (x + y)  = a \cdot x + a \cdot y$ 
-\item[Identity]      $1 \in S$ such that for all $s \in S$ $1 \cdot s = s \cdot 1 = s$. 
+\item[Distributivity] $a \cdot (x + y)  = a \cdot x + a \cdot y$ 
+\item[Identity] $1 \in S$ such that for all $s \in S$ $1 \cdot s = s \cdot 1 = s$. 
 \end{description}
 \end{definition}
 In this work all rings are considered to be a commutative ring with unit, unless otherwise specified.  
 \begin{example}
 $\Z$, $\Z_n$, $\Q$, $\R$ and $\C$ are rings. Another important example is the set $R[t]$ of polynomials in $t$ which coefficients in any other ring $R$.
 \end{example}
+\begin{definition}{Field}
 A \emph{field} $F$ is a ring which further has \emph{multiplicative inverses}.
+\end{definition}
 \begin{example}
 $\Q$, $\R$ and $\C$ are rings.  $Z_n$ is a field whenever $n = p^k$ for some prime $p$ and $k > 0$.
 \end{example}
@@ -305,10 +307,10 @@ $\Z$, $\Z_n$, $\Q$ $\R$ and $\C$ are principal ideal domains. $\Z[x]$ is not a p
 even over fields $R[x,y]$ the ring of polynomials in two variables is not a principal ideal domain.
 \end{example}
 \begin{definition}{Module}
-For any ring $R$ an \emph{R-module} $M$ is an \emph{abelian group} together with an associative, scalar multiplication by $R$: 
+For any ring $R$ an \emph{R-module} $M$ is an \emph{abelian group} together with an associative, scalar multiplication by $R$, for all $r \in R$ and $x,y \in M$:
 \begin{description}
-\item[distributivity] for all $r \in R$ and $x,y \in M$ $a \cdot (x + y)  = a \cdot x + a \cdot y$
-\item[identity] $1_R \cdot x = x$
+\item[Distributivity]  $r \cdot (x + y)  = r \cdot x + r \cdot y$
+\item[Identity] $1_R \cdot x = x$
 \end{description}
 \end{definition}
 In particular, when $R$ is a field $k$, the concept of $k$-module and $k$-vector space are identical.
@@ -338,7 +340,7 @@ such that
 \[ M \equiv \bigoplus_i R/I_i \]
 \end{theorem}
 \begin{proof}
-Carlsson \& Zomorodian~\cite{dummitnfoote}.
+Dummit \& Foote~\cite{dummitnfoote}.
 \end{proof}
 \begin{definition}{Module Homomorphisms}
 A \emph{module homomorphism} is a group homomorphism respecting scalar multiplication. Given an $R$-module homomorphism $f: X \rightarrow Y $, we define the \emph{kernel} of $f$, the \emph{image} of $f$ and the co-kernel of $f$, as follows: 
@@ -390,9 +392,9 @@ sequence. The boundary operator is the linear extension of the above action.
 An important property of homology is \emph{functorality} namely whenever we have a continuous map $f: X \rightarrow Y$ between topological spaces there is an induced linear map $\tilde{f}$ between there homology vector spaces in any dimension. That is the following diagram commutes:
 \[ \begin{tikzcd}
 X \arrow{r}{f}\arrow{d}{H_d} & Y \arrow{d}{H_d} \\
-H_d(X) \arrow{r}{\tilde{f}} & H_d(Y)
+H_d(X) \arrow{r}{f_{\sharp}} & H_d(Y)
 \end{tikzcd} \]
-For simplicial complexes, the map is defined as follows: First we define the \emph{induced chain map} $f_\sharp$ as the linear extension of the following action: 
+For simplicial complexes, continuous maps are approximated by simplicial maps. The induced map is defined as follows: First we define the \emph{induced chain map} $f_\sharp$ as the linear extension of the following action: 
 \[ f_\sharp([v_0, \ldots v_d]) = 
 \begin{cases} 
     [f(v_0) \ldots, f(v_d)] \textrm{ unless } f(v_i) = f(v_j) \textrm{ for some } i,j \\
@@ -506,8 +508,8 @@ this gives rise to a \emph{long exact sequence} at the level of homology:
 \[ \ldots \rightarrow H_n(A) \rightarrow H_n(B) \rightarrow H_n(C) \rightarrow H_{n-1}(A) \rightarrow \ldots  \]  
 \end{theorem}
 \begin{proof}
-See Hatcher~\ref{hatcher}.
+See Hatcher~\cite{hatcher}.
 \end{proof}
-The most important ingredient in this proof is the definition of the \emph{connecting homomorphism}. We discuss this map in terms of the short exact sequence of a pair. For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. To show that this map is well defined one needs to show that all the arbitrary choices made in this construction do not affect the definition of $\delta$. 
+The key ingredient in this proof is the definition of the \emph{connecting homomorphism}. We discuss this map in terms of the short exact sequence of a pair. For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. To show that this map is well defined one needs to show that all the arbitrary choices made in this construction do not affect the definition of $\delta$. 
  
 This long exact sequence allows us to compute the homology of a space, with field coefficients, from a subspace and it's quotient. This will be a key ingredient in deriving persistent homology in the next chapter.

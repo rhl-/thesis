@@ -32,7 +32,7 @@ We refer to the homology of this sequence as the $E_0$ page of the spectral sequ
 0 \arrow{r}{i} & \K_0 \arrow{r}{i}\arrow{d}{j} & \K_1 \arrow{r}{i}\arrow{d}{j}   & \K_2 \arrow{r}{i}\arrow{d}{j} & \ldots \arrow{r}{i} & \K_{n-1} \arrow{r}{i} \arrow{d}{j} & \K_n\arrow{d}{j} \\ 		&     \K_0/{0} &			 \K_1/{\K_0} & 	 \K_2/{\K_{1}}		   & \ldots  			   & \K_{n-1}/{\K_{n-2}}		 & \K_n/{\K_{n-1}} 
 \end{tikzcd}
 \]
-This diagram passes to homology, where each short exact sequence extends to a long exact sequence. In the diagrams below denote the [relative] homology as the $k$-vector space which is the direct sum of homology computations in each dimension. Please keep in mind that the diagram below is not commutative, however each triangle is exact, and maps remain graded. Finally, we drop most indices on maps for visual clarity.
+This diagram passes to homology, where each short exact sequence extends to a long exact sequence. In the diagrams below denote the [relative] homology as the $k$-vector space which is the direct sum of homology vector spaces in each dimension. Please keep in mind that the diagram below is not commutative, however each triangle is exact, and $\delta$ involves a dimension shift. Finally, we drop most indices on maps for visual clarity.
 \[
 \begin{tikzcd}[column sep=small]
 0 \arrow{r}{i} & H(\K_0 \arrow{r}{i}\arrow{d}{j}) & H(\K_1 \arrow{r}{i}\arrow{d}{j})   & H(\K_2 \arrow{r}{i}\arrow{d}{j}) & \ldots \arrow{r}{i} & H(\K_{n-1}) \arrow{r}{i} \arrow{d}{j} & H(\K_n\arrow{d}{j}) \\ 		
@@ -68,22 +68,22 @@ We know that since $F$ is a field $H(K,F)$ can be decomposed. It remains to show
 \end{proof}
 \section{The Spectral Sequence Algorithm}
 \label{sec:persistence-algorithm}
-Recall from Chapter 1, that computing ordinary homology with field coefficients is equivalent to gaussian elimination, and that that we may reduce the matrices in each dimension independently. The spectral sequence of a filtration suggests an iterative, parallel approach to computing persistent homology in which at iteration $p$ the barcode of length at most $p$ is resolved. The following psuedo code summarizes this construction.
+Recall from Chapter 1, that computing ordinary homology with field coefficients is equivalent to gaussian elimination, and that that we may reduce the matrices in each dimension independently. The spectral sequence of a filtration suggests an iterative, parallel approach to computing persistent homology in which at iteration $r$ the barcode of length at most $r$ is resolved. The following psuedo code summarizes this construction.
 \begin{figure}
 \begin{codebox}
 \Procname{\proc{Spectral-Sequence}($K_1, \ldots K_m)$}
-\li \For{ $p \gets 0 \ldots m-1$} \Comment{Iterate over pages of spectral sequence} 
+\li \For{ $r \gets 0 \ldots m-1$} \Comment{Iterate over pages of spectral sequence} 
 \li \Do
-\li \Parfor{ $r \gets p \ldots m-1$} \Comment{Iterate over terms left to be reduced}
+\li \Parfor{ $p \gets p \ldots m-1$} \Comment{Iterate over terms left to be reduced}
 \li \Do
-\li  \proc{Reduce}($d_{p,r} : E_{p,r} \rightarrow E_{p,r+p}$)
+\li  \proc{Reduce}($d_{r,p} : E_{r,p} \rightarrow E_{r,p+r}$)
 \End
 \End
 \end{codebox}
 \caption{Spectral Sequence Algorithm}
 \label{alg:ss-alg}
 \end{figure}
-This algorithm essentially breaks the boundary matrix into blocks, and reduces each block in order, but some blocks may now be processed out of the normal order. This is important
+This algorithm essentially breaks the boundary matrix into blocks, and reduces each block in order, but groups of blocks may now be processed out of the normal order. This is important
 because it allows the two optimizations mentioned in Chapter 1, clearing and compressing, to be utilized at the same time. The trouble with this procedure as stated is that at each page, the work to reduce the differentials of the later terms increases, while the work for the lower terms vanishes. In practice this is handled by redistributing the data in a chunk across the cluster.  This approach was recently implemented by Bauer et. al~\cite{bkr-cccph-13}. If there are $m$ cells in the complex, divided into $n$ chunks of size at most $l$, and $g$ is the $\dim(\ker(d_1))$ , then the authors provide an algorithm with a $O(nl^3 + glm + g^3)$ worst case time complexity. 
 
-This is not the only method for computing persistent homology in parallel. Many times extra information, in the form of a cover on a space, is available while computing persistence. It is natural to try and glue the local connectivity data of a cover together to provide the persistent homology of the entire filtration. Classically the mayer vietoris sequence is used for this purpose. In the next chapter, we explore algorithms which utilize this principal and compare them to algorithms using the spectral sequence of a filtration.  
+This is not the only method for computing persistent homology in parallel. Many times extra information, in the form of a cover on a space, is available while computing persistence. It is natural to try and glue the local connectivity data of a cover together to provide the persistent homology of the entire filtration. Classically the \mv sequence is used for this purpose. In the next chapter, we explore algorithms which utilize this principal and compare them to algorithms using the spectral sequence of a filtration.  
