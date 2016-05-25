@@ -1,7 +1,7 @@
 \chapter{Introduction}
-Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field, persistent homology and mapper, have been used in a wide variety of applications, including image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, and cosmology~\cite{cosmic-web}. Unlike traditional data analysis, in which one concerns itself with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ using information about $X$ and $Z$~\cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This implies providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{\mv principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via \mv{}, and the second which improves the running time of the algorithm and extends it to the persistent setting. We connect these procedures to \emph{spectral sequences}, a manual calculation tool used for computing algebraic structures by hand. To this end we also re-introduce persistent homology within the language of spectral sequences.
+Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field, persistent homology and mapper, have been used in a wide variety of applications, including image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, and cosmology~\cite{cosmic-web}. Unlike traditional data analysis, in which one concerns themselves with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ using information about $X$ and $Z$~\cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This involves providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{\mv principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via \mv{}, and the second improving the running time of the first and extending it to the persistent setting. We connect these procedures to \emph{spectral sequences}, a manual calculation tool used for computing algebraic structures by hand. To this end we also re-introduce persistent homology within the language of spectral sequences.
 
-The structure of the thesis is as follows. First, we introduce general background material on algebraic topology and persistent homology. Second, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Next, we will show how one can leverage the \emph{\mv spectral sequence}, to compute ordinary homology. We then provide a description of a parallel algorithm using the \mvb{} an analogous topological space. We take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on Mayer-Vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
+The structure of the thesis is as follows. First, we introduce general background material on algebraic topology and persistent homology. Second, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Next, we will show how one can leverage the \emph{\mv spectral sequence} to compute ordinary homology. We then provide a description of a parallel algorithm using the \mvb{} an analogous topological space. We take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on Mayer-Vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
 
 \section{Background}
 
@@ -23,7 +23,7 @@ The structure of the thesis is as follows. First, we introduce general backgroun
 
 Suppose someone asked you describe the shape of the point cloud shown in Figure~\ref{fig:point-cloud-annulus}. One might be inclined to propose that the point cloud looks quite disconnected. Indeed, the topology of a set of points in $\R^n$ is not all that interesting. Perhaps, however, if you were to squint your eyes, you might be inclined to describe the shape as something like an annulus. Persistence is a tool for modeling this phenomenon. As an example, for any \emph{metric space} $(X,d)$ and  $\epsilon > 0$ we can define a space: \[ M_\epsilon = \bigcup_{x \in X} B_{\epsilon}(x) \] where $B_{\epsilon}(x) = \{ y \mid d(x,y) < \epsilon\} $ is the \emph{ball of radius $\epsilon$ centered around x}. Notice that by varying the scale parameter $\epsilon$ one finds that the model space $M_\epsilon$ has different topologies. $M_\epsilon$ at various scales is shown in Figure~\ref{model-spaces}. The collection $\{M_\epsilon\}_\epsilon$ of spaces together with the inclusion maps between $M_\epsilon$ and $M_{\epsilon'}$ for any $\epsilon < \epsilon'$ is called a \emph{one parameter family} of spaces.   
  
-Persistent topology concerns itself with capturing topological features which can be found at multiple scales of a parameterized family of spaces.
+Persistent topology concerns itself with capturing topological features that can be found at multiple scales of a parameterized family of spaces.
 
 
  \begin{figure}
@@ -70,13 +70,13 @@ Persistent topology concerns itself with capturing topological features which ca
 We begin with a review of algebraic topology. We refer the reader to Hatcher for further background material in algebraic topology~\cite{hatcher}.
 \subsection{Topological Spaces}
 \begin{definition}[Topological Space]
-A \emph{topological space} on a set $X$ is a pair $(X,T)$ where $T$ is a subcollection of $P(X)$, containing $\emptyset$ and $X$, and is further closed under countable unions, and finite intersections. Elements of $T$ are referred to as \emph{open sets.}
+A \emph{topological space} on a set $X$ is a pair $(X,T)$ where $T$ is a subcollection of \emph{the powerset} of $X$, containing $\emptyset$ and $X$, and is further closed under countable unions, and finite intersections. Elements of $T$ are referred to as \emph{open sets.}
 \end{definition}
 \begin{definition}[Closed Set]
  The complement of an open set is a \emph{closed} set.
 \end{definition}
 
-Some examples of topological spaces are, $D^n$ the unit $n$-disk in $\R^n$, $S^n$, the unit sphere in $R^{n+1}$, the mickey mouse $MM^2$, the torus $T^2$, and the mobius strip. The boundary of the $n$-disk is the $(n-1)$-ball. $\partial D^n = S^{n-1}$. These spaces are visualized in Figure~\ref{fig:example-ts}.
+Some examples of topological spaces are, $D^n$ the unit $n$-disk in $\R^n$, $S^n$, the unit sphere in $R^{n+1}$, the Mickey Mouse $MM^2$, the torus $T^2$, and the mobius strip. The boundary of the $n$-disk is the $(n-1)$-ball. $\partial D^n = S^{n-1}$. These spaces are visualized in Figure~\ref{fig:example-ts}.
 \begin{figure}
 \centering
 \begin{tikzpicture}[y=0.80pt, x=0.8pt,yscale=1, inner sep=0pt, outer sep=0pt]
@@ -123,13 +123,13 @@ Suppose $L \subseteq K$.  $L$ is a \emph{subcomplex} if it is a simplicial compl
 \begin{definition}[Closure]
  The \emph{closure} of $L$ is $\Cl(L) = \{ \tau \mid \tau \subseteq \sigma \in L\}$ and it is a simplicial complex.
 \end{definition}
-\begin{definition}
-The  \emph{$k$-skeleton} of a complex $\K$ is the set of all simplices
+\begin{definition}[$k$-skeleton]
+The  \emph{$k$-skeleton} of a complex $\K$ is the subset of all simplices
 of dimension less than or equal to $k$. Note that the 1-skeleton of
 any complex is a graph.
 \end{definition}
 \begin{definition}[Open Star]
-The \emph{open star} of a simplex $\sigma$ is the set of simplices which have a face in $\sigma$, and denoted as $\operatorname{St}(\sigma)$. The star of a set $S$ of simplices is the union of the stars of those simplices.
+The \emph{open star} of a simplex $\sigma$ is the set of co-faces of $\sigma$, and denoted as $\operatorname{St}(\sigma)$. The star of a set $S$ of simplices is the union of the stars of those simplices.
 \end{definition}
 \begin{lemma}
 $\operatorname{St}$ commutes with intersections.
@@ -147,7 +147,7 @@ We can also define a simplicial complex geometrically.
 If $x_0, x_1, \ldots, x_k$ are $k+1$ affinely independent points in $\R^d$, then their convex hull is referred to as a \emph{geometric $k$-simplex}. Observe that any subset of affinely independent points is again affinely independent. 
 \end{definition}
 \begin{definition}[Geometric Simplicial Complex]
-A collection $\K$ of geometric simplices, closed under the subset relation, is a \emph{geometric simplicial complex}. $\K$ together with the topology it inherits from $\R^d$ is referred to as the \emph{underlying topological space of $\K$} and is denoted $\card{\K}$. 
+A collection $\K$ of geometric simplices closed under the subset relation, is a \emph{geometric simplicial complex}. $\K$ together with the topology it inherits from $\R^d$ is referred to as the \emph{underlying topological space of $\K$} and is denoted $\card{\K}$. 
 \end{definition}
 \begin{definition}[Subdivision]
 A simplicial complex $G$ is a \emph{subdivision} of a complex $\K$ if every simplex in $G$ is contained in a simplex in $K$. If $G$ and $\K$ are geometric we further require that $\card{G} = \card{K}$.
@@ -156,7 +156,7 @@ A simplicial complex $G$ is a \emph{subdivision} of a complex $\K$ if every simp
 The \emph{barycenter} of a geometric simplex is the average of its vertices.
 \end{definition}
 \begin{definition}[Barycentric Subdivision]
-Given a geometric simplicial complex $\K$, its \emph{barycentric subdivision} $G$ is defined as follows, First define $G_0$ to be the vertex set of $\K$. Then, define $G_i$ for $i > 0$ as follows: $G_i$ contains $G_{i-1}$ and additionally for each $i$-simplex $\sigma  \in \K$ we add its barycenter, and we introduce an $i$-simplex for each simplex $(i-1)$-simplex $\tau$ which bounds $\sigma$.
+Given a geometric simplicial complex $\K$, its \emph{barycentric subdivision} $G$ is defined as follows, First define $G_0$ to be the vertex set of $\K$. Then, define $G_i$ for $i > 0$ as follows: $G_i$ contains $G_{i-1}$ and additionally for each $i$-simplex $\sigma  \in \K$ we add its barycenter, and we introduce an $i$-simplex for each simplex $(i-1)$-simplex $\tau$ that bounds $\sigma$.
 \end{definition}
 
 A simplicial complex may be viewed as the result of gluing simplices of 
@@ -167,7 +167,7 @@ to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. We end this section 
 \begin{definition}[CW-Complex]
  A finite dimensional CW-Complex $X$ is defined as the finite union $X = \bigcup_n X_n$, where $X_0$ is a given set of $0$-cells. One defines the $k$-cells $X_k$ inductively from $X_{k-1}$. To attach a $k$-cell $\sigma_\alpha$ construct an \emph{attaching map} $\phi_\alpha: S^{k-1} \rightarrow X_{k-1}$. We then define $X_k = X_{k-1} \sqcup D^k_\alpha / \sim$ where $x ~\sim \phi_\alpha(x)$ if $x \in \partial D^k_\alpha$. 
 \end{definition}
-In practice we only consider the class of  \emph{computable CW complexes} which are finite dimensional CW-complexes with computable attaching maps.
+In practice we only consider the class of  \emph{computable CW complexes}, which are finite dimensional CW-complexes with computable attaching maps.
 \begin{lemma}
 Every simplicial complex is a CW-complex
 \label{lem:simp-is-cw}
@@ -185,10 +185,13 @@ If $X$ and $Y$ are CW-Complexes, then $X \times Y$ is a CW-Complex where the cel
 
 \subsection{Maps, Covers, and Filtrations}
 \begin{definition}[Continuous functions]
-A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is ab (open/closed) set in $X$. 
+A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is an (open/closed) set in $X$. 
 \end{definition}
 \begin{definition}[Homotopic Maps]
 A pair of maps $f,g: X \rightarrow X$ are \emph{homotopic}, denoted $f \sim g$, if there is a continuous map $F: X \times [0,1] \rightarrow X$ with $F(x,0) = f(x)$ and $F(x,1) = g(x)$. 
+\end{definition}
+\begin{definition}[Identity Map]
+Given a topological space $X$, the map $1_X : X \rightarrow X$ is the identity map on $X$, defined as $1_X(x) = x$.
 \end{definition}
 \begin{definition}[Homotopy Equivalence]
 Two spaces are said to be \emph{homotopy equivalent}, denoted $X \simeq Y$, if there exists maps $f: X \rightarrow Y$ and $g: Y \rightarrow X$ such that $f \circ g \sim 1_Y$ and $g \circ f \sim 1_X$.
@@ -304,7 +307,7 @@ $\Z$, $\Z_n$, $\Q$, $\R$ and $\C$ are rings. Another important example is the se
 A \emph{field} $F$ is a ring which further has \emph{multiplicative inverses}.
 \end{definition}
 \begin{example}
-$\Q$, $\R$ and $\C$ are fields.  $Z_n$ is a field whenever $n = p^k$ for some prime $p$ and $k > 0$.
+$\Q$, $\R$ and $\C$ are fields.  $Z_n$ is a field whenever $n = p$ for some prime $p$.
 \end{example}
 \begin{definition}[Ideal]
 An \emph{ideal} $I$ of a ring $R$ is an additive subgroup with the following additive property:
@@ -342,7 +345,7 @@ Any finitely generated $k[x_1, \ldots, x_n]$-module can be decomposed into indec
 \begin{proof}
 See~\cite{caikm-ptafm-1997}.
 \end{proof}
-Importantly when we have a finitely generated module over a principal ideal domain, we have a structure theorem. 
+Importantly, when we have a finitely generated module over a principal ideal domain, we have a structure theorem. 
 \begin{theorem}{Structure Theorem for a module over a PID}
 Let $M$ be a finitely-generated module over a PID $R$. Then there are uniquely determined ideals:
 $I_k \subset \ldots \subset I_2  \subset I_1$ 
@@ -361,7 +364,7 @@ A \emph{module homomorphism} is a group homomorphism respecting scalar multiplic
 \end{description}
 \end{definition}
 
-Module homomorphisms provide two more important examples of $R$-modules. That is, if $M$ and $N$ are $R$-modules then the set $\operatorname{Hom}(M,N)$ of $R$-module homomorphisms, is itself an $R$-module under addition of functions, and the obvious scalar multiplication. Now suppose that $\{M_i\}$ are a sequence of $R$-modules connected by module homomorphisms. Certainly there is an $R$-module structure on $M = \bigoplus M_i$, but there is also an $R[t]$-module structure, where the action of $t$ on an element in $M_i$ applies the map $f_i$. Such a module is referred to as a \emph{graded module}.
+Module homomorphisms provide two more important examples of $R$-modules. That is, if $M$ and $N$ are $R$-modules then the set $\operatorname{Hom}(M,N)$ of $R$-module homomorphisms is itself an $R$-module under addition of functions, and the obvious scalar multiplication. Now suppose that $\{M_i\}$ are a sequence of $R$-modules connected by module homomorphisms. Certainly there is an $R$-module structure on $M = \bigoplus M_i$, but there is also an $R[t]$-module structure, where we define the action of $t$ on an element in $M_i$ to be the result of applying the map $f_i$. Such a module is referred to as a \emph{graded module}.
 
 \subsection{Homology}
 In this section, we describe the homology of cellular spaces. 
@@ -422,16 +425,16 @@ f_\sharp(\partial([v_0, \ldots, v_d])) &= \\
 &=  \sum_i(-1)^i [f_{\sharp}(v_0), \ldots, \widehat{f_{\sharp}(v_i)}, \ldots, f_{\sharp}(v_d)] \\
 &=  \partial(f_\sharp([v_0, \ldots, v_d]))
 \end{align*}
-Observe now that if there is more than two repeated elements, that the result holds trivially as all terms are zero. If there are exactly two repeated elements, then they appear
+Observe now that if there are more than two repeated elements, that the result holds trivially as all terms are zero. If there are exactly two repeated elements, then they appear
 in the sum with opposing signs.
 \end{proof}
 
 If $X$ is a simplicial complex and $A$ is any subcomplex, we define the \emph{relative homology} of $X$ by $A$ as $H_d(X,A) = H(C_d(X)/C_d(A))$. We will write $C_d(X,A)$ to refer to $C_d(X)/C_d(A)$.  Some authors provide an alternative definition of $C_d(X,A)$ which is isomorphic to the definition stated here.
 
 \subsection{Computing Homology}
-Over field coefficients, homology is a vector space characterized by its dimension, so we may compute homology using \emph{Gaussian elimination}. However, when the coefficient ring is taken to be a \emph{principal ideal domain}, we may use a similar technique, known as the \emph{Smith normal form}~\cite{uhlig}. Smith Normal Form is a matrix reduction technique similar to Gaussian Elimination~\cite{uhlig}. This algorithm was written down in western mathematical literature by Smith~\cite{smith}, and then republished four decades later by Poincare~\cite{poincare-smith}. Of course, as previously mentioned this is a variant of Gaussian Elimination, which was known to the Chinese mathematical community in $\approx$ 100AD~\cite{chinese-ge}.
+Over field coefficients, homology is a vector space characterized by its dimension, so we may compute homology using \emph{Gaussian elimination}. However, when the coefficient ring is taken to be a \emph{principal ideal domain}, we may use a similar technique, known as the \emph{Smith normal form}~\cite{uhlig}. Reduction of a matrix to Smith normal form is a technique similar to Gaussian elimination~\cite{uhlig}. This algorithm was written down in western mathematical literature by Smith~\cite{smith}, and then republished four decades later by Poincare~\cite{poincare-smith}. Of course, as previously mentioned this is a variant of Gaussian Elimination, which was known to the Chinese mathematical community in $\approx$ 100AD~\cite{chinese-ge}.
 
-The Smith Normal Form of an $m \times n$ matrix $M$ over a principal ideal domain $R$, is a factorization $M = SDU$, where $S$ and $U$ are invertible $m \times m$ and $n \times n$ matrices respectively, and $D$ is a diagonal matrix, of the same shape as $M$. Note that neither $S$ nor $U$ is unique. The nonzero diagonal entries of $D$ are entries in $R$. In the case that $M = \partial_k$ the $k^{th}$  boundary operator, we have that $d_i \mid d_{i+1}$. If $d_1, \ldots, d_r = 1$, then $\betti_k = \dim(H_k(X)) = r$. The remaining nonzero elements of $D$ are referred to as \emph{torsion}. If $R$ is a field then there are no torsion elements. 
+The Smith Normal Form of an $m \times n$ matrix $M$ over a principal ideal domain $R$, is a factorization $M = SDU$, where $S$ and $U$ are invertible $m \times m$ and $n \times n$ matrices respectively, and $D$ is a diagonal matrix, of the same shape as $M$. Note that neither $S$ nor $U$ is unique. The nonzero diagonal entries of $D$ are entries in $R$. In the case that $M$ represents $\partial_k$ the $k^{th}$  boundary operator, we have that $d_i$ divides $d_{i+1}$. If $d_1, \ldots, d_r = 1$, then $\betti_k = \dim(H_k(X)) = r$. The remaining nonzero elements of $D$ are referred to as \emph{torsion}. If $R$ is a field then there are no torsion elements. 
 \begin{figure}
 \begin{codebox}
 \Procname{\proc{SMITH}($\partial$):}

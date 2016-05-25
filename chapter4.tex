@@ -57,7 +57,7 @@ Our work is based on the following key property; the blowup complex $\K^\C$ has 
 dimension.
 \begin{theorem}
 If $\K$ is a simplicial complex and $\C$ is any cover by subcomplexes then
-$H_d(\K^\C) \cong H_d(\K)$ for any $d \geq 0$.
+\[ H_d(\K^\C) \cong H_d(\K)\] for any $d \geq 0$.
 \end{theorem}
 \begin{proof}
 The original proof is due to Segal~\cite{segal}, where covers are prescribed by open sets. However, in our setting covers are closed sets. To resolve this technicality we invoke this theorem on an open cover $\C'$ of the space $\K'$, the barycentric subdivision of $\K$. The cover $\C' = \{\C'_i\}$ where \[ \C'_i = \bigcup_{v \in \C_i, \textrm{a vertex}} \operatorname{St(v)}. \] Observe that $\K$ is homotopy equivalent to $\K'$ and that $\C_J$, is a deformation retract of $\C'_J$ for any subset $J \subseteq [\card{C}]$.
@@ -141,7 +141,7 @@ Observe that if we construct a filtration of the blowup complex by increasing ne
 \li \Do $\K^{\C} \gets \K^{\C} \cup (\sigma \times \tau)$ 
 \end{codebox}
 \end{figure}
-\footnotetext{When the list of cells given as input to \proc{Pair-Cells} is not a sub complex computation should be interpreted as relative homology computation by ignoring
+\footnotetext{When the list of cells given as input to \proc{Pair-Cells} is not a subcomplex computation should be interpreted as relative homology computation by ignoring
 elements of the boundary which are not given in the input.}
 The algorithm in Figure~(\ref{fig:multicore-code}) shows how to build the blowup complex and compute its homology in parallel. 
 The procedure $\proc{Build-Blowup-Complex}$ runs in parallel and has parallel running time $O(2m/p + p)$ where $m = \card{\K^{\C}}$ and $p$ is the number of processors available. In practice $\proc{Build-Blowup-Complex}$ not only produces a blowup complex but also its skeletal filtration.
@@ -331,7 +331,7 @@ $p$ cover sets are disjoint since they are formed from disjoint sets of vertices
 It follows by Lemma~\ref{lem:char-blowup-sol} that $\factor < 3$.
 \end{proof}
 
-Since we are interested only in the homology of $\K$ and not it's persistent homology we may avoid the construction of the blowup complex and use the open cover generated to place a filtration on $\K$. In particular, consider the filtration on $\K$ obtained by ordering $\tilde{\C}_i < \tilde{\C}_p$ for $i \in [p-1]$. It is clear that before including $\tilde{\C}_p$ the complex is again disconnected and thus these columns of the matrix may be reduced in parallel. Finally, we reduce this last set of columns against the columns from the first $p$ cover sets. We call this procedure $\proc{Heuristic-MH}$.
+Since we are interested only in the homology of $\K$ and not its persistent homology we may avoid the construction of the blowup complex and use the open cover generated to place a filtration on $\K$. In particular, consider the filtration on $\K$ obtained by ordering $\tilde{\C}_i < \tilde{\C}_p$ for $i \in [p-1]$. It is clear that before including $\tilde{\C}_p$ the complex is again disconnected and thus these columns of the matrix may be reduced in parallel. Finally, we reduce this last set of columns against the columns from the first $p$ cover sets. We call this procedure $\proc{Heuristic-MH}$.
  
 In the next section we compare these two parallel algorithms against the standard serial algorithm as well as the algorithm $\proc{Chunk}$ of Bauer et. al\@ on a series of examples. The $\proc{Chunk}$ algorithm is based on the spectral sequence of a filtration~\cite{bkr-cccph-13}.
 \section{Experiments}
@@ -366,12 +366,12 @@ Time is always reported in seconds, and all reported measurements are averaged o
 We remind the reader that while we may spawn $p$ threads we only ever have at most $p-1$ of the total $p$ cores 
 in order to leave room for system processes. In this work we use at most one thread per available 
 core. When running PHAT we used the latest stable version 1.4 and the ``vector vector" option as 
-this is the same basic data structure we use in our library. All software has compiled with gcc and optimizations
+this is the same basic data structure we use in our library. All software was compiled with gcc and optimizations
 enabled.
 
 \subsection{Data}
 \input{table} 
-We summarize each data set in Table~\ref{tab:data}.  All complexes are skeleta of a Vietoris-Rips Complex~\cite{z-fcv-10}.  
+We summarize each data set in Table~\ref{tab:data}.  All complexes are skeletons of a Vietoris-Rips Complex~\cite{z-fcv-10}.  
 Next, we describe the input space for each experiment. 
 Recall that {\blobs} is a collection of 22,720 copies of a fully connected 10 dimensional complex on 11 vertices, organized
 into 10 groups of 2,272, with each 

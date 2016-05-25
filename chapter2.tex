@@ -1,5 +1,5 @@
 \chapter{Filtrations \& Persistent Homology}
-In this chapter we will define persistent homology, and provide some algorithms for computing them. Suppose we have a one-parameter family of  $X = \{ X_\alpha \}$ of topological spaces. For example, consider the one-parameter family of Cech complexes computed from the model spaces in Figure~\ref{model-spaces}. Observe that there is some minimal scale $\alpha$ at which the major cycle of the annulus appears. Further, at some later scale $\beta$, this cycle becomes the boundary of a higher dimensional $2$-chain. In other words, if we refer to the cycle as $c$, then $[c] \in \Im(\partial_2(X_\beta))$. This type of data is what is referred to as persistent homology. To make this more formal, recall that the one-parameter family of $X$ gives rise to a one-parameter family of homology vector spaces in dimension $d$, connected by induced linear maps. We may associate to this one-parameter family a graded $k[t]$-module \[ H(X) := \bigoplus_\alpha t^i H(X_\alpha) \] called the \emph{persistent homology module}. The action of the indeterminate $t$ on an element in $H(X_\alpha)$ is defined by applying the induced linear map $f_\alpha$. It is possible to characterize the lifetime of all the elements in the persistent homology module. That is, module elements are born (appear) at particular grades, and may exist as a nontrivial element until a later grade, when it becomes the boundary of some higher dimensional surface. It turns out that when persistent homology is computed over field coefficients one can systematically organize the elements of the persistent homology module by this lifetime information. 
+In this chapter we will define persistent homology, and provide some algorithms for computing it. Suppose we have a one-parameter family $X = \{ X_\alpha \}$ of topological spaces. For example, consider the one-parameter family of Cech complexes computed from the model spaces in Figure~\ref{model-spaces}. Observe that there is some minimal scale $\alpha$ at which the major cycle of the annulus appears. Further, at some later scale $\beta$, this cycle becomes the boundary of a higher dimensional $2$-chain. In other words, if we refer to the cycle as $c$, then $[c] \in \Im(\partial_2(X_\beta))$. This type of data is what is referred to as persistent homology. To make this more formal, recall that the one-parameter family of $X$ gives rise to a one-parameter family of homology vector spaces in dimension $d$, connected by induced linear maps. We may associate to this one-parameter family a graded $k[t]$-module \[ H(X) := \bigoplus_\alpha t^i H(X_\alpha) \] called the \emph{persistent homology module}. The action of the indeterminate $t$ on an element in $H(X_\alpha)$ is defined by applying the induced linear map $f_\alpha$. It is possible to characterize the lifetime of all the elements in the persistent homology module. That is, module elements are born (appear) at particular grades, and each may exist as a nontrivial element until a later grade, when it becomes the boundary of some higher dimensional surface. It turns out that when persistent homology is computed over field coefficients one can systematically organize the elements of the persistent homology module by this lifetime information. 
 \begin{theorem} Let $H(X) = \bigoplus_\alpha t^\alpha H(X_\alpha)$ be a graded $k[t]$-module for some field $k$. Then we have that 
 \[ H(X) \simeq \left( \bigoplus_{\alpha_i}t^{\alpha_i}R[t] \right) \bigoplus \left( \bigoplus_{[\alpha_i, \beta_i]} t^{\alpha_i}R[t]/t^{\beta_i}  \right)  \]
 The collection of intervals $[\alpha_i,\beta_i]$ together with the intervals $[\alpha_i, \infty)$ are a complete and discrete invariant 
@@ -12,7 +12,7 @@ The collection of intervals is referred to as a barcode. In the next section we 
 
 \section{The Spectral Sequence of a Filtration}
 \label{sec:ss-filt}
-The \emph{spectral sequence of a filtration} generalizes the long exact sequence of a pair, to the case of a filtration.
+The \emph{spectral sequence of a filtration} generalizes the long exact sequence of a pair to the case of a filtration.
 
 Let $R$ be a commutative ring and $0 \rightarrow \K_0 \rightarrow \K_1 \rightarrow  \ldots \rightarrow  \K_n$ 
 be a filtration of chain complexes so that \[ \K_i = C_*(X_i, R) = \bigoplus_d C_d(X_i, R)\] is a free $R$-module.
@@ -20,24 +20,36 @@ be a filtration of chain complexes so that \[ \K_i = C_*(X_i, R) = \bigoplus_d C
 
 \noindent We begin with the original filtration of $\K$,
 \[
+\begin{tikzpicture}[baseline= (a).base]
+\node[scale=.9] (a) at (0,0){
 \begin{tikzcd} [column sep=small]
 0 \arrow{r}{i} & \K_0 \arrow{r}{i} & \K_1 \arrow{r}{i}   & \K_2 \arrow{r}{i} & \ldots \arrow{r}{i} & \K_{n-1} \arrow{r}{i} & \K_n
 \end{tikzcd}
+};
+\end{tikzpicture}
 \]
 We refer to the homology of this sequence as the $E_0$ page of the spectral sequence. Next, we demonstrate how to construct the $E_1$ page.
 
 \noindent With each map $K_i \rightarrow K_{i+1}$ we get a short exact sequence by attaching the cokernel:
 \[
+\begin{tikzpicture}[baseline= (a).base]
+\node[scale=.9] (a) at (0,0){
 \begin{tikzcd} [column sep=small]
 0 \arrow{r}{i} & \K_0 \arrow{r}{i}\arrow{d}{j} & \K_1 \arrow{r}{i}\arrow{d}{j}   & \K_2 \arrow{r}{i}\arrow{d}{j} & \ldots \arrow{r}{i} & \K_{n-1} \arrow{r}{i} \arrow{d}{j} & \K_n\arrow{d}{j} \\ 		&     \K_0/{0} &			 \K_1/{\K_0} & 	 \K_2/{\K_{1}}		   & \ldots  			   & \K_{n-1}/{\K_{n-2}}		 & \K_n/{\K_{n-1}} 
 \end{tikzcd}
+};
+\end{tikzpicture}
 \]
 This diagram passes to homology, where each short exact sequence extends to a long exact sequence. In the diagrams below we denote the [relative] homology as the $k$-vector space which is the direct sum of homology vector spaces in each dimension. Please keep in mind that the diagram below is not commutative. However, each triangle is exact and $\delta$ involves a dimension shift. Finally, we drop most indices on maps for visual clarity.
 \[
+\begin{tikzpicture}[baseline= (a).base]
+\node[scale=.9] (a) at (0,0){
 \begin{tikzcd}[column sep=small]
 0 \arrow{r}{i} & H(\K_0 \arrow{r}{i}\arrow{d}{j}) & H(\K_1 \arrow{r}{i}\arrow{d}{j})   & H(\K_2 \arrow{r}{i}\arrow{d}{j}) & \ldots \arrow{r}{i} & H(\K_{n-1}) \arrow{r}{i} \arrow{d}{j} & H(\K_n\arrow{d}{j}) \\ 		
 &     H(\K_0) &			\arrow{l}{d_{1}} \arrow{ul}{\delta}  H(\K_1, {\K_0}) & 	\arrow{l}{d_{1}} \arrow{ul}{\delta} H(\K_2, {\K_{1}})		   & \arrow{l}{d_{1}} \arrow{ul}{\delta} \hspace{.5cm} \ldots  			   &\arrow{l}{d_{1}}\arrow{ul}{\delta}H(\K_{n-1}, {\K_{n-2}})		 & \arrow{l}{d_{1}} \arrow{ul}{\delta} H(\K_n, {\K_{n-1}})
 \end{tikzcd}
+};
+\end{tikzpicture}
 \]
 The terms of the $E_1$ page are defined as follows: $E_{1,i} = H(K_i, K_{i-1})$, and the first differential $d_{1,i}: E_{1,i} \rightarrow E_{1,{i-1}}$ by $d_1 = j \circ \delta$. Now it remains to show that $(E_1, d_1)$ is a chain complex.
 \begin{lemma} $d_1 \circ d_1 = 0$ \end{lemma} 
@@ -83,7 +95,7 @@ Recall that page $r$ has maps of length $r$. After computing homology we now the
 \end{tikzcd} \]
 What we can see is that the $E_\infty$ page of the spectral sequence represents $H(D^1)$. 
 \end{example}
-There is a $k[t]$-module structure on $E_\infty$. In particular, $E_\infty = \bigoplus_j t^j E_{\infty,j}$. However, we originally wanted to show that this construction produced the invariant decomposition of the persistent homology module. It turns out that we have already done that. Along the way to the $E_\infty$ page we actually computed the persistence homology of the filtration itself. Specifically we build an associated graded module called the $\emph{spectral persistent homology module}$ $H(K) = E_\infty \oplus \bigoplus_p H_p(K)$ where $H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p} \bigoplus E_\infty$.
+There is a $k[t]$-module structure on $E_\infty$. In particular, $E_\infty = \bigoplus_j t^j E_{\infty,j}$. However, we originally wanted to show that this construction produced the invariant decomposition of the persistent homology module. It turns out that we have already done that. Along the way to the $E_\infty$ page we actually computed the persistence homology of the filtration itself. Specifically we build an associated graded module called the \emph{spectral persistent homology module} \[ H(K) = E_\infty \oplus \bigoplus_p H_p(K) \] where \[ H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p} \bigoplus E_\infty\]
 \begin{theorem}
 For any field $F$, the persistent homology module $H(K,F)$ is isomorphic to the spectral persistent homology module $H(K)$.
 \end{theorem}
@@ -92,7 +104,7 @@ We know that since $F$ is a field $H(K,F)$ can be decomposed. It remains to show
 \end{proof}
 \section{The Spectral Sequence Algorithm}
 \label{sec:persistence-algorithm}
-Recall from Chapter 1 that computing ordinary homology with field coefficients is equivalent to Gaussian Elimination, and that that we may reduce the matrices in each dimension independently. The spectral sequence of a filtration suggests an iterative, parallel approach to computing persistent homology in which at iteration $r$ the barcode of length at most $r$ is resolved. The  psuedo code in Figure~\ref{alg:ss-alg} summarizes this construction.
+Recall from Chapter 1 that computing ordinary homology with field coefficients is equivalent to Gaussian Elimination, and that we may reduce the matrices in each dimension independently. The spectral sequence of a filtration suggests an iterative, parallel approach to computing persistent homology in which at iteration $r$ the barcode of length at most $r$ is resolved. The  psuedo code in Figure~\ref{alg:ss-alg} summarizes this construction.
 \begin{figure}
 \begin{codebox}
 \Procname{\proc{Spectral-Sequence}($K_1, \ldots K_m)$}
@@ -108,6 +120,6 @@ Recall from Chapter 1 that computing ordinary homology with field coefficients i
 \label{alg:ss-alg}
 \end{figure}
 This algorithm essentially breaks the boundary matrix into blocks, and reduces each block in order, but groups of blocks may now be processed out of the normal order. This is important
-because it allows the two optimizations mentioned in Chapter 1, clearing and compressing, to be utilized at the same time. The trouble with this procedure as stated is that at each page, the work to reduce the differentials of the later terms increases, while the work for the lower terms vanishes. In practice this is handled by redistributing the data in a chunk across the cluster.  This approach was discussed as a homework problem by Edelsbrunner and Harer~\cite{edelsbrunner2010computational}. recently implemented by Bauer et al.~\cite{bkr-cccph-13}. If there are $m$ cells in the complex, divided into $n$ chunks of size at most $l$, and $g$ is the $\dim(\ker(d_1))$, then the authors provide an algorithm with  $O(nl^3 + glm + g^3)$ worst case time complexity. 
+because it allows the two optimizations mentioned in Chapter 1, clearing and compressing, to be utilized at the same time. The trouble with this procedure as stated is that at each page, the work to reduce the differentials of the later terms increases, while the work for the lower terms vanishes. In practice this is handled by redistributing the data in a chunk across the cluster.  This approach was discussed as a homework problem by Edelsbrunner and Harer~\cite{edelsbrunner2010computational}, and has been recently implemented by Bauer et al.~\cite{bkr-cccph-13}. If there are $m$ cells in the complex, divided into $n$ chunks of size at most $l$, and $g$ is the $\dim(\ker(d_1))$, then the authors provide an algorithm with  $O(nl^3 + glm + g^3)$ worst case time complexity. 
 
 This is not the only method for computing persistent homology in parallel. Many times extra information, in the form of a cover on a space, is available while computing persistence. It is natural to try and glue the local connectivity data of a cover together to provide the persistent homology of the entire filtration. Classically, the \mv sequence is used for this purpose. In the next chapter, we explore algorithms which utilize this principal and compare them to algorithms using the spectral sequence of a filtration.  

@@ -1,4 +1,4 @@
-\chapter{Mayer Vietoris \& Persistent Homology}
+\chapter{Mayer-Vietoris \& Persistent Homology}
 In the chapter we demonstrated how to compute homology using the \mvb{} or equivalently the \mv spectral sequence. In this chapter we expand on this, to show how we can adapt these procedures to computing persistent homology. To do this, we will first observe that there exists a filtration on the blowup complex which produces identical persistent homology to a filtration on the base space. Then we will show how we can use the structure of the blowup complex to extract some parallelism, while still computing the correct result. In order to acheive this, we need to characterize when two filtrations will produce the same persistent homology. 
 \begin{theorem}{Persistence Equivalence Theorem}
     Given two filtrations $L_0 \subseteq \ldots \subseteq L_n$ and
@@ -39,7 +39,8 @@ $\Procname{\proc{Sparsify}(R)}$
 \li    \For{rows $\row{P}{i}$ of $P$ from bottom up} 
 \li \Do \If{$P[i,j]$ is not zero}
 \li            \For{non-zero entries $P[i', j]$ in $\col{P}{j}$, with $i' \neq i$}
-\li		  $\row{P}{i'} = \row{P}{i'} - \row{P}{i}$  \Comment{zero out the entry $P[i',j]$}
+\li \Comment{zero out the entry $P[i',j]$}
+\li		  $\row{P}{i'} = \row{P}{i'} - \row{P}{i}$  
 \li		  $\col{S}{i} = \col{S}{i} + \col{S}{i'}$
             \End
         \End
@@ -62,7 +63,8 @@ $\Procname{\proc{Cascade}(T)}$
  \li \Do  subtract $\col{T}{j}$ from $\col{T}{j'}$
 \End
 \li \For{$i' < i$ with $T[i,j] \neq 0$}
-\li \Do  subtract $\row{T}{i}$ from $\row{T}{i'}$     \Comment{zero out all but the lowest entry of column $\col{T}{j}$}
+\li  \Comment{zero out all but the lowest entry of column $\col{T}{j}$}
+\li \Do  subtract $\row{T}{i}$ from $\row{T}{i'}$    
         \End
     \End
 \end{codebox}
@@ -239,7 +241,7 @@ final stages of the merge reduction. Although the $(n+m)$ term in the space anal
 term does follow the growth of $n$, the size of the domain, in many practical
 examples. So our technique does not solve the memory limitations of the
 persistence algorithm for large data sets covered by many relatively small cover sets. This is
-intuitive, as the Mayer Vietoris principle is most effective when we can cover a space by large open sets, which do not
+intuitive, as the Mayer-Vietoris principle is most effective when we can cover a space by large open sets, which do not
 have relatively deep intersections. 
 
 Despite the limitations of these new reduction techniques, we believe our theoretical
