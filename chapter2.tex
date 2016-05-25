@@ -81,9 +81,9 @@ Recall that page $r$ has maps of length $r$. After computing homology we now the
 1 \\
 \end{pmatrix} & 0 & 0 & \ldots & 0 & 0
 \end{tikzcd} \]
-On this page the 
+What we can see is that the $E_\infty$ page of the spectral sequence represents $H(D^1)$. 
 \end{example}
-What we can see is that the $E_\infty$ page of the spectral sequence represents $H(D^1)$. There is also an obvious $k[t]$-module structure on $E_\infty$. In particular. $E_\infty = \bigoplus_j t^j E_{\infty,j}$. However, we originally wanted to show that this construction produced the invariant decomposition of the persistent homology module. It turns out that we have already done that. Along the way to the $E_\infty$ page we actually computed the persistence homology of the filtration itself. Specifically we build an associated graded module called the $\emph{spectral persistent homology module}$ $H(K) = E_\infty \oplus \bigoplus_p H_p(K)$ where $H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p} \bigoplus E_\infty$.
+There is a $k[t]$-module structure on $E_\infty$. In particular, $E_\infty = \bigoplus_j t^j E_{\infty,j}$. However, we originally wanted to show that this construction produced the invariant decomposition of the persistent homology module. It turns out that we have already done that. Along the way to the $E_\infty$ page we actually computed the persistence homology of the filtration itself. Specifically we build an associated graded module called the $\emph{spectral persistent homology module}$ $H(K) = E_\infty \oplus \bigoplus_p H_p(K)$ where $H_p(K) = \bigoplus_r t^r \Im(d_{p,r}) / t^{r+p} \bigoplus E_\infty$.
 \begin{theorem}
 For any field $F$, the persistent homology module $H(K,F)$ is isomorphic to the spectral persistent homology module $H(K)$.
 \end{theorem}

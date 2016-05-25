@@ -358,7 +358,7 @@ smaller print.
 \figurespagetrue \tablespagetrue
 
 
-\def\@standardsub{submitted to the department of \uppercase\expandafter{\@dept}\\
+\def\@standardsub{submitted to the \uppercase\expandafter{\@dept}\\
                 and the committee on graduate studies}
 \def\@standardend{}
 
@@ -492,6 +492,8 @@ of Doctor of Philosophy.
 \def\thepage{}
 \thispagestyle{myheadings}
 \markboth{\rm \@author}{\rm \@author}\fi
+\hfill\@author
+\begin{singlespace}
 \signature{(\@principaladviser)\quad Principal \advis@r}
   \vfill
 % if second principal advisor
@@ -513,6 +515,7 @@ of Doctor of Philosophy.
         \signature{(\@fourthreader)}
         \vfill\fi
 \ucgssignature
+\end{singlespace}
 }
 
 \def\onlinesignature{
