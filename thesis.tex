@@ -14,6 +14,7 @@
 % Copy this file and call it something like mythesis.tex
 
 \documentclass[12pt,twsoside]{report}
+\usepackage{suthesis-2e}
 \input{commands}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -37,7 +38,7 @@
 % including \setstretch{1.213}, which seems to be as close
 % to single spacing as they allow so far (2007).
 
-\usepackage{suthesis-2e}
+
 \usepackage{amsmath, amsfonts, amsthm,
   verbatim, fancyhdr, graphicx, array,
   color, listings, afterpage, epsfig, boxedminipage}
@@ -57,12 +58,12 @@
 
    \title{Spectral Sequences and Applied Topology}
    \author{Ryan H. Lewis}
-   \programthesis
-   \dept{Institute for Computational and Mathematics and Engineering}
+   %\programthesis
+   \dept{Institute for Computational and Mathematical and Engineering}
    \principaladviser{Gunnar Carlsson}
    \firstreader{Leonidas Guibas}
    \secondreader{Dmitry Morozov}
-   \thirdreader{Andras Vasy}
+   %\thirdreader{Andras Vasy}
 
 % The following command would (if uncommented) allow only
 % chapter1 and chapter2 to be processed
@@ -80,7 +81,7 @@
 
 \begin{document}
 
-\maketitle
+\beforepreface
 % First the preface sections.
 
 % This includes the file preface.tex which should include the
@@ -88,9 +89,8 @@
 % \beforepreface
  \prefacesection{Abstract}
 % body of the preface
-%\include{abstract}
-
 Shape matters for data analysis. In this thesis we investigate the utility of spectral sequences for persistent homology, a tool which characterizes the shape of data. We show how to use these spectral sequences to compute persistent homology in parallel. We present two algorithms, one for computing the homology of a simplicial space in parallel using the \mv spectral sequence, and another which uses \mv to compute persistent homology. We implement our algorithms and present preliminary experimental results.
+
 
 % The last preface section (e.g., acknowledgement.tex)
 % should look like
@@ -108,14 +108,14 @@ I am indebted to my soon to be wife, Elena, as well as my family for there patie
 
 % This includes chapter1.tex which should start with a \chapter{...}
 % command
-
-\include{chapter1} %background 
-\include{chapter2} %persistence \& s.s. of a filtration
-\include{chapter3} %the mayer vietoris spectral sequence
-\include{chapter4} %ordinary homology & mayer vietoris
-\include{chapter5} %persistent homology & mayer vietoris
-\include{chapter6} %conclusion
-
+%
+%\include{chapter1} %background 
+%\include{chapter2} %persistence \& s.s. of a filtration
+%\include{chapter3} %the mayer vietoris spectral sequence
+%\include{chapter4} %ordinary homology & mayer vietoris
+%\include{chapter5} %persistent homology & mayer vietoris
+%\include{chapter6} %conclusion
+%
 % and the end material
 
 % bibliography.tex should include either
