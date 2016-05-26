@@ -1,11 +1,14 @@
 \section{Blowup Complex}
 \input{vignette}
+In the previous section we introduced the \mv spectral sequence as a tool for computing homology.
+While it is straightforward to write down an algorithm for this spectral sequence, it can be at first, a bit challenging to keep track of all the relevant data. In this section we introduce the \mvb, an associated topological space, whose $d$ cells generate $\bigoplus_{i+j = d} E^0_{i,j}$. Studying this gadget is equivalent to studying the spectral sequence, and, we argue, is more intuitive.
+
 Like homology, the blowup complex may be defined for arbitrary topological 
-spaces~\cite{zc-lh-08}, but in this paper we focus on blowups of simplicial 
+spaces~\cite{zc-lh-08}. However, we focus on blowups of simplicial 
 complexes. For a longer exposition of the \mvb{} we refer the reader to Zomorodian
 \& Carlsson~\cite{zc-lh-08}. Given a simplicial complex $K$ and cover 
 $\C = \{\C_i\}_i$ of $n$ subcomplexes, let 
-$\K^J = \bigcap_{k \in J} \C_j$. The \emph{Mayer-Vietoris blowup complex} is:
+$\K^J = \bigcap_{k \in J} \C_k$. The \emph{Mayer-Vietoris blowup complex} is:
 \begin{linenomath*}
 \begin{align*}
 \K^\C &= \bigcup_{\emptyset \not = J \subseteq [n-1]} \K^J \times \Delta^J,
@@ -41,36 +44,35 @@ Luckily this approach is also not necessary. To compute the homology of the blow
 above in another way.  At the space level, we may view each cell of the blowup complex as a product 
 of two simplices $\sigma \times \tau$, where $\sigma \in \K$ and $\tau \in \N(\C) \subseteq \Delta^{[n]}$.  
 For example, the product of two edges, $bc \times 01$, gives us a quadrilateral cell in Example~\ref{ex:blowup}.  
-That is the definition specified is an example of a cellular complex. 
+That is the blowup complex is an example of a cellular complex. 
 \begin{lemma}
 $\K^\C$ is a CW-Complex
 \end{lemma}
 \begin{proof}
-Recall from Lemma~\ref{lem:simp-is-cw} that any simplicial complex is a CW-complex. Any so by Lemma~\ref{lem:cw-complex-product} $\K^\C$ is a subset of the CW complex: $\K \times \Delta^\card{\C}$. We need to only verify that it is closed. This follows since if $\sigma \times \tau \in \K^\C$ then $\sigma \in \cap_{v \in \tau} \C_{v}$ So therefore $\sigma \in \cap_{v \in \rho} \C_v$ for any $\rho \subset \tau$. Similarly since each cover set is closed if $\alpha$ is a face of $\sigma$ then $\alpha \times \tau \in \K^\C$.  Therefore $\sigma \times \rho \in \K^\C$. So therefore $\K^\C$ is a CW-Complex.
+Recall from Lemma~\ref{lem:simp-is-cw} that any simplicial complex is a CW-complex. By Lemma~\ref{lem:cw-complex-product}, $\K^\C$ is a subset of the CW-complex: $\K \times \Delta^{\card{\C}}$. We need to only verify that it is closed. If $\sigma \times \tau \in \K^\C$. Then $\sigma \in \cap_{v \in \tau} \C_{v}$ So therefore $\sigma \in \cap_{v \in \rho} \C_v$ for any $\rho \subset \tau$, so all faces $\sigma \times \rho$ for $\rho$ a face of $\tau$ are contained in $\K^\C$. Since each cover set is closed if $\alpha$ is a face of $\sigma$ then $\alpha \times \tau \in \K^\C$. So therefore $\K^\C$ is a CW-Complex.
 \end{proof}
 
 % key property
-Our work is based on the following key property.
-The blowup complex $\K^\C$ has the same homology as its base complex $\K$ in any 
-dimension: 
+Our work is based on the following key property; the blowup complex $\K^\C$ has the same homology as its base complex $\K$ in any 
+dimension.
 \begin{theorem}
-If $\K$ is a simplicial complex and $\C$ is any cover by subcomplexes then:
-$H_d(\K^\C) \cong H_d(\K)$ for any $d \geq 0$.
+If $\K$ is a simplicial complex and $\C$ is any cover by subcomplexes then
+\[ H_d(\K^\C) \cong H_d(\K)\] for any $d \geq 0$.
 \end{theorem}
 \begin{proof}
-The original proof is due to Segal~\cite{segal}, where covers are prescribed by open sets. However, in our setting our covers are closed sets. To resolve this technicality we invoke this theorem on an open cover $\C'$ of the space $\K'$, the barycentric subdivision of $\K$. The cover $\C' = \{\C'_i\}$ is defined by \[ \C'_i = \bigcup_{v \in \C_i, \textrm{ a vertex}} \operatorname{St(v)}. \] Observe that $\K$ is homotopically equivalent to $\K'$ and that $\C_J$, is a deformation retract of $\C'_J$ for any subset $J \subseteq [\card{C}]$.
+The original proof is due to Segal~\cite{segal}, where covers are prescribed by open sets. However, in our setting covers are closed sets. To resolve this technicality we invoke this theorem on an open cover $\C'$ of the space $\K'$, the barycentric subdivision of $\K$. The cover $\C' = \{\C'_i\}$ where \[ \C'_i = \bigcup_{v \in \C_i, \textrm{a vertex}} \operatorname{St(v)}. \] Observe that $\K$ is homotopy equivalent to $\K'$ and that $\C_J$, is a deformation retract of $\C'_J$ for any subset $J \subseteq [\card{C}]$.
 The latter holds since the operator $\operatorname{St}(\_)$ commutes with intersection, and any set is a deformation retract of its open star. 
 Therefore there is a homotopy equivalence between $\C'_J \times \Delta^J$ and $\C_J \times \Delta^J$ for each $J \subset \Delta^n$. Therefore we have that $\K'^{\C'}$ and $\K$ are homotopy equivalent. It remains to show that $\K^\C$ and $\K'^{\C'}$ produce the same homology in each dimension. 
 
-Define $\K_i = \bigcup_{\sigma \in \Delta^n, \dim{\sigma} \leq i} \C_\sigma \times \sigma$ and similarly for $\K'$. Observe that  we have already shown that $\K_0$ is homotopy equivalent to $\K'_0$ because we have produced a homotopy equivalence on each element of the disjoint union. Now assume that for any fixed $d > 0$ we have shown the result for all $i < d$. We have that the following diagram:
+Define $\K_i = \bigcup_{\sigma \in \Delta^n, \dim{\sigma} \leq i} \C_\sigma \times \sigma$ and similarly for $\K'_i$. Observe that  we have already shown that $\K_0$ is homotopy equivalent to $\K'_0$ because we have produced a homotopy equivalence on each element of the disjoint union. Now assume that for any fixed $d > 0$ we have shown the result for all $i < d$. We have the following diagram,
 \[ \begin{tikzcd}
 \ldots \arrow{r} & H_*(\K'_{d-1}) \arrow{r} & H_*(\K'_d) \arrow{r} & H_*(\K'_d, \K'_{d-1}) \arrow{r} & \ldots \\
 \ldots \arrow{r} & H_*(\K_{d-1}) \arrow{r}\arrow{u} & H_*(\K_d) \arrow{r}\arrow{u} & H_*(\K_d, \K_{d-1})\arrow{u}  \arrow{r} & \ldots
 \end{tikzcd} \]
-Where the rows are exact, but, by induction the leftmost and rightmost vertical maps are isomorphisms, and so the middle map must be both surjective and injective, respectively, and as such an isomorphism.
+where the rows are exact. However, by induction the leftmost and rightmost vertical maps are isomorphisms, and so the middle map must be both surjective and injective, and as such an isomorphism.
 \end{proof}
 Our approach then is to compute the cellular homology of the blowup complex 
-instead of the simplicial homology of base complex. The blowup has a structure that allows 
+instead of the simplicial homology of base complex. The blowup complex has a structure that allows 
 for computation in parallel, unlike the base complex. 
 
 We now examine the chain complex attached to the blowup complex.
@@ -110,7 +112,7 @@ the blowup complex, we now can compute the homology of the blowup complex. In th
 outline how to do this in parallel.
 
 \section{Parallel Homology}
-Observe that if we construct a filtration of the blowup complex by increasing nerve dimension, that we have a special case of the spectral sequence of the filtration from Section~\ref{sec:ss-filt}. 
+Observe that if we construct a filtration of the blowup complex by increasing nerve dimension, we have a special case of the spectral sequence of the filtration from Section~\ref{sec:ss-filt}. 
 
 %%algorithms figure
 \begin{figure}
@@ -126,7 +128,7 @@ Observe that if we construct a filtration of the blowup complex by increasing ne
  \li \Do $\For$ $\Delta^J \in \N(\C)$ a $d$-cell.
  \li  \Do $\proc{Reduce}(\Cl{(\K^{J} \times \Delta^{J})})$ 
 \end{codebox}
-\caption{Psuedocode for computing the blowup complex and its homology in parallel. $\proc{Cover}$ can be any algorithm for generating a cover of $\K$ by $p$ subspaces. The procedure $\proc{Reduce}$ is any algorithm for reducing the columns of the boundary matrix of the input subspace.}
+\caption{Pseudocode for computing the blowup complex and its homology in parallel. $\proc{Cover}$ can be any algorithm for generating a cover of $\K$ by $p$ subspaces. The procedure $\proc{Reduce}$ is any algorithm for reducing the columns of the boundary matrix of the input subspace.}
 \label{fig:multicore-code}
 \end{figure}
 
@@ -139,10 +141,10 @@ Observe that if we construct a filtration of the blowup complex by increasing ne
 \li \Do $\K^{\C} \gets \K^{\C} \cup (\sigma \times \tau)$ 
 \end{codebox}
 \end{figure}
-\footnotetext{When the list of cells given as input to \proc{Pair-Cells} is not a sub complex computation should be interpreted as relative homology computation by ignoring
+\footnotetext{When the list of cells given as input to \proc{Pair-Cells} is not a subcomplex computation should be interpreted as relative homology computation by ignoring
 elements of the boundary which are not given in the input.}
-The Algorithm in Figure~(\ref{fig:multicore-code}) shows how to build the blowup complex and compute its homology in parallel. 
-The procedure $\proc{Build-Blowup-Complex}$ runs in parallel and has parallel running time $O(2m/p + p)$ time where $m = \card{\K^{\C}}$ and $p$ is the number of processors available. In practice $\proc{Build-Blowup-Complex}$ not only produces a blowup complex but also its skeletal filtration.
+The algorithm in Figure~(\ref{fig:multicore-code}) shows how to build the blowup complex and compute its homology in parallel. 
+The procedure $\proc{Build-Blowup-Complex}$ runs in parallel and has parallel running time $O(2m/p + p)$ where $m = \card{\K^{\C}}$ and $p$ is the number of processors available. In practice $\proc{Build-Blowup-Complex}$ not only produces a blowup complex but also its skeletal filtration.
 
 The size of the blowup complex depends on the cover. In the worst case, all of 
 the simplices in a space $\K$ are contained within all $n$ sets of the cover 
@@ -172,7 +174,7 @@ In this section, we formalize the problem of finding covers
 that minimize blowup size. We show that this problem is \NPH{}, and its 
 decision-variant, \NPC{}.
 
-It should be clear that seek a cover which does not yield a large blowup complex. 
+We seek a cover which does not yield a large blowup complex. 
 To quantify blowup, we define the $\emph{blowup factor}$ as the ratio: 
 $\factor.$ We search for a cover $\C$ of size $p$ that minimizes the blowup 
 factor. Since we intend to compute the homology of each cover set in parallel,
@@ -210,8 +212,8 @@ This follows directly from the product cell definition of $\K^\C$.
 \noindent Now we observe an important necessary condition of optimal solutions to \ablp{}.
 \begin{lemma}
 \label{lem:blowup-sol-max-simplices}
-Given a complex $\K$ and $\C = \{\C_1, \C_2\}$ be an optimal solution of  \ablp{}, then 
-$\C$ is a partition of $\M(\K)$ the maximal cells of $\K$.
+Given a complex $\K$, let $\C = \{\C_1, \C_2\}$ be an optimal solution of  \ablp{}. Then 
+$\C$ is a partition of $\M(\K)$, the maximal cells of $\K$.
 \end{lemma}
 \begin{proof}
 If $\sigma \in \C_i \cap \C_j$ is a maximal cell, then consider the cover
@@ -220,24 +222,24 @@ cardinality. $\C'$ is certainly a cover satisfying $\alpha$-balance but
 by Lemma~\ref{lem:char-blowup-sol} the blowup factor has decreased
 which contradicts the optimality of $\C$.
 \end{proof}
-\noindent Suppose the input to \ablp{} is a graph $G$. In this context any cover $\C$ of $G$ is a pair of subgraphs $G_1,G_2$.
-Lemma~\ref{lem:blowup-sol-max-simplices} tells us that in any optimal solution the intersection $I = G_1 \cap G_2$ of these two 
-subgraphs is a set of vertices. The requirement that $\C$ is a cover implies that $I$ is a vertex separator. In other words
-given a vertex separator of a graph $G$ we may view it as a cover of that graph and vice versa. 
-The equivalent problem for vertex separators is for any $\alpha \in (\frac{1}{2},1)$:
+\noindent Suppose the input to \ablp{} is a graph $G$. In this context, any cover $\C$ of $G$ is a pair of subgraphs $G_1,G_2$.
+Lemma~\ref{lem:blowup-sol-max-simplices} tells us that in any optimal solution, the intersection $I = G_1 \cap G_2$ of these two 
+subgraphs is a set of vertices. The requirement that $\C$ is a cover implies that $I$ is a vertex separator. In other words,
+given a vertex separator of a graph $G$, we may view it as a cover of that graph and vice versa. 
+The equivalent problem for vertex separators for any $\alpha \in (\frac{1}{2},1)$  is:
 \begin{description}
 \addtolength{\itemsep}{-.8\baselineskip}
 \item[\textsc{Problem:}]  \avertex{}
 \item[\textsc{Instance:}] A graph $G$
 \item[\textsc{Goal:}] Find a vertex separator $(V_1,V_2,I)$ of $G$ such that: 
-\[ \card{I} \textrm{ is minimized} \textrm{ subject to } \max_i{(\card{V_i} + \card{E_i})} + \card{I} \leq \alpha(\card{V}+\card{E})  \]
+\[ \card{I} \textrm{ is minimized} \textrm{ subject to } \max_i{(\card{V_i} + \card{E_i})} + \card{I} \leq \alpha(\card{V}+\card{E}),  \]
 \end{description}
 where $E_i$ is the set of edges with at least one endpoint in $V_i$. \avertex{} is \NPH{} for any $\alpha \in (\frac{1}{2},1)$ and its decision problem variant is \NPC{}~\cite{rhl-yaggpis-14}.
 \begin{theorem}
 For any $\alpha \in (1/2,1)$ the optimization problem \ablp{} is \NPH{} and its decision problem variant \NPC{}.
 \end{theorem}
 \begin{proof}
-By restricting \ablp{} and \avertex{} are equivalent when the former is restricted to graph instances.
+\ablp{} and \avertex{} are equivalent when the former is restricted to graph instances.
 \end{proof}
 This procedure shows us that finding covers of graphs with bounded overlap also identifies partitions of that graph.
 In the next section we show how given a complex $\K$ and a partition of its 1-skeleton one can produce a cover of the entire complex with bounded overlap.
@@ -261,10 +263,10 @@ In the next section we show how given a complex $\K$ and a partition of its 1-sk
  \li \Return \id{\C}
   \End
 \end{codebox}
-\label{alg:open-cov}
 \caption{The pseudocode for $\proc{Open-Cover}$ which runs in $O(md/p)$ time, where $m$ is the 
 number of simplices in $\K$ a $d$-dimensional complex, and $p$ is the 
 maximum number of available cores.}
+\label{alg:open-cov}
 \end{figure}
 \begin{figure}[h!]
 \begin{description}
@@ -329,7 +331,7 @@ $p$ cover sets are disjoint since they are formed from disjoint sets of vertices
 It follows by Lemma~\ref{lem:char-blowup-sol} that $\factor < 3$.
 \end{proof}
 
-Since we are interested only in the homology of $\K$ and not it's persistent homology we may avoid the construction of the blowup complex and use the open cover generated to place a filtration on $\K$. In particular, consider the filtration on $\K$ obtained by ordering $\tilde{\C}_i < \tilde{\C}_p$ for $i \in [p-1]$. It is clear that before including $\tilde{\C}_p$ the complex is again disconnected and thus these columns of the matrix may be reduced in parallel. Finally, we reduce this last set of columns against the columns from the first $p$ cover sets. We call this procedure $\proc{Heuristic-MH}$.
+Since we are interested only in the homology of $\K$ and not its persistent homology we may avoid the construction of the blowup complex and use the open cover generated to place a filtration on $\K$. In particular, consider the filtration on $\K$ obtained by ordering $\tilde{\C}_i < \tilde{\C}_p$ for $i \in [p-1]$. It is clear that before including $\tilde{\C}_p$ the complex is again disconnected and thus these columns of the matrix may be reduced in parallel. Finally, we reduce this last set of columns against the columns from the first $p$ cover sets. We call this procedure $\proc{Heuristic-MH}$.
  
 In the next section we compare these two parallel algorithms against the standard serial algorithm as well as the algorithm $\proc{Chunk}$ of Bauer et. al\@ on a series of examples. The $\proc{Chunk}$ algorithm is based on the spectral sequence of a filtration~\cite{bkr-cccph-13}.
 \section{Experiments}
@@ -364,16 +366,16 @@ Time is always reported in seconds, and all reported measurements are averaged o
 We remind the reader that while we may spawn $p$ threads we only ever have at most $p-1$ of the total $p$ cores 
 in order to leave room for system processes. In this work we use at most one thread per available 
 core. When running PHAT we used the latest stable version 1.4 and the ``vector vector" option as 
-this is the same basic data structure we use in our library. All software has compiled with gcc and optimizations
+this is the same basic data structure we use in our library. All software was compiled with gcc and optimizations
 enabled.
 
 \subsection{Data}
 \input{table} 
-We summarize each data set in Table~\ref{tab:data}.  All complexes are skeleta of a Vietoris-Rips Complex~\cite{z-fcv-10}.  
+We summarize each data set in Table~\ref{tab:data}.  All complexes are skeletons of a Vietoris-Rips Complex~\cite{z-fcv-10}.  
 Next, we describe the input space for each experiment. 
 Recall that {\blobs} is a collection of 22,720 copies of a fully connected 10 dimensional complex on 11 vertices, organized
 into 10 groups of 2,272, with each 
-copy within a group connected to the next by a single edge, and each group connected to the next by a single edge as shown in Figure~(\ref{fig:blobs-vis}). 
+copy within a group connected to the next by a single edge, and each group connected to the next by a single edge. 
 {\clique} is a fully connected complex on 19 vertices. Recall that $\Delta^{[n]}$ has $\Theta(2^n)$ 
 faces. {\bunny} is a 3-complex built on a set of points sampled from the 
 \emph{Stanford bunny}. We create {\sphere} by using Muller's method~\cite{m-nmgpuns-59} to sample 

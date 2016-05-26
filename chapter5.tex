@@ -1,4 +1,4 @@
-\chapter{Mayer Vietoris \& Persistent Homology}
+\chapter{Mayer-Vietoris \& Persistent Homology}
 In the chapter we demonstrated how to compute homology using the \mvb{} or equivalently the \mv spectral sequence. In this chapter we expand on this, to show how we can adapt these procedures to computing persistent homology. To do this, we will first observe that there exists a filtration on the blowup complex which produces identical persistent homology to a filtration on the base space. Then we will show how we can use the structure of the blowup complex to extract some parallelism, while still computing the correct result. In order to acheive this, we need to characterize when two filtrations will produce the same persistent homology. 
 \begin{theorem}{Persistence Equivalence Theorem}
     Given two filtrations $L_0 \subseteq \ldots \subseteq L_n$ and
@@ -15,9 +15,9 @@ In the chapter we demonstrated how to compute homology using the \mvb{} or equiv
 \begin{proof}
 See Zomorodian and Carlsson~\cite{zc-cph-05}
 \end{proof}
-Now we need to produce a filtration on the blowup complex to use as a row of one of these filtrations. To do this, observe that if $\{K_i\}$ is a filtration on the base space, and $\C =\{ \C_i \}$ is a cover of $K_n$, that by restriction, this provides a cover of all the spaces in the filtration. Now, each of these covers is closed, and there is an associated blowup complex. It is easy to see that these blowup complexes also form a filtration, with the same number of terms as the original space. Recall that the projection map, $\pi: \K_i^\C \to \K_i$, is also a homotopy equivalence, and so the map $\pi^*: H(\K^\C) \to H(K)$, induced on homology modules, is an isomorphism. Also the map $\pi$ clearly commutes with inclusions, by construction, so  the persistence equivalence theorem applies. We now explain this filtration again, using partial orders.
+Now we need to produce a filtration on the blowup complex to use as a row of one of these filtrations. To do this, observe that if $\{K_i\}$ is a filtration on the base space, and $\C =\{ \C_i \}$ is a cover of $K_n$, that by restriction, this provides a cover of all the spaces in the filtration. Now, each of these covers is closed, and there is an associated blowup complex. It is easy to see that these blowup complexes also form a filtration, with the same number of terms as the original space. Recall that the projection map $\pi: \K_i^\C \to \K_i$ is also a homotopy equivalence, and so the map $\pi^*: H(\K^\C) \to H(K)$, induced on homology modules, is an isomorphism. Also the map $\pi$ commutes with inclusions by construction, so  the persistence equivalence theorem applies. We now explain this filtration again, using partial orders.
 
-Recall that we computed the homology of the blowup complex, by computing the persistent homology of a two step filtration, which ordered product cells $\sigma \otimes \tau \leq \sigma'  \otimes \tau'$ where $\sigma,\sigma' \in \K$ and $\tau, \tau' \in N$. It is not hard to see that if one simply reverses this comparison, and first compares the base complex term, breaking ties by the factor in the nerve, that this partial order is equivalent to the filtration defined in the previous statement. However, these two filtrations have a bit more in common. We state the following lemma without proof.
+Recall that we computed the homology of the blowup complex, by computing the persistent homology of a two step filtration. This filtration ordered product cells $\sigma \otimes \tau \leq \sigma'  \otimes \tau'$ first by the right factor and broke ties by the first factor. It is not hard to see that if one simply reverses this comparison, and first compares the base complex term, breaking ties by the factor in the nerve, that this partial order is not equivalent to the filtration defined in the previous statement. However, despite these two filtrations producing different results, they do have a bit in common. 
 \begin{lemma}
 Denote the two filtrations $\leq_N$ and $\leq_K$ respectively
 Fix any $\tau \in N$, if $\alpha, \beta \in K$ such that $\alpha \times \tau, \beta \times \tau \in \K^\C$ then $\alpha \times \tau \leq_K \beta \times \tau$ if and only if $\alpha \times \tau \leq_N \beta \times \tau$
@@ -28,9 +28,9 @@ This implies that the following reduction algorithm would be correct.:
 \item First, reduce all submatrices corresponding to product cells with a fixed nerve factor in parallel. 
 \item Further reduce the matrix in the correct $\leq_K$ filtration order.
 \end{enumerate}
-The goal will be to begin the procedure the same way as we did in the previous chapter, first reduce the columns, corresponding to the boundaries of the cells $_ \times \tau$ for fixed $\tau$ independently, and then merge these results together. In particular, the important observation, is that each of these subsets of columns, are by themselves, respecting the filtration order. Therefore if we naively just reduced the remaining matrix sequentially, this would result in the correct algorithm. However, this would be inefficient.
+The goal will be to begin the procedure the same way as we did in the previous chapter, first reduce the columns, corresponding to the boundaries of the cells $_ \times \tau$ for fixed $\tau$ independently, and then merge these results together. In particular, the important observation is that each of these subsets of columns, are by themselves, respecting the filtration order. Therefore if we naively just reduced the remaining matrix sequentially, this would result in the correct algorithm. However, this would be inefficient.
 
-The trouble here is that as stated, performing only column operations, we have no control over the fill in of the resulting matrix. However, we may now take advantage of the sparsity pattern to reduce the space complexity. Over each submatrix corresponding to a vertex in the nerve, we may perform row operations in a specific order signficantly reduce the fill in. The algorithm $\proc{Sparsify}$ is used on the submatrix whose rows fall in the disjoint union.
+The trouble here is that as stated, performing only column operations, we have no control over the fill in of the resulting matrix. However, we may now take advantage of the sparsity pattern to reduce the space complexity. Over each submatrix corresponding to a vertex in the nerve, we may perform row operations in a specific order to significantly reduce the fill in. The algorithm $\proc{Sparsify}$ is used on the submatrix whose rows fall in the disjoint union.
 
 \begin{figure}
 \begin{codebox}
@@ -39,7 +39,8 @@ $\Procname{\proc{Sparsify}(R)}$
 \li    \For{rows $\row{P}{i}$ of $P$ from bottom up} 
 \li \Do \If{$P[i,j]$ is not zero}
 \li            \For{non-zero entries $P[i', j]$ in $\col{P}{j}$, with $i' \neq i$}
-\li		  $\row{P}{i'} = \row{P}{i'} - \row{P}{i}$  \Comment{zero out the entry $P[i',j]$}
+\li \Comment{zero out the entry $P[i',j]$}
+\li		  $\row{P}{i'} = \row{P}{i'} - \row{P}{i}$  
 \li		  $\col{S}{i} = \col{S}{i} + \col{S}{i'}$
             \End
         \End
@@ -49,7 +50,7 @@ $\Procname{\proc{Sparsify}(R)}$
 \label{alg:sparsify}
 \end{figure}
 
-After applying $\proc{Sparsify}$ we make use of the algorithm $\proc{Cascade}$ to finish the reduction. This is similar to the standard algorithm, in that columns are still added in order, but, when a pivot is found, we perform row operations to sparsify the final column.
+After applying $\proc{Sparsify}$ we make use of the algorithm $\proc{Cascade}$ to finish the reduction. This is similar to the standard algorithm, in that columns are still added in order, but when a pivot is found, we perform row operations to sparsify the final column.
 
 \begin{figure}
 \begin{codebox}
@@ -62,7 +63,8 @@ $\Procname{\proc{Cascade}(T)}$
  \li \Do  subtract $\col{T}{j}$ from $\col{T}{j'}$
 \End
 \li \For{$i' < i$ with $T[i,j] \neq 0$}
-\li \Do  subtract $\row{T}{i}$ from $\row{T}{i'}$     \Comment{zero out all but the lowest entry of column $\col{T}{j}$}
+\li  \Comment{zero out all but the lowest entry of column $\col{T}{j}$}
+\li \Do  subtract $\row{T}{i}$ from $\row{T}{i'}$    
         \End
     \End
 \end{codebox}
@@ -78,7 +80,7 @@ We can now state the following result:
     $m$ dense columns in time $O(n^2 m)$, while keeping its size $O(nm)$.
 \end{theorem}
 \begin{proof}
-    The initial number of nonzero elements in the matrix $T$ is in $O{(n + m) m + n} = O(nm)$.
+    The initial number of nonzero elements in the matrix $T$ is $O{(n + m) m + n} = O(nm)$.
      By using row operations applied to column $j$ the number of dense columns never increases. So the
      space used during the cascade remains $O(nm)$.
 
@@ -129,7 +131,7 @@ The second pair of results would be combined similarly.
 The two combined matrices contain the same information as the reduced boundary
 matrices $R^{12}$ and $R^{34}$ for the cover sets $K^1 \cup K^2$
 and $K^3 \cup K^4$ at level $i$. We could proceed with the algorithm at level
-$i$, with one caveat: the higher rows (the second to last column in the figure)
+$i$, with one caveat, the higher rows (the second to last column in the figure)
 involved in the combination did not get updated during the execution of {\bf
 Sparsify} and {\bf Cascade} algorithms. The fix is straight-forward: when
 processing any given level of the cover, we perform the row operations on the
@@ -187,7 +189,7 @@ speeds up the initial computation, which is already plenty fast.
                     ymin=580,
                     symbolic x coords={8,16,32,64,128,256,512},
                     height=3in,
-                    width=.5\textwidth,
+                    width=.75\textwidth,
                     xlabel={Number of processes},
                     ylabel={Seconds},
                 ]
@@ -239,7 +241,7 @@ final stages of the merge reduction. Although the $(n+m)$ term in the space anal
 term does follow the growth of $n$, the size of the domain, in many practical
 examples. So our technique does not solve the memory limitations of the
 persistence algorithm for large data sets covered by many relatively small cover sets. This is
-intuitive, as the Mayer Vietoris principle is most effective when we can cover a space by large open sets, which do not
+intuitive, as the Mayer-Vietoris principle is most effective when we can cover a space by large open sets, which do not
 have relatively deep intersections. 
 
 Despite the limitations of these new reduction techniques, we believe our theoretical

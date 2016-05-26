@@ -1,4 +1,10 @@
 \chapter{Introduction}
+Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field, persistent homology and mapper, have been used in a wide variety of applications, including image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, and cosmology~\cite{cosmic-web}. Unlike traditional data analysis, in which one concerns themselves with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ using information about $X$ and $Z$~\cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This involves providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{\mv principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via \mv{}, and the second improving the running time of the first and extending it to the persistent setting. We connect these procedures to \emph{spectral sequences}, a manual calculation tool used for computing algebraic structures by hand. To this end we also re-introduce persistent homology within the language of spectral sequences.
+
+The structure of the thesis is as follows. First, we introduce general background material on algebraic topology and persistent homology. Second, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Next, we will show how one can leverage the \emph{\mv spectral sequence} to compute ordinary homology. We then provide a description of a parallel algorithm using the \mvb{} an analogous topological space. We take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on Mayer-Vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
+
+\section{Background}
+
 \begin{figure}
 \centering
 \begin{tikzpicture}[scale=.25]
@@ -14,11 +20,11 @@
  \caption{Point Cloud sampled from annulus}
 \label{fig:point-cloud-annulus}
  \end{figure}
-Over the past twenty years \emph{topological data analysis} has been found to be very useful in understanding scientific data. The primary tools of the field: persistent homology and mapper have been used in a wide variety of applications, including image processing~\cite{cid-lbs-08}, material science~\cite{SW-measuring-shape}, and cosmology~\cite{cosmic-web}. Unlike traditional data analysis, in which one concerns itself with modeling physical phenomena from measurements on finite sets of samples, topological data analysis assumes that the input point cloud $X$ comes from an unknown underlying geometric space $Y$ embedded in yet some known larger ambient space $Z$. Topological data analysis then focuses on the recovery of the lost topology of $Y$ using information about $X$ and $Z$~\cite{c-tnd-09}. In this thesis we aim to make the primary tool for topological data analysis, persistent homology, computable for practitioners. To this end we investigate parallel algorithms for the computation of persistent homology. This implies providing a mechanism for decomposing a topological space, performing persistence computations on subspaces, and then gluing this information back together. For a topologist, this means exploiting the \emph{\mv principle}. The main contributions in this work are two new parallel algorithms, the first for computing homology via \mv, and the second which improves the running time of the algorithm and extends it to the persistent setting. We connect these procedures to \emph{spectral sequences} a manual calculation tool used for computing algebraic structures by hand. To this end we also re-introduce persistent homology within the language of spectral sequences.
 
-The structure of the thesis as as follows. First, we introduce general background material on algebraic topology and persistent homology. Second, to introduce spectral sequences, we will derive persistent homology using the spectral sequence of a filtration. Next, we will show how one can leverage the \emph{\mv spectral sequence}, to compute ordinary homology. We then provide a description of a parallel algorithm using the \mvb{} an analogous topological space. We take a brief digression to discuss the complexity of finding decompositions of a space which yield efficient parallel computation. Finally, we will show how to modify this construction to provide a parallel algorithm for persistence based on mayer-vietoris. Additionally we will show how one can derive upper bounds on the fill-in of these reduced matrices in terms of the quality of the cover. We will present experimental results which explore the efficacy of these techniques.
+Suppose someone asked you describe the shape of the point cloud shown in Figure~\ref{fig:point-cloud-annulus}. One might be inclined to propose that the point cloud looks quite disconnected. Indeed, the topology of a set of points in $\R^n$ is not all that interesting. Perhaps, however, if you were to squint your eyes, you might be inclined to describe the shape as something like an annulus. Persistence is a tool for modeling this phenomenon. As an example, for any \emph{metric space} $(X,d)$ and  $\epsilon > 0$ we can define a space: \[ M_\epsilon = \bigcup_{x \in X} B_{\epsilon}(x) \] where $B_{\epsilon}(x) = \{ y \mid d(x,y) < \epsilon\} $ is the \emph{ball of radius $\epsilon$ centered around x}. Notice that by varying the scale parameter $\epsilon$ one finds that the model space $M_\epsilon$ has different topologies. $M_\epsilon$ at various scales is shown in Figure~\ref{model-spaces}. The collection $\{M_\epsilon\}_\epsilon$ of spaces together with the inclusion maps between $M_\epsilon$ and $M_{\epsilon'}$ for any $\epsilon < \epsilon'$ is called a \emph{one parameter family} of spaces.   
+ 
+Persistent topology concerns itself with capturing topological features that can be found at multiple scales of a parameterized family of spaces.
 
-\section{Background}
 
  \begin{figure}
 \centering
@@ -59,20 +65,18 @@ The structure of the thesis as as follows. First, we introduce general backgroun
 \caption{Model spaces at various scales}
 \label{model-spaces}
 \end{figure}
-
-Suppose someone asked you describe the shape of the point cloud show in Figure~\ref{fig:point-cloud-annulus}. One might be inclined to propose that the point cloud looks quite disconnected. Indeed, the topology of a set of points in $\R^n$ is not all that interesting. Perhaps, however, if you were to squint your eyes, you might be inclined to describe the shape as something like an annulus. Persistence is a tool for modeling this phenomenon. As an example, for any \emph{metric space} $(X,d)$ and  $\epsilon > 0$ we can define a space: \[ M_\epsilon = \bigcup_{x \in X} B_{\epsilon}(x) \] where $B_{\epsilon}(x) = \{ y \mid d(x,y) < \epsilon\} $ is the \emph{ball of radius $\epsilon$ around x}. Notice that by varying the scale parameter $\epsilon$ one finds that the model space $M_\epsilon$ has different topologies. $M_\epsilon$ as various scales is shown in Figure~\ref{model-spaces}. The collection $\{M_\epsilon\}_\epsilon$ of spaces together with the inclusion maps between $M_\epsilon$ and $M_{\epsilon'}$ for any $\epsilon < \epsilon'$ is called a \emph{one parameter family} of spaces.   
  
-Persistent topology concerns itself with capturing topological features which can be found at multiple scales of a parameterized family of spaces.
-
 \section{Preliminaries}
 We begin with a review of algebraic topology. We refer the reader to Hatcher for further background material in algebraic topology~\cite{hatcher}.
 \subsection{Topological Spaces}
-\begin{definition}{Topological Space.}
-A \emph{topological space} on a set $X$ is the pair $(X,T)$ where $T$ is a subcollection of $P(X)$, containing $\emptyset$ and $X$, and is further closed under countable unions, and finite intersections. Elements of $T$ are referred to as \emph{open sets.}
+\begin{definition}[Topological Space]
+A \emph{topological space} on a set $X$ is a pair $(X,T)$ where $T$ is a subcollection of \emph{the powerset} of $X$, containing $\emptyset$ and $X$, and is further closed under countable unions, and finite intersections. Elements of $T$ are referred to as \emph{open sets.}
 \end{definition}
-\begin{definition}{Closed Set.}
+\begin{definition}[Closed Set]
  The complement of an open set is a \emph{closed} set.
 \end{definition}
+
+Some examples of topological spaces are, $D^n$ the unit $n$-disk in $\R^n$, $S^n$, the unit sphere in $R^{n+1}$, the Mickey Mouse $MM^2$, the torus $T^2$, and the mobius strip. The boundary of the $n$-disk is the $(n-1)$-ball. $\partial D^n = S^{n-1}$. These spaces are visualized in Figure~\ref{fig:example-ts}.
 \begin{figure}
 \centering
 \begin{tikzpicture}[y=0.80pt, x=0.8pt,yscale=1, inner sep=0pt, outer sep=0pt]
@@ -96,75 +100,80 @@ A \emph{topological space} on a set $X$ is the pair $(X,T)$ where $T$ is a subco
 \caption{Some topological spaces.}
 \label{fig:example-ts}
 \end{figure}
-Some examples of topological spaces are, the $D^n$ the unit $n$-disk in $R^n$, $S^n$ the unit sphere in $R^{n+1}$, the mickey mouse $MM^2$, the torus $T^2$, and the mobius strip. The boundary of the $n$-disk is the $n-1$-ball. $\partial D^n = S^{n-1}$. These spaces are visualized in Figure~\ref{fig:example-ts}
 
-\begin{definition}{Simplicial Complex}
+\begin{definition}[Simplicial Complex]
 A \emph{simplicial complex} is a collection $\K$ of finite sets called
-\emph{simplices} such that if $\sigma \in \K$ and $\tau \subseteq \sigma$ then $\sigma \in \K$. 
+\emph{simplices} such that if $\sigma \in \K$ and $\tau \subseteq \sigma$ then $\tau \in \K$. 
 \end{definition}
-In what follows, $\K$ is a simplicial complex, $\sigma \in \K$ and $\tau \subset \sigma$.
-\begin{definition}{dimension}
-If $\card{\sigma} = k+1$ then $\sigma$ is a $k$-simplex, it has \emph{dimension} $k$, denoted 
+In what follows, $\K$ is a simplicial complex, $\sigma \in \K$ and $\tau \subseteq \sigma$.
+\begin{definition}[Dimension]
+If $\card{\sigma} = k+1$, then $\sigma$ is a $k$-simplex, with \emph{dimension} $k$, denoted 
 $\dim{\sigma} = k$. We say that $\K$ is \emph{$d$-dimensional} if 
 $d = \max_{\sigma \in \K} \dim{\sigma}$.
 \end{definition}
-\begin{definition}{Faces \& Co-faces}
-We say that $\tau$ is a \emph{face} of $\sigma$, its \emph{coface}. A simplex is \emph{maximal} if it has no proper coface in $\K$. The set of maximal cells of a simplicial complex $\K$ is $\M(\K)$. 
- \end{definition}
-\begin{definition}{Closure}
-Suppose we have a subset $L \subseteq K$.  $L$ is a \emph{subcomplex}
-if it is a simplicial complex. The \emph{closure} of $L$ is 1
-$\Cl(L) = \{ \tau \mid \tau \subseteq \sigma \in L\}$ and it is a simplicial complex. The 
-\emph{$k$-skeleton} of a complex $\K$ is the set of all simplices
-of dimension less than or equal to $k$. Note that the 1-skeleton of
-any complex is as a graph.
+\begin{definition}[Faces \& Co-faces]
+We say that $\tau$ is a \emph{face} of $\sigma$, its \emph{coface}. 
 \end{definition}
-\begin{definition}{Open Star}
-The open star of a simplex $\sigma$ is the set of simplices which have a face in $\sigma$, it is denoted $\operatorname{St}(\sigma)$. The star of a set $S$ of simplices is the union of the stars of those simplices.
+\begin{definition}[Maximal Simplices]
+A simplex is \emph{maximal} if it has no proper coface in $\K$. The set of maximal cells of a simplicial complex $\K$ is $\M(\K)$. 
+\end{definition}
+\begin{definition}[Subcomplexes]
+Suppose $L \subseteq K$.  $L$ is a \emph{subcomplex} if it is a simplicial complex.
+\end{definition}
+\begin{definition}[Closure]
+ The \emph{closure} of $L$ is $\Cl(L) = \{ \tau \mid \tau \subseteq \sigma \in L\}$ and it is a simplicial complex.
+\end{definition}
+\begin{definition}[$k$-skeleton]
+The  \emph{$k$-skeleton} of a complex $\K$ is the subset of all simplices
+of dimension less than or equal to $k$. Note that the 1-skeleton of
+any complex is a graph.
+\end{definition}
+\begin{definition}[Open Star]
+The \emph{open star} of a simplex $\sigma$ is the set of co-faces of $\sigma$, and denoted as $\operatorname{St}(\sigma)$. The star of a set $S$ of simplices is the union of the stars of those simplices.
 \end{definition}
 \begin{lemma}
 $\operatorname{St}$ commutes with intersections.
 \label{lem:st-inter}
 \end{lemma}
 A simplicial complex is a topological space, where the closed sets are specified by the closure of each simplex.
-\begin{definition}{Standard $n$-simplex}
+\begin{definition}[Subcomplexes of the standard $n$-simplex]
 Let $\Delta^n$ be the standard $n$-simplex~\cite{hatcher}. For any
 \emph{indexing set} $J \subseteq [n]$, $\Delta^J$ is the $(\card{J}-1)$ 
 dimensional face of $\Delta^n$  that is defined on $J$. In the abstract setting we may
 identify $\Delta^n$ with the set $[n] = \{1, \ldots, n\}$ of natural numbers, and $\Delta^J$ with the set $J$.
 \end{definition}
 We can also define a simplicial complex geometrically. 
-\begin{definition}{Geometric Simplex}
-If $x_0, x_1, \ldots x_k$ are $k+1$ affinely independent points in $\R^d$, then there convex hull is referred to as a \emph{geometric $k$-simplex}. Observe that any subset of affinely independent points is again affinely independent. 
+\begin{definition}[Geometric Simplex]
+If $x_0, x_1, \ldots, x_k$ are $k+1$ affinely independent points in $\R^d$, then their convex hull is referred to as a \emph{geometric $k$-simplex}. Observe that any subset of affinely independent points is again affinely independent. 
 \end{definition}
-\begin{definition}{Geometric Simplicial Complex}
-A collection $\K$ of geometric simplices, closed under the subset relation, is a \emph{geometric simplicial complex}. $\K$ together with the topology it inherits from $\R^d$ is referred to as the \emph{underlying topological space of $\K$} and is denoted $\card{\K}$. 
+\begin{definition}[Geometric Simplicial Complex]
+A collection $\K$ of geometric simplices closed under the subset relation, is a \emph{geometric simplicial complex}. $\K$ together with the topology it inherits from $\R^d$ is referred to as the \emph{underlying topological space of $\K$} and is denoted $\card{\K}$. 
 \end{definition}
-\begin{definition}{Subdivision}
+\begin{definition}[Subdivision]
 A simplicial complex $G$ is a \emph{subdivision} of a complex $\K$ if every simplex in $G$ is contained in a simplex in $K$. If $G$ and $\K$ are geometric we further require that $\card{G} = \card{K}$.
 \end{definition}
-\begin{definition}{Barycenter}
+\begin{definition}[Barycenter]
 The \emph{barycenter} of a geometric simplex is the average of its vertices.
 \end{definition}
-\begin{definition}{Barycentric Subdivision}
-Given a geometric simplicial complex $\K$, its barycentric subdivision $G$ is defined as follows, First define $G_0$ to be the vertex set of $\K$. Then, define $G_i$ for $i > 0$ as follows: $G_i$ contains $G_{i-1}$ and additionally for each $i$-simplex $\sigma  \in \K$ we add its barycenter, and we introduce an $i$-simplex for each simplex $(i-1)$-simplex $\tau$ which bounds $\sigma$.
+\begin{definition}[Barycentric Subdivision]
+Given a geometric simplicial complex $\K$, its \emph{barycentric subdivision} $G$ is defined as follows, First define $G_0$ to be the vertex set of $\K$. Then, define $G_i$ for $i > 0$ as follows: $G_i$ contains $G_{i-1}$ and additionally for each $i$-simplex $\sigma  \in \K$ we add its barycenter, and we introduce an $i$-simplex for each simplex $(i-1)$-simplex $\tau$ that bounds $\sigma$.
 \end{definition}
 
 A simplicial complex may be viewed as the result of gluing simplices of 
 different dimensions along common faces. Other types of complexes are defined 
-similarly using different types of \emph{cells}. Such \emph{cellular} complexes include \emph{cubical} complexes, \emph{simplicial sets}. $\Delta$-complexes, and \emph{CW-complexes}, 
+similarly using different types of \emph{cells}. Such \emph{cellular} complexes include \emph{cubical} complexes, \emph{simplicial sets}, $\Delta$-complexes, and \emph{CW-Complexes}, 
 to name a few~\cite{ez-ssc-50,hatcher,kmm-ch-04,m-soat-68}. We end this section by introducing CW-Complexes.
 
-\begin{definition}{CW-Complex}
- A finite dimensional CW-Complex $X$ is defined as the finite union $X = \bigcup_n X_n$, where $X_0$ is a given set of $0$-cells. One defines the $k$-cells $X_k$ inductively from $X_{k-1}$. To attach a $k$-cell $\sigma_\alpha$ construct an \emph{attaching map} $\phi_\alpha: S^{k-1} \rightarrow X_{k-1}$. We then define $X_k = X_{k-1} \sqcup D^k_\alpha / \sim$ where we quotient by the relation $x ~\sim \phi_\alpha(x)$ for $x \in \partial D^k_\alpha$. 
+\begin{definition}[CW-Complex]
+ A finite dimensional CW-Complex $X$ is defined as the finite union $X = \bigcup_n X_n$, where $X_0$ is a given set of $0$-cells. One defines the $k$-cells $X_k$ inductively from $X_{k-1}$. To attach a $k$-cell $\sigma_\alpha$ construct an \emph{attaching map} $\phi_\alpha: S^{k-1} \rightarrow X_{k-1}$. We then define $X_k = X_{k-1} \sqcup D^k_\alpha / \sim$ where $x ~\sim \phi_\alpha(x)$ if $x \in \partial D^k_\alpha$. 
 \end{definition}
-In practice we only consider the class of  \emph{computable CW complexes} which are finite dimensional CW-complexes with computable attaching maps.
+In practice we only consider the class of  \emph{computable CW complexes}, which are finite dimensional CW-complexes with computable attaching maps.
 \begin{lemma}
 Every simplicial complex is a CW-complex
 \label{lem:simp-is-cw}
 \end{lemma}
 \begin{proof}
-If $\K$ is a simplicial complex, it is identified with the CW-Complex which has a single $k$-cell per simplex $\sigma$, and an attaching map attaching map $\phi_\sigma$ whose image is $\partial(\sigma)$.  
+If $\K$ is a simplicial complex, it is identified with the CW-Complex which has a single $k$-cell per simplex $\sigma$, and an attaching map $\phi_\sigma$ whose image is $\partial(\sigma)$.  
 \end{proof}
 \begin{lemma}
 The product of two CW-Complexes is a CW-Complex.
@@ -174,37 +183,40 @@ The product of two CW-Complexes is a CW-Complex.
 If $X$ and $Y$ are CW-Complexes, then $X \times Y$ is a CW-Complex where the cells are the products of the cells in $X$ and $Y$ and the attaching maps are specified as the products of the attaching maps.
 \end{proof}
 
-\subsection{Maps, covers, and filtrations}
-\begin{definition}{Continuous functions}
-A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is (open/closed) in $X$. 
+\subsection{Maps, Covers, and Filtrations}
+\begin{definition}[Continuous functions]
+A map $f: X \rightarrow Y$ between topological spaces is \emph{continuous} if the inverse image of every (open/closed) set in $Y$ is an (open/closed) set in $X$. 
 \end{definition}
-\begin{definition}{Homotopic Maps}
-A pair of maps $f,g: X \rightarrow X$ are \emph{homotopic}, denoted $f \tilde g$, if there is a continuous map $F: X \times [0,1] \rightarrow X$ with $F(x,0) = f(x)$ and $F(x,1) = g(x)$. 
+\begin{definition}[Homotopic Maps]
+A pair of maps $f,g: X \rightarrow X$ are \emph{homotopic}, denoted $f \sim g$, if there is a continuous map $F: X \times [0,1] \rightarrow X$ with $F(x,0) = f(x)$ and $F(x,1) = g(x)$. 
 \end{definition}
-\begin{definition}{Homotopy Equivalence}
-Two spaces are said to be \emph{homotopy equivalent}, denoted $X \sim Y$, if there exists maps $f: X \rightarrow Y$ and $g: Y \rightarrow X$ such that $f \circ g \sim 1_Y$ and $g \circ f \sim 1_X$.
+\begin{definition}[Identity Map]
+Given a topological space $X$, the map $1_X : X \rightarrow X$ is the identity map on $X$, defined as $1_X(x) = x$.
 \end{definition}
-\begin{definition}{Contractible}
-If a space $X$ is \emph{contractible} if it is homotopy equivalent to a point.
+\begin{definition}[Homotopy Equivalence]
+Two spaces are said to be \emph{homotopy equivalent}, denoted $X \simeq Y$, if there exists maps $f: X \rightarrow Y$ and $g: Y \rightarrow X$ such that $f \circ g \sim 1_Y$ and $g \circ f \sim 1_X$.
 \end{definition}
-\begin{definition}{Cover}
-Given a simplicial complex $\K$, An \emph{open cover} of $\K$ is a collection of open sets $\{\C_i\}_i$ of $\K$ where $K = \bigcup_i \C_i$. Similarly, we call a cover closed if each element of the cover is a closed set.
+\begin{definition}[Contractible]
+A space $X$ is \emph{contractible} if it is homotopy equivalent to a point.
 \end{definition}
-\begin{definition}{Nerve}
+\begin{definition}[Cover]
+Given a simplicial complex $\K$, an \emph{open cover} of $\K$ is a collection of open sets $\{\C_i\}_i$, of $\K$ where $K = \bigcup_i \C_i$. Similarly, we call a cover closed if each element of the cover is a closed set.
+\end{definition}
+\begin{definition}[Nerve]
 The \emph{nerve} $\N(\C)$ of a cover $\C$ is the simplicial complex on $[\card{\C}]$ whose $k$-simplices represent the non-trivial intersections of subsets of $\C$ of size $k+1$. The nerve may be regarded as a subcomplex of $\Delta^n$ and so we may denote its simplices by $\Delta^J$ where $J \subseteq [\card{\C}-1]$.
 \end{definition}
-Let $\K$ be any topological space $\C$ be an cover of it, and $\N$ be the nerve of $\C$. 
+Let $\K$ be any topological space, $\C$ be any cover of it, and $\N$ be the nerve of $\C$. 
 \begin{lemma}
 If every element of a finite closed cover $\C$, as well as all non-empty intersections of elements in $\C$, are contractible, then $\N$ is homotopy equivalent to $\K$.
 \end{lemma}
 \begin{proof}
 See~\cite{hatcher}.
 \end{proof}
-Recall from the previous section that a sequence of spaces connected by continuous maps is referred to as a one-parameter family. Let $M = \{M_\epsilon\}$ be the one-parameter family defined in the previous section. Let $\C = \{\C_\epsilon\}$ be the collection of open sets in $\R^n$, defining every member of $M$. We may define another one parameter family $\{ \N_\epsilon \}$ where $\N_\epsilon$ is the nerve of $\C_\epsilon$. Observe that whenever $\epsilon < \epsilon'$ there is an inclusion map: $\N_\epsilon \rightarrow \N_{\epsilon'}$.
+Recall from the previous section that a sequence of spaces connected by continuous maps is referred to as a one-parameter family. Let $M = \{M_\epsilon\}$ be the one-parameter family defined in the previous section. Let $\C = \{\C_\epsilon\}$ be the collection of open sets in $\R^n$, defining every member of $M$. We may define another one-parameter family $\{ \N_\epsilon \}$ where $\N_\epsilon$ is the nerve of $\C_\epsilon$. Observe that whenever $\epsilon < \epsilon'$ there is an inclusion map: $\N_\epsilon \rightarrow \N_{\epsilon'}$.
 We now redefine $N_{\epsilon}$ geometrically.
-\begin{definition}{Cech Complex}
-The \emph{Cech}-Complex at scale $\epsilon$ is the set:
-\[ C_\epsilon = \{ [ x_0, \ldots x_k] \mid \bigcap_i B_{\epsilon/2}(x_i)  \neq \emptyset \}. \]
+\begin{definition}[$\check{C}$ech Complex]
+The \emph{$\check{C}$ech}-Complex at scale $\epsilon$ is,
+\[ \check{C}_\epsilon = \{ [ x_0, \ldots,x_k] \mid \bigcap_i B_{\epsilon/2}(x_i)  \neq \emptyset \}. \]
 \end{definition}
 \begin{figure}
 \centering
@@ -220,7 +232,7 @@ The \emph{Cech}-Complex at scale $\epsilon$ is the set:
  \end{tikzpicture}
  \hspace{1cm}
   \begin{tikzpicture}[scale=.5]
-	\node[draw=none, fill=white] at (0, -5.5) {$\textrm{VR}_{.6}$};
+	\node[draw=none, fill=white] at (0, -5.5) {$\textrm{V}_{.6}$};
     \foreach[count=\p] \x / \y in \data {
 	\begin{pgfonlayer}{ball}
         \fill[gray!50,radius= .6 cm] (\x,\y) circle{};
@@ -229,24 +241,25 @@ The \emph{Cech}-Complex at scale $\epsilon$ is the set:
     } 
 \input{cell_5_vr}
  \end{tikzpicture}
-\caption{(Left) The Cech complex at $\epsilon = .6$. (Right) The 2-skeleton of the Rips complex at $\epsilon = .6$ }
+\caption{(Left) The $\check{C}ech$ complex at $\epsilon = .6$ (Right) The 2-skeleton of the Vietoris-Rips complex at $\epsilon = .6$ }
 \label{fig:c-and-r}
 \end{figure}
-Unfortunately, determining membership in $C_\epsilon$ can be quite complicated. A simpler construction is the 
+Unfortunately, determining membership in $\check{C}_\epsilon$ can be quite complicated. A simpler construction is the 
 Vietoris-Rips complex.
-\begin{definition}{Vietoris-Rips}
-\[ V_\epsilon = \{ [x_0, \ldots x_k] \mid d(x_i, x_j) < \epsilon \textrm{ for all } i,j  \}. \]
+\begin{definition}[Vietoris-Rip]
+The Vietoris-Rips complex at scale $\epsilon$ is:
+\[ V_\epsilon = \{ [x_0, \ldots, x_k] \mid d(x_i, x_j) < \epsilon \textrm{ for all } i,j  \}. \]
 \end{definition}
-An example of the Cech and Rips complex is shown in Figure~\ref{fig:c-and-r}. These two simplicial complexes are related.
+An example of the $\check{C}$ech and Rips complex is shown in Figure~\ref{fig:c-and-r}. These two simplicial complexes are related.
 \begin{theorem}
-\[ C_\epsilon \rightarrow V_\epsilon \]
+\[ \check{C}_\epsilon \hookrightarrow V_\epsilon \]
 \end{theorem}
 \begin{proof}
 Whenever $I = B_{\epsilon/2}(x) \cap B_{\epsilon/2}(y) \neq \emptyset$ we have that $d(x,y) \leq d(x,r) + d(r,y)$ for any $r$ in $I$. Therefore $d(x,y) < 2(\epsilon/2) = \epsilon$. 
 \end{proof}
 \begin{theorem}
-When we consider points in $\R^d$ we have the following stronger result due to Ghrist \& DeSilva.:
-\[ C_\epsilon \rightarrow V_\epsilon \rightarrow C_{2\epsilon}. \]
+When we consider points in $\R^d$ we have the following stronger result due to Ghrist and de-Silva,
+\[ \check{C}_\epsilon \hookrightarrow V_\epsilon \hookrightarrow \check{C}_{2\epsilon} \]
 \end{theorem}
 \begin{proof}
 See $\cite{ghrist-n-desilva}$
@@ -261,86 +274,88 @@ See $\cite{ghrist-n-desilva}$
 We define a \emph{filtration} of topological spaces to be a finite sequence of topological spaces connected by
 continuous maps.
 \end{definition} 
-An example of a filtration is a one parameter family of spaces. A filtration of rips complexes is shown in Figure~\ref{fig:rips-filt}.
+An example of a filtration is a one parameter family of spaces. A filtration of Rips complexes is shown in Figure~\ref{fig:rips-filt}.
 
-Given a filtration of simplicial complexes, whose final space is $\K$ we can create a  
-partial ordering on the simplices of $\K$ such that the $i^{th}$ prefix of the ordering is the image in $\K$ of the $i^{th}$ map. Each prefix is itself a sub complex of $\K$, so in practice we consider only filtrations of spaces connected by inclusion maps.
+Given a filtration of simplicial complexes whose final space is $\K$, we can create a  
+partial ordering on the simplices of $\K$ such that the $i^{th}$ prefix of the ordering is the image in $\K$ of the $i^{th}$ map. Each prefix is itself a subcomplex of $\K$, so in practice we consider only filtrations of spaces connected by inclusion maps.
 
 \section{Algebra}
 In this section we provide a review of algebra. 
-\begin{definition}{Abelian Group}
+\begin{definition}[Abelian Group]
 An \emph{abelian group} $(S,+)$ is a set $S$ together with an associative, commutative binary operation $+: S \times S \rightarrow S$, which has:
 \begin{description}
 \item[Identity:] An element $0$, such that for each $s \in S$, $s+0 = 0+s = 0$.
-\item[Inverse:] For each element $s \in S$, an element $t$ such that $s+t = 0$.
+\item[Inverse:] For each element $s \in S$, an element $t$ such that $s+t = t+s = 0$.
 \end{description}
 \end{definition}
 \begin{example}
-The set $\Z$ of integers are a group under the operation of addition. The set of all invertible $n \times $ matrices, are a group, the \emph{general linear group}.
+The set $\Z$ of integers is an abelian group under the operation of addition. The set of all invertible $n \times n$ matrices, are a group, the \emph{general linear group}.
 The set $\Z_n$ of integers modulo $n$ is a group under addition modulo $n$.
 \end{example}
-\begin{definition}{Ring}
-A \emph{commutative ring with unit} $(S,+,\cdot)$ is an abelian group $(S,+)$  together with another associative, commutative, binary operation $\cdot$ for which:
+\begin{definition}[Ring]
+A \emph{commutative ring with unit} $(S,+,\cdot)$ is an abelian group $(S,+)$  together with another associative, commutative, binary operation $\cdot$ such that for all $a,x,y \in S$:
 \begin{description}
-\item[Distributivity] for all $a,x,y \in S$ $a \cdot (x + y)  = a \cdot x + a \cdot y$ 
-\item[Identity]      $1 \in S$ such that for all $s \in S$ $1 \cdot s = s \cdot 1 = s$. 
+\item[Distributivity] $a \cdot (x + y)  = a \cdot x + a \cdot y$ 
+\item[Identity] $1 \in S$ such that for all $s \in S$\, $1 \cdot s = s \cdot 1 = s$. 
 \end{description}
 \end{definition}
-In this work all rings are considered to be a commutative ring with unit, unless otherwise specified.  
+In this work all rings are considered to be commutative rings with unit, unless otherwise specified.  
 \begin{example}
-$\Z$, $\Z_n$, $\Q$, $\R$ and $\C$ are rings. Another important example is the set $R[t]$ of polynomials in $t$ which coefficients in any other ring $R$.
+$\Z$, $\Z_n$, $\Q$, $\R$ and $\C$ are rings. Another important example is the set $R[t]$ of polynomials in $t$ with coefficients in any other ring $R$.
 \end{example}
+\begin{definition}[Field]
 A \emph{field} $F$ is a ring which further has \emph{multiplicative inverses}.
-\begin{example}
-$\Q$, $\R$ and $\C$ are rings.  $Z_n$ is a field whenever $n = p^k$ for some prime $p$ and $k > 0$.
-\end{example}
-\begin{definition}{Ideal}
-An \emph{ideal} $I$ of a ring $R$ is an additive subgroup with the following additive property:
-\[ \textrm{ for each } x \in I, \textrm{ and each } r \in R, x \dot r, r \cdot x \in I  \]
-And ideal $I$ is \emph{principal} if for some $a \in I$, we have: $I = Ra \{ ra \mid r \in R\} = \langle a \rangle$.
-A ring $R$ is an \emph{principal ideal domain} if every ideal in $R$ is principal.
 \end{definition}
 \begin{example}
-$\Z$, $\Z_n$, $\Q$ $\R$ and $\C$ are principal ideal domains. $\Z[x]$ is not a principal ideal domain. $R[t]$ is a principal ideal domain if and only if $R$ is a field. However
-even over fields $R[x,y]$ the ring of polynomials in two variables is not a principal ideal domain.
+$\Q$, $\R$ and $\C$ are fields.  $Z_n$ is a field whenever $n = p$ for some prime $p$.
 \end{example}
-\begin{definition}{Module}
-For any ring $R$ an \emph{R-module} $M$ is an \emph{abelian group} together with an associative, scalar multiplication by $R$: 
+\begin{definition}[Ideal]
+An \emph{ideal} $I$ of a ring $R$ is an additive subgroup with the following additive property:
+\[ \textrm{ for each } x \in I, \textrm{ and each } r \in R, x \cdot r, r \cdot x \in I  \]
+An ideal $I$ is \emph{principal} if for some $a \in I$, we have $I = Ra =\{ ra \mid r \in R\} = \langle a \rangle$.
+A ring $R$ is a \emph{principal ideal domain} if every ideal in $R$ is principal.
+\end{definition}
+\begin{example}
+$\Z$, $\Z_n$, $\Q$, $\R$ and $\C$ are principal ideal domains. $\Z[x]$ is not a principal ideal domain. $R[t]$ is a principal ideal domain if and only if $R$ is a field. However,
+even over fields, $R[x,y]$, the ring of polynomials in two variables, is not a principal ideal domain.
+\end{example}
+\begin{definition}[Module]
+For any ring $R$, an \emph{R-module}, $M$, is an \emph{abelian group} together with an associative, scalar multiplication by $R$ such that, for all $r \in R$ and $x,y \in M$:
 \begin{description}
-\item[distributivity] for all $r \in R$ and $x,y \in M$ $a \cdot (x + y)  = a \cdot x + a \cdot y$
-\item[identity] $1_R \cdot x = x$
+\item[Distributivity]  $r \cdot (x + y)  = r \cdot x + r \cdot y$
+\item[Identity] $1_R \cdot x = x$
 \end{description}
 \end{definition}
 In particular, when $R$ is a field $k$, the concept of $k$-module and $k$-vector space are identical.
 \begin{example}
 Any ring is a module over itself.  All groups are $\Z$-modules. $R[t]$, the ring of polynomials with coefficients in a ring $R$, is an $R$-module. If $S$ is any set and $M$ is any $R$-module, then the collection of linear functions from $S$ to $M$, denoted $M^S$, is an $R$-module where the action $(rf)(s) =  r \cdot f(s)$.
 \end{example}
-\begin{definition}{Sums, Summands, and Submodules}
-Given two $R$-modules $M$ and $N$ there are the \emph{direct sum} of modules $M \oplus N = \{ (m,n) \mid m \in M and n \in N \}$.
+\begin{definition}[Sums, Summands, and Submodules]
+Given two $R$-modules $M$ and $N$ there is the \emph{direct sum} of modules $M \oplus N = \{ (m,n) \mid m \in M \textrm{ and } n \in N \}$.
 An $R$-module $N$ is said to be a \emph{direct summand} of $M$ if $M = N \oplus E$ for some $R$-module $E$. 
 A \emph{submodule} $N$ of an $R$-module $M$ is a subset of the module that is itself an $R$-module. Clearly, all summands are submodules, but the converse is not true.
 \end{definition}
-\begin{definition}{Decomposables and Indecomposables}
-If a module $M$ is said to be \emph{decomposable} if it can be written as a direct sum of two non-trivial summands, modules which are not decomposable are \emph{indecomposable}. 
+\begin{definition}[Decomposables and Indecomposables]
+A module $M$ is said to be \emph{decomposable} if it can be written as a direct sum of two non-trivial summands. Modules which are not decomposable are \emph{indecomposable}. 
 \end{definition}
 The following result explains when we can find a representation of a module as indecomposables.
-\begin{theorem}{Decomposibility}
-Any finitely generated $k[x_1, \ldots x_n]$-module can be decomposed into indecomposables in polynomial time in the description of the module. 
+\begin{theorem}{Decomposibility.}
+Any finitely generated $k[x_1, \ldots, x_n]$-module can be decomposed into indecomposables in polynomial time in the description of the module. 
 \end{theorem}
 \begin{proof}
-See~\cite{caikm-ptafm-1997}
+See~\cite{caikm-ptafm-1997}.
 \end{proof}
-Importantly when we have a finitely generated module over a principal ideal domain, we have a structure theorem. 
-\begin{theorem}{Structure Theorem for modules over a PID}
-Let $M$ be a finitely-generated module over a PID $R$.Then there are uniquely determined ideals:
+Importantly, when we have a finitely generated module over a principal ideal domain, we have a structure theorem. 
+\begin{theorem}{Structure Theorem for a module over a PID}
+Let $M$ be a finitely-generated module over a PID $R$. Then there are uniquely determined ideals:
 $I_k \subset \ldots \subset I_2  \subset I_1$ 
 such that
 \[ M \equiv \bigoplus_i R/I_i \]
 \end{theorem}
 \begin{proof}
-Carlsson \& Zomorodian~\cite{dummitnfoote}.
+Dummit \& Foote~\cite{dummitnfoote}.
 \end{proof}
-\begin{definition}{Module Homomorphisms}
+\begin{definition}[Module Homomorphisms]
 A \emph{module homomorphism} is a group homomorphism respecting scalar multiplication. Given an $R$-module homomorphism $f: X \rightarrow Y $, we define the \emph{kernel} of $f$, the \emph{image} of $f$ and the co-kernel of $f$, as follows: 
 \begin{description}
 \item[Kernel] $\ker{f} = \{ x \mid f(x) = 0 \}$. 
@@ -349,7 +364,7 @@ A \emph{module homomorphism} is a group homomorphism respecting scalar multiplic
 \end{description}
 \end{definition}
 
-Module homomorphisms provide two more important example of $R$-modules. That is if $M$ and $N$ are $R$-modules then the set $\operatorname{Hom}(M,N)$ of $R$-module homomorphisms, is itself an $R$-module under addition of functions, and the obvious scalar multiplication. Now suppose that $\{M_i\}$ are a sequence of $R$-modules connected by module homomorphisms. Certainly there is an $R$-module structure on $M = \bigoplus M_i$, but there is also a $R[t]$-module structure, where the action of $t$ on an element in $M_i$ applies the map $f_i$. Such a module is referred to as a \emph{graded module}.
+Module homomorphisms provide two more important examples of $R$-modules. That is, if $M$ and $N$ are $R$-modules then the set $\operatorname{Hom}(M,N)$ of $R$-module homomorphisms is itself an $R$-module under addition of functions, and the obvious scalar multiplication. Now suppose that $\{M_i\}$ are a sequence of $R$-modules connected by module homomorphisms. Certainly there is an $R$-module structure on $M = \bigoplus M_i$, but there is also an $R[t]$-module structure, where we define the action of $t$ on an element in $M_i$ to be the result of applying the map $f_i$. Such a module is referred to as a \emph{graded module}.
 
 \subsection{Homology}
 In this section, we describe the homology of cellular spaces. 
@@ -359,7 +374,7 @@ the set of $d$-dimensional cells of $K$, its \emph{canonical basis}.
 Suppose we are given a linear \emph{boundary operator} 
 $\bd_d\colon C_d \rightarrow C_{d-1}$ such that 
 $\bd_d \circ \bd_{d-1} \equiv 0$ for any $d$.  
-The boundary operator connects the chain vector space into a 
+The boundary operator connects the chain vector spaces into a 
 \emph{chain complex $C_*$}:
 \begin{equation*}
   \cdots \rightarrow             C_{d+1}
@@ -373,9 +388,7 @@ Given any chain complex, the \emph{$d$th homology module $H_d$} is:
   \label{eqn:homology}
   H_d = {\ker{\bd_d}}\,/\,{\im{\bd_{d+1}}}, 
 \end{equation}
-where $\ker(.)$ and $\im(.)$ are the \emph{kernel} and \emph{image} of $\bd$, 
-respectively.
-When $R$ is a field $k$ then each homology module is characterized fully by its \emph{Betti number}, 
+When $R$ is a field $k$ then each homology module is characterized fully by its \emph{Betti number}
 $\betti_d = \dim{H_d}$. 
 We now only need to define boundary operators to define homology. 
 For simplicial homology, we begin by defining the action of the boundary operator on any
@@ -387,41 +400,41 @@ $n$-simplex $[v_0,\ldots,v_n] \in \K$:
 where $\hat{v_i}$ indicates that $v_i$ is deleted from the vertex 
 sequence. The boundary operator is the linear extension of the above action.
 
-An important property of homology is \emph{functorality} namely whenever we have a continuous map $f: X \rightarrow Y$ between topological spaces there is an induced linear map $\tilde{f}$ between there homology vector spaces in any dimension. That is the following diagram commutes:
+An important property of homology is \emph{functorality}. Namely, whenever we have a continuous map $f: X \rightarrow Y$ between topological spaces there is an induced linear map $f_\sharp$ between there homology vector spaces in any dimension. That is the following diagram commutes:
 \[ \begin{tikzcd}
 X \arrow{r}{f}\arrow{d}{H_d} & Y \arrow{d}{H_d} \\
-H_d(X) \arrow{r}{\tilde{f}} & H_d(Y)
+H_d(X) \arrow{r}{f_{\sharp}} & H_d(Y)
 \end{tikzcd} \]
-For simplicial complexes, the map is defined as follows: First we define the \emph{induced chain map} $f_\sharp$ as the linear extension of the following action: 
-\[ f_\sharp([v_0, \ldots v_d]) = 
+For simplicial complexes, continuous maps are approximated by simplicial maps. The induced map is defined as follows. First, we define the \emph{induced chain map} $f_\sharp$ as the linear extension of the following action: 
+\[ f_\sharp([v_0, \ldots, v_d]) = 
 \begin{cases} 
-    [f(v_0) \ldots, f(v_d)] \textrm{ unless } f(v_i) = f(v_j) \textrm{ for some } i,j \\
-    0 \textrm{ otherwise. }
+    [f(v_0), \ldots, f(v_d)] \textrm{ unless } f(v_i) = f(v_j) \textrm{ for some } i,j \\
+    0 \textrm{ otherwise}
    \end{cases}
 \]
-Then for any $[x] \in H_d(X)$ we have $\tilde{f}([x]) = [f_{\sharp}(x)]$.  That this map is well defined follows from 
-the following lemma:
+Then for any $[x] \in H_d(X)$ we have $f_\sharp([x]) = [f_{\sharp}(x)]$.  That this map is well defined follows from 
+the following lemma.
 \begin{lemma}
 $f_\sharp$ commutes with the $\partial$ operator. 
 \end{lemma}
 \begin{proof}
 Assume first that $f(v_i) \neq f(v_j)$ for $i \neq j$.
 \begin{align*}
-f_\sharp(\partial([v_0, \ldots v_d])) &= \\
-&= f_{\sharp}(\sum_i (-1)^i[v_0 \ldots \hat{v_i} v_d])  \\
-&=  \sum_i(-1)^i [f_{\sharp}(v_0) \ldots \hat{f_{\sharp}(v_i)} f_{\sharp}(v_d)] \\
-&=  \partial(f_\sharp([v_0, \ldots v_d]))
+f_\sharp(\partial([v_0, \ldots, v_d])) &= \\
+&= f_{\sharp}(\sum_i (-1)^i[v_0, \ldots, \hat{v_i}, \ldots, v_d])  \\
+&=  \sum_i(-1)^i [f_{\sharp}(v_0), \ldots, \widehat{f_{\sharp}(v_i)}, \ldots, f_{\sharp}(v_d)] \\
+&=  \partial(f_\sharp([v_0, \ldots, v_d]))
 \end{align*}
-Observe now that if there is more than two repeated elements, that the result holds trivially as all terms are zero. If there are exactly two repeated elements, then they appear
+Observe now that if there are more than two repeated elements, that the result holds trivially as all terms are zero. If there are exactly two repeated elements, then they appear
 in the sum with opposing signs.
 \end{proof}
 
-If $X$ is a simplicial complex and $A$ is any subcomplex we define the \emph{relative homology} of $X$ by $A$ as $H_d(X,A) = H(C_d(X)/C_d(A))$. We will write $C_d(X,A)$ to refer to $C_d(X)/C_d(A)$. Note, some authors provide an alternative definition of $C_d(X,A)$ which is isomorphic to the definition stated here.
+If $X$ is a simplicial complex and $A$ is any subcomplex, we define the \emph{relative homology} of $X$ by $A$ as $H_d(X,A) = H(C_d(X)/C_d(A))$. We will write $C_d(X,A)$ to refer to $C_d(X)/C_d(A)$.  Some authors provide an alternative definition of $C_d(X,A)$ which is isomorphic to the definition stated here.
 
 \subsection{Computing Homology}
-Over field coefficients, homology is a vector space characterized by its dimension, so we may compute homology using \emph{Gaussian Elimination}. However, when the coefficient ring is taken to be an \emph{principal ideal domain}, we may use a similar technique, known as the \emph{Smith Normal Form}~\cite{uhlig}. Smith Normal Form, is a matrix reduction technique similar to Gaussian Elimination~\cite{uhlig}. This algorithm was written down in western mathematical literature by Smith~\cite{smith}, and then republished four decades later by Poincare~\cite{poincare-smith}. Of course, as previously mentioned this is a variant of Gaussian Elimination, which was known to the Chinese mathematical community in $\approx$ 100AD~\cite{chinese-ge}.
+Over field coefficients, homology is a vector space characterized by its dimension, so we may compute homology using \emph{Gaussian elimination}. However, when the coefficient ring is taken to be a \emph{principal ideal domain}, we may use a similar technique, known as the \emph{Smith normal form}~\cite{uhlig}. Reduction of a matrix to Smith normal form is a technique similar to Gaussian elimination~\cite{uhlig}. This algorithm was written down in western mathematical literature by Smith~\cite{smith}, and then republished four decades later by Poincare~\cite{poincare-smith}. Of course, as previously mentioned this is a variant of Gaussian Elimination, which was known to the Chinese mathematical community in $\approx$ 100AD~\cite{chinese-ge}.
 
-The smith normal form of an $m \times n$ matrix $M$ over a principal ideal domain $R$, is a factorization $M = SDU$ where $S$ and $U$ are invertible $m \times m$ and $n \times n$ matrices respectively, and $D$ is a diagonal matrix, of the same shape as $M$. Note that neither $S$ nor $U$ is unique. The nonzero diagonal entries of $D$ are entries in $R$. In the case that $M = \partial_k$ the $k^{th}$  boundary operator, we have that $d_i \mid d_{i+1}$. If $d_1, \ldots d_r = 1$, then $\betti_k = \dim(H_k(X)) = r$. The remaining nonzero elements of $D$ are referred to as \emph{torsion}. If $R$ is a field then there is no torsion elements. 
+The Smith Normal Form of an $m \times n$ matrix $M$ over a principal ideal domain $R$, is a factorization $M = SDU$, where $S$ and $U$ are invertible $m \times m$ and $n \times n$ matrices respectively, and $D$ is a diagonal matrix, of the same shape as $M$. Note that neither $S$ nor $U$ is unique. The nonzero diagonal entries of $D$ are entries in $R$. In the case that $M$ represents $\partial_k$ the $k^{th}$  boundary operator, we have that $d_i$ divides $d_{i+1}$. If $d_1, \ldots, d_r = 1$, then $\betti_k = \dim(H_k(X)) = r$. The remaining nonzero elements of $D$ are referred to as \emph{torsion}. If $R$ is a field then there are no torsion elements. 
 \begin{figure}
 \begin{codebox}
 \Procname{\proc{SMITH}($\partial$):}
@@ -443,18 +456,18 @@ The smith normal form of an $m \times n$ matrix $M$ over a principal ideal domai
 \label{alg:smith}
 \end{figure}
 
-We present an algorithm for computing the smith normal form in Figure~\ref{alg:smith}. Given a column $c$ the function $\operatorname{Lowest}[c]$, 
+We present an algorithm for computing the Smith Normal Form in Figure~\ref{alg:smith}. Given a column $c$, the function $\operatorname{Lowest}[c]$, 
 returns the position of the nonzero of largest row index.
 
-The worst case complexity of this algorithm for an $m \times n$ matrix is $O(mn^2)$. When computing homology as the matrix $\partial$ is \emph{sparse} containing at most $O(\operatorname{dim}{(X)})$ nonzeros per column. Recall that in the case of a complex embedded in $R^d$ this means at most $O(d)$ nonzeros. It turns out however that for a complex of size $m$ the worst case complexity of this procedure is still $O(m^3)$, and in particular, there is now a matching lower bound for homology computation~\cite{parsa}. Despite this, it is well known that these bounds are pessimistic, and that on many examples, homology computation does not scale cubically~\cite{elz-tps-02}. 
+The worst case complexity of this algorithm for an $m \times n$ matrix is $O(mn^2)$. The matrix $\partial$ is \emph{sparse} containing at most $O(\operatorname{dim}{(X)})$ nonzeros per column. Recall that in the case of a complex embedded in $\R^d$ this means at most $O(d)$ nonzeros. It turns out however that for a complex of size $m$ the worst case complexity of this procedure is still $O(m^3)$, and in particular, there is now a matching lower bound for homology computation~\cite{parsa}. Despite this, it is well known that these bounds are pessimistic, and that on many examples, homology computation does not scale cubically~\cite{elz-tps-02}. 
 
 However, when reducing a sequence of boundary matrices, these algorithm specializes further. To see this we interpret the work done at iteration $i$ in terms of the chain complex. 
 \begin{lemma}
-The introduction of any $d$-simplex into a space $K$ either created homology in dimension $d$, or destroys homology in dimension $d-1$.
+The introduction of any $d$-simplex into a space $K$ either creates homology in dimension $d$, or destroys homology in dimension $d-1$.
 \end{lemma}
-This implies that whenever we have a nonzero column after reducing $\partial_k$, we know that the corresponding row in $\partial_{k+1}$ is never a pivot row. That is, the pivot rows of the matrix $\partial_{k+1}$ matrix, are exactly a basis for $\ker{\partial_k}$. This implies that we may simply drop these rows from $\partial_{k+1}$ as this will not affect the result of the algorithm. On the other hand, if row $j$ is a pivot in $\partial_{k+1}$, this implies that column $j$ in $\partial_k$, may be immediately set to zero. These optimizations are referred to as \emph{clearing} and \emph{compressing}.
+This implies that whenever we have a nonzero column after reducing $\partial_k$, we know that the corresponding row in $\partial_{k+1}$ is never a pivot row. That is, the pivot rows of the matrix $\partial_{k+1}$ matrix are exactly a basis for $\ker{\partial_k}$. This implies that we may simply drop these rows from $\partial_{k+1}$ as this will not affect the result of the algorithm. On the other hand, if row $j$ is a pivot in $\partial_{k+1}$, this implies that column $j$ in $\partial_k$ may be immediately set to zero. These optimizations are referred to as \emph{clearing} and \emph{compressing}.
 
-We present Algorithm~\ref{alg:elz} another variant of the smith normal form algorithm which produces a factorization $\partial = RU$ where $R = (SD)$: Here we view $\partial$ as a square matrix, such as $\bigoplus_i \partial_i$, or the result of applying any permutation to the columns of that matrix. This algorithm incorporates both of the above optimizations, although, as stated only one of them will ever be employed since the algorithm moves across the matrix in a left to right fashion.
+We present Algorithm~\ref{alg:elz} another variant of the $\proc{Smith}$ algorithm which produces a factorization $\partial = RU$ where $R = (SD)$. Here we view $\partial$ as a square matrix, such as $\bigoplus_i \partial_i$, or the result of applying any permutation to the columns of that matrix. This algorithm incorporates both of the above optimizations, although, as stated, only one of them will ever be employed since the algorithm moves across the matrix in a left to right fashion.
 \begin{figure}[h]
 \begin{codebox}
 \Procname{\proc{ELZ}($\partial$):}
@@ -481,33 +494,33 @@ We present Algorithm~\ref{alg:elz} another variant of the smith normal form algo
 \end{figure}
 
 \subsection{Homological Algebra} 
-Suppose we are given two module homomorphism $f: A \rightarrow B$ and $g: B \rightarrow C$. we say that $A \rightarrow B \rightarrow C$
-is \emph{exact} at $B$ if $\im{f} =  \ker{g}$. Such a sequence is called a \emph{short exact sequence}. As an example, suppose that $f: M \rightarrow N$ is a group homomorphism, then we have a short exact sequence:
+Suppose we are given two module homomorphisms $f: A \rightarrow B$ and $g: B \rightarrow C$. We say that $A \rightarrow B \rightarrow C$
+is \emph{exact} at $B$ if $\im{f} =  \ker{g}$. Such a sequence is called a \emph{short exact sequence}. As an example, suppose that $f: M \rightarrow N$ is a group homomorphism. Then we have a short exact sequence,
 \[ 
 \begin{tikzcd}
 0 \arrow{r} & \ker{f} \arrow{r} & M \arrow{r}{f} & N \arrow{r} & \coker{f} \arrow{r}& 0
 \end{tikzcd}
 \] 
 If $\ker{f} = 0$ we would say that the map $f$ is injective. If $\coker{f} = 0$ we would say that $f$ is surjective. $f$ is an isomorphism when it is injective and surjective. 
-\begin{definition}{Short exact sequence of a pair}
-Suppose that $X$ is a simplicial complex and $A \subset X$ is a subcomplex. We have a short exact sequence 
+\begin{definition}[Short exact sequence of a pair]
+Suppose that $X$ is a simplicial complex and $A \subset X$ is a subcomplex. Then we have a short exact sequence 
 \[
 \begin{tikzcd}
 0 \arrow{r}& C_d(A) \arrow{r}{i} & C_d(X) \arrow{r}{j} & C_d(X)/\Im{C_d(A)} \arrow{r} & 0 
 \end{tikzcd}
 \]
-known as \emph{short exact sequence of a pair} $(A,X)$.
+known as article \emph{short exact sequence of a pair} $(A,X)$.
 \end{definition}
-When we pass to homology there turns out to be more structure:
+When we pass to homology there turns out to be more structure.
 \begin{theorem} 
-Whenever we have a short exact sequence of chain complexes: 
-\[  0 \rightarrow C_n(A) \rightarrow C_n(B) \rightarrow C_n(C) \rightarrow 0 \]
-this gives rise to a \emph{long exact sequence} at the level of homology:
+A short exact sequence of chain complexes: 
+\[  0 \rightarrow C_n(A) \rightarrow C_n(B) \rightarrow C_n(C) \rightarrow 0, \]
+gives rise to a \emph{long exact sequence} at the level of homology:
 \[ \ldots \rightarrow H_n(A) \rightarrow H_n(B) \rightarrow H_n(C) \rightarrow H_{n-1}(A) \rightarrow \ldots  \]  
 \end{theorem}
 \begin{proof}
-See Hatcher~\ref{hatcher}.
+See Hatcher~\cite{hatcher}.
 \end{proof}
-The most important ingredient in this proof is the definition of the \emph{connecting homomorphism}. We discuss this map in terms of the short exact sequence of a pair. For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. To show that this map is well defined one needs to show that all the arbitrary choices made in this construction do not affect the definition of $\delta$. 
+The key ingredient in this proof is the definition of the \emph{connecting homomorphism}. We discuss this map in terms of the short exact sequence of a pair. For a relative cycle $[x] \in H_d(X,A)$ we define $\delta([x]) = [\partial_X(c(x))]$, where $\partial_X$ denotes the boundary operator for $C_d(X)$, and $c(x)$ is any chain in $X$ such that $j(c(x)) = x$. To show that this map is well defined one needs to show that all the arbitrary choices made in this construction do not affect the definition of $\delta$. 
  
-This long exact sequence allows us to compute the homology of a space, with field coefficients, from a subspace and it's quotient. This will be a key ingredient in deriving persistent homology in the next chapter.
+This long exact sequence allows us to compute the homology of a space, with field coefficients, from a subspace and its quotient. This will be a key ingredient in deriving persistent homology in the next chapter.
